@@ -3,6 +3,24 @@ import './App.css'
 import * as pdfjsLib from 'pdfjs-dist'
 import { createWorker } from 'tesseract.js'
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import { 
+  Upload, 
+  FileText, 
+  Bot, 
+  Eye, 
+  EyeOff, 
+  Copy, 
+  RefreshCw, 
+  Search, 
+  X, 
+  Trash2, 
+  AlertTriangle, 
+  Info, 
+  CheckCircle,
+  Settings,
+  Download,
+  Loader2
+} from 'lucide-react'
 
 // Set up PDF.js worker - using local worker file
 pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
@@ -27,6 +45,10 @@ function App() {
   const [processingProgress, setProcessingProgress] = useState({})
   const [fileResults, setFileResults] = useState({})
   const [overallProgress, setOverallProgress] = useState(0)
+  
+  // New states for question grouping
+  const [groupedQuestions, setGroupedQuestions] = useState([])
+  const [isGroupingQuestions, setIsGroupingQuestions] = useState(false)
 
   const handleFileSelect = (event) => {
     const files = Array.from(event.target.files)
@@ -63,6 +85,7 @@ function App() {
       setCleanedQuestions('')
       setFileResults({})
       setProcessingProgress({})
+      setGroupedQuestions([])
       return
     }
     
@@ -78,6 +101,7 @@ function App() {
     setCleanedQuestions('') // Clear previous results
     setFileResults({})
     setProcessingProgress({})
+    setGroupedQuestions([]) // Clear previous question groups
     
     // Start processing all files
     processMultiplePDFs(validFiles)
@@ -260,7 +284,7 @@ function App() {
           const canvas = document.createElement('canvas')
           const context = canvas.getContext('2d')
           canvas.height = viewport.height
-          canvas.width = viewport.width
+          canvas.width = viewport.width 
           
           // Render PDF page to canvas
           await page.render({
@@ -633,6 +657,8 @@ ${text}`
       setProcessingProgress({})
       setFileResults({})
       setOverallProgress(0)
+      setGroupedQuestions([])
+      setIsGroupingQuestions(false)
     }
   }
 
@@ -642,6 +668,122 @@ ${text}`
     const sizes = ['Bytes', 'KB', 'MB', 'GB']
     const i = Math.floor(Math.log(bytes) / Math.log(k))
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+  }
+
+
+
+  // Function to analyze and group questions using Gemini AI
+  const analyzeQuestions = async (cleanedText) => {
+    if (!cleanedText || cleanedText.trim().length === 0) {
+      setGroupedQuestions([])
+      return
+    }
+
+    if (!geminiApiKey.trim()) {
+      setErrorMessage('Please enter your Google Gemini API key to analyze questions.')
+      return
+    }
+
+    try {
+      setIsGroupingQuestions(true)
+      setErrorMessage('')
+      setExtractionStatus('Analyzing questions with AI...')
+
+      const genAI = new GoogleGenerativeAI(geminiApiKey.trim())
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+
+      const prompt = `You are an intelligent assistant that analyzes a block of OCR-extracted exam questions. Your task is as follows:
+
+1. Group similar or semantically related questions together. Use moderate semantic similarity (not just exact matches), grouping questions that are conceptually the same even if phrased differently.
+2. For each group, create a **single, unified question** that represents the main intent of all questions in that group.
+3. Also mention all the questions that were grouped together in the unified question in indented bullet points.
+4. Count how many questions are in each group (how many times similar questions appear).
+
+Format your output as:
+Group 1:
+Question Count: <number of similar questions in this group>
+Unified Question: <merged version>
+  Individual Questions: <list of original questions in this group, indented>
+
+Group 2:
+Question Count: <number of similar questions in this group>
+Unified Question: <merged version>
+  Individual Questions: <list of original questions in this group, indented>
+… and so on.
+
+Here are the extracted questions to analyze:
+
+${cleanedText}`
+
+      const result = await model.generateContent(prompt)
+      const response = await result.response
+      const analysisResult = response.text()
+
+      // Parse the AI response into structured groups
+      const groups = parseAIAnalysisResponse(analysisResult)
+      
+      setGroupedQuestions(groups)
+      setExtractionStatus(`AI analysis complete! Found ${groups.length} question groups with unified questions and repetition counts.`)
+      
+    } catch (error) {
+      console.error('Error analyzing questions with AI:', error)
+      let errorMsg = 'Failed to analyze questions with AI. '
+      
+      if (error.message.includes('API_KEY_INVALID') || error.message.includes('401')) {
+        errorMsg += 'Invalid API key. Please check your Google Gemini API key.'
+      } else if (error.message.includes('QUOTA_EXCEEDED') || error.message.includes('429')) {
+        errorMsg += 'API quota exceeded. Please check your usage limits.'
+      } else if (error.message.includes('SAFETY')) {
+        errorMsg += 'Content was blocked by safety filters.'
+      } else {
+        errorMsg += `Error: ${error.message || 'Unknown error occurred.'}`
+      }
+      
+      setErrorMessage(errorMsg)
+    } finally {
+      setIsGroupingQuestions(false)
+    }
+  }
+
+  // Function to parse AI analysis response into structured groups
+  const parseAIAnalysisResponse = (analysisText) => {
+    const groups = []
+    
+    // Split by "Group X:" pattern
+    const groupSections = analysisText.split(/Group \d+:/i).filter(section => section.trim().length > 0)
+    
+    groupSections.forEach((section, index) => {
+      const lines = section.trim().split('\n').filter(line => line.trim().length > 0)
+      
+      let questionCount = 1
+      let unifiedQuestion = ''
+      
+      for (const line of lines) {
+        const trimmedLine = line.trim()
+        
+        if (trimmedLine.toLowerCase().startsWith('question count:')) {
+          const countMatch = trimmedLine.match(/question count:\s*(\d+)/i)
+          if (countMatch) {
+            questionCount = parseInt(countMatch[1], 10)
+          }
+        } else if (trimmedLine.toLowerCase().startsWith('unified question:')) {
+          unifiedQuestion = trimmedLine.replace(/^unified question:\s*/i, '').trim()
+        } else if (unifiedQuestion && trimmedLine.length > 0 && !trimmedLine.toLowerCase().startsWith('group ')) {
+          // Continue building the unified question if it spans multiple lines
+          unifiedQuestion += ' ' + trimmedLine
+        }
+      }
+      
+      if (unifiedQuestion.trim().length > 0) {
+        groups.push({
+          groupNumber: index + 1,
+          unifiedQuestion: unifiedQuestion.trim(),
+          count: questionCount
+        })
+      }
+    })
+    
+    return groups
   }
 
   return (
@@ -657,10 +799,13 @@ ${text}`
           onDragLeave={handleDragLeave}
         >
           <div className="upload-content">
-            <div className="upload-icon">📄</div>
+            <div className="upload-icon">
+              <Upload size={64} />
+            </div>
             <h3>Drag & Drop your PDFs here</h3>
             <p>or</p>
             <label htmlFor="file-input" className="file-input-label">
+              <FileText size={20} />
               Choose Files
             </label>
             <input
@@ -678,11 +823,15 @@ ${text}`
         {/* Google Gemini API Key Section */}
         <div className="api-key-section">
           <div className="api-key-header">
-            <h3>🤖 AI Text Processing</h3>
+            <h3>
+              <Bot size={24} />
+              AI Text Processing
+            </h3>
             <button 
               className="toggle-api-key-btn"
               onClick={() => setShowApiKeyInput(!showApiKeyInput)}
             >
+              {showApiKeyInput ? <EyeOff size={16} /> : <Settings size={16} />}
               {showApiKeyInput ? 'Hide' : 'Setup'} API Key
             </button>
           </div>
@@ -708,32 +857,73 @@ ${text}`
         {selectedFiles && selectedFiles.length > 0 && (
           <div className="files-preview">
             <div className="files-header">
-              <h3>Selected Files ({selectedFiles.length})</h3>
+              <h3>
+                <FileText size={20} />
+                Selected Files ({selectedFiles.length})
+              </h3>
               <button 
                 className="remove-all-btn"
                 onClick={() => handleRemoveFile()}
                 title="Remove all files"
               >
+                <Trash2 size={16} />
                 Clear All
               </button>
             </div>
             <div className="files-list">
               {selectedFiles.map((file, index) => (
                 <div key={index} className="file-details">
-                  <div className="file-icon">📄</div>
+                  <div className="file-icon">
+                    <FileText size={32} />
+                  </div>
                   <div className="file-info-details">
                     <h4>{file.name}</h4>
                     <p>{formatFileSize(file.size)}</p>
                     {processingProgress[file.name] && (
                       <div className="file-progress">
                         <span className="progress-status">
-                          {processingProgress[file.name].status === 'waiting' && '⏳ Waiting...'}
-                          {processingProgress[file.name].status === 'processing' && '🔄 Processing...'}
-                          {processingProgress[file.name].status === 'reading' && '📖 Reading...'}
-                          {processingProgress[file.name].status === 'extracting' && '📝 Extracting...'}
-                          {processingProgress[file.name].status === 'ocr' && '🔍 OCR Processing...'}
-                          {processingProgress[file.name].status === 'completed' && '✅ Completed'}
-                          {processingProgress[file.name].status === 'error' && '❌ Error'}
+                          {processingProgress[file.name].status === 'waiting' && (
+                            <>
+                              <Loader2 size={12} className="animate-spin" />
+                              Waiting...
+                            </>
+                          )}
+                          {processingProgress[file.name].status === 'processing' && (
+                            <>
+                              <Loader2 size={12} className="animate-spin" />
+                              Processing...
+                            </>
+                          )}
+                          {processingProgress[file.name].status === 'reading' && (
+                            <>
+                              <FileText size={12} />
+                              Reading...
+                            </>
+                          )}
+                          {processingProgress[file.name].status === 'extracting' && (
+                            <>
+                              <Search size={12} />
+                              Extracting...
+                            </>
+                          )}
+                          {processingProgress[file.name].status === 'ocr' && (
+                            <>
+                              <Search size={12} />
+                              OCR Processing...
+                            </>
+                          )}
+                          {processingProgress[file.name].status === 'completed' && (
+                            <>
+                              <CheckCircle size={12} />
+                              Completed
+                            </>
+                          )}
+                          {processingProgress[file.name].status === 'error' && (
+                            <>
+                              <AlertTriangle size={12} />
+                              Error
+                            </>
+                          )}
                         </span>
                         <div className="progress-bar-small">
                           <div 
@@ -749,7 +939,7 @@ ${text}`
                     onClick={() => handleRemoveFile(file)}
                     title="Remove this file"
                   >
-                    ✕
+                    <X size={16} />
                   </button>
                 </div>
               ))}
@@ -759,6 +949,15 @@ ${text}`
 
         {uploadStatus && (
           <div className={`status-message ${uploadStatus.includes('success') ? 'success' : uploadStatus.includes('failed') ? 'error' : 'info'}`}>
+            <div className="status-icon">
+              {uploadStatus.includes('success') ? (
+                <CheckCircle size={20} />
+              ) : uploadStatus.includes('failed') ? (
+                <AlertTriangle size={20} />
+              ) : (
+                <Info size={20} />
+              )}
+            </div>
             {uploadStatus}
           </div>
         )}
@@ -768,13 +967,25 @@ ${text}`
           onClick={handleUpload}
           disabled={!selectedFiles || selectedFiles.length === 0 || uploadStatus === 'Uploading...'}
         >
-          {uploadStatus === 'Uploading...' ? 'Uploading...' : `Upload ${selectedFiles.length || 0} PDF${selectedFiles.length !== 1 ? 's' : ''}`}
+          {uploadStatus === 'Uploading...' ? (
+            <>
+              <Loader2 size={20} className="animate-spin" />
+              Uploading...
+            </>
+          ) : (
+            <>
+              <Upload size={20} />
+              Upload {selectedFiles.length || 0} PDF{selectedFiles.length !== 1 ? 's' : ''}
+            </>
+          )}
         </button>
 
         {/* Error Message */}
         {errorMessage && (
           <div className="error-message">
-            <div className="error-icon">⚠️</div>
+            <div className="error-icon">
+              <AlertTriangle size={24} />
+            </div>
             <div className="error-content">
               <h3>Processing Error</h3>
               <p>{errorMessage}</p>
@@ -785,7 +996,9 @@ ${text}`
         {/* Extraction Status */}
         {extractionStatus && !errorMessage && (
           <div className="status-message info">
-            <div className="status-icon">ℹ️</div>
+            <div className="status-icon">
+              <Info size={20} />
+            </div>
             <p>{extractionStatus}</p>
           </div>
         )}
@@ -793,7 +1006,10 @@ ${text}`
         {/* Processing Status Section */}
         {(isExtracting || isOCRProcessing || isAutoProcessing) && (
           <div className="text-extraction-section">
-            <h2>Processing {selectedFiles.length > 1 ? `${selectedFiles.length} PDFs` : 'PDF'}</h2>
+            <h2>
+              <Loader2 size={24} className="animate-spin" />
+              Processing {selectedFiles.length > 1 ? `${selectedFiles.length} PDFs` : 'PDF'}
+            </h2>
             {isExtracting ? (
               <div className="extraction-loading">
                 <div className="loading-spinner"></div>
@@ -833,7 +1049,10 @@ ${text}`
         {/* Cleaned Questions Section */}
         {cleanedQuestions && (
           <div className="cleaned-questions-section">
-            <h2>📄 Extracted Questions</h2>
+            <h2>
+              <FileText size={24} />
+              Extracted Questions
+            </h2>
             <div className="cleaned-questions-container">
               <div className="text-controls">
                 <button 
@@ -841,7 +1060,8 @@ ${text}`
                   onClick={() => navigator.clipboard.writeText(cleanedQuestions)}
                   title="Copy questions to clipboard"
                 >
-                  📋 Copy Questions
+                  <Copy size={16} />
+                  Copy Questions
                 </button>
                 {/* Optional: Add manual re-process button for edge cases */}
                 <button 
@@ -850,12 +1070,129 @@ ${text}`
                   title="Re-process with AI if needed"
                   disabled={!extractedText || isProcessingWithGemini || !geminiApiKey.trim()}
                 >
-                  {isProcessingWithGemini ? '🔄 Re-processing...' : '🔄 Re-process'}
+                  {isProcessingWithGemini ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      Re-processing...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw size={16} />
+                      Re-process
+                    </>
+                  )}
+                </button>
+                <button 
+                  className="analyze-btn"
+                  onClick={() => analyzeQuestions(cleanedQuestions)}
+                  title="Analyze questions for similarity and group them"
+                  disabled={!cleanedQuestions || isGroupingQuestions}
+                >
+                  {isGroupingQuestions ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <Search size={16} />
+                      Analyze & Group Questions
+                    </>
+                  )}
                 </button>
               </div>
               <div className="cleaned-questions-text">
                 <pre>{cleanedQuestions}</pre>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Question Analysis Prompt */}
+        {cleanedQuestions && (!groupedQuestions || groupedQuestions.length === 0) && !isGroupingQuestions && (
+          <div className="analysis-prompt-section">
+            <h2>
+              <Search size={24} />
+              Question Analysis
+            </h2>
+            <div className="analysis-prompt">
+              <p>
+                <CheckCircle size={20} />
+                Questions have been extracted successfully!
+              </p>
+              <p>Click the button below to analyze and group similar questions together.</p>
+              <button 
+                className="analyze-main-btn"
+                onClick={() => analyzeQuestions(cleanedQuestions)}
+                title="Analyze questions for similarity and group them"
+                disabled={!cleanedQuestions || isGroupingQuestions}
+              >
+                <Search size={20} />
+                Analyze & Group Questions
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Question Groups Section */}
+        {groupedQuestions && groupedQuestions.length > 0 && (
+          <div className="question-groups-section">
+            <h2>
+              <Bot size={24} />
+              AI Question Analysis & Grouping
+            </h2>
+            <div className="groups-summary">
+              <p>Found <strong>{groupedQuestions.length}</strong> unified question groups with repetition counts.</p>
+            </div>
+            
+            {isGroupingQuestions && (
+              <div className="grouping-loading">
+                <div className="loading-spinner"></div>
+                <p>AI is analyzing and grouping questions...</p>
+              </div>
+            )}
+            
+            <div className="question-groups-container">
+              {groupedQuestions.map((group, groupIndex) => (
+                <div key={groupIndex} className="question-group">
+                  <div className="group-header">
+                    <h3>Group {group.groupNumber || groupIndex + 1}</h3>
+                    <span className="group-count">
+                      {group.count === 1 ? '1 question' : `${group.count} similar questions`}
+                    </span>
+                  </div>
+                  
+                  <div className="unified-question">
+                    <div className="question-header">
+                      <h4>❓ Unified Question:</h4>
+                      <span className="repetition-badge">
+                        {group.count}x repeated
+                      </span>
+                    </div>
+                    <div className="question-text">
+                      {group.unifiedQuestion}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="groups-controls">
+              <button 
+                className="copy-btn"
+                onClick={() => {
+                  const groupedText = groupedQuestions.map((group, index) => {
+                    let text = `Group ${group.groupNumber || index + 1}:\n`
+                    text += `Question Count: ${group.count} (repeated ${group.count}x)\n`
+                    text += `Unified Question: ${group.unifiedQuestion}\n`
+                    return text
+                  }).join('\n' + '='.repeat(50) + '\n\n')
+                  navigator.clipboard.writeText(groupedText)
+                }}
+                title="Copy unified questions to clipboard"
+              >
+                📋 Copy Questions
+              </button>
             </div>
           </div>
         )}
