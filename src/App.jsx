@@ -238,7 +238,7 @@ function App() {
 
     try {
       const genAI = new GoogleGenerativeAI(geminiApiKey.trim())
-      const model = genAI.getGenerativeModel({ model: "gemini-pro" })
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
 
       const prompt = `You are given OCR-scanned text from a question paper. The text is unstructured and contains grammar errors, typos, and layout issues.
 Your task is to:
@@ -263,12 +263,18 @@ ${text}`
       console.error('Gemini API Error:', error)
       let errorMsg = 'Failed to process text with Google Gemini AI. '
       
-      if (error.message.includes('API_KEY_INVALID')) {
+      if (error.message.includes('API_KEY_INVALID') || error.message.includes('401')) {
         errorMsg += 'Invalid API key. Please check your Google Gemini API key.'
-      } else if (error.message.includes('QUOTA_EXCEEDED')) {
+      } else if (error.message.includes('QUOTA_EXCEEDED') || error.message.includes('429')) {
         errorMsg += 'API quota exceeded. Please check your usage limits.'
       } else if (error.message.includes('SAFETY')) {
         errorMsg += 'Content was blocked by safety filters.'
+      } else if (error.message.includes('404') || error.message.includes('not found')) {
+        errorMsg += 'Model not available. The API might have been updated. Please try again or contact support.'
+      } else if (error.message.includes('403')) {
+        errorMsg += 'Access forbidden. Please check your API key permissions.'
+      } else if (error.message.includes('500')) {
+        errorMsg += 'Server error. Please try again in a few moments.'
       } else {
         errorMsg += `Error: ${error.message || 'Unknown error occurred.'}`
       }

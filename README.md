@@ -82,7 +82,7 @@ Your task is to:
 - **React**: Frontend framework
 - **pdfjs-dist**: PDF text extraction
 - **tesseract.js**: OCR processing
-- **@google/generative-ai**: Google Gemini AI integration
+- **@google/generative-ai**: Google Gemini AI integration (uses gemini-1.5-flash model)
 
 ## File Structure
 
@@ -145,6 +145,16 @@ The application handles various error scenarios:
 4. **No text extracted**
    - The PDF might be image-based (OCR will run automatically)
    - The PDF might be corrupted or password-protected
+
+5. **"Model not available" or 404 errors**
+   - The Gemini API models may have been updated
+   - Ensure you're using a valid API key
+   - Try refreshing the page and attempting again
+
+6. **"Access forbidden" (403 errors)**
+   - Check if your API key has the necessary permissions
+   - Verify the API key is correctly entered
+   - Ensure the Generative Language API is enabled in your Google Cloud project
 
 ## Development
 
