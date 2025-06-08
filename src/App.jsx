@@ -11,7 +11,7 @@ function App() {
   const [selectedFile, setSelectedFile] = useState(null)
   const [uploadStatus, setUploadStatus] = useState('')
   const [isDragOver, setIsDragOver] = useState(false)
-  const [extractedText, setExtractedText] = useState('')
+  const [extractedText, setExtractedText] = useState('') // Keep for internal processing
   const [isExtracting, setIsExtracting] = useState(false)
   const [isOCRProcessing, setIsOCRProcessing] = useState(false)
   const [ocrProgress, setOcrProgress] = useState(0)
@@ -19,6 +19,7 @@ function App() {
   const [extractionStatus, setExtractionStatus] = useState('')
   const [cleanedQuestions, setCleanedQuestions] = useState('')
   const [isProcessingWithGemini, setIsProcessingWithGemini] = useState(false)
+  const [isAutoProcessing, setIsAutoProcessing] = useState(false) // New state for auto-processing
   const [geminiApiKey, setGeminiApiKey] = useState(import.meta.env.VITE_GEMINI_API_KEY || '')
   const [showApiKeyInput, setShowApiKeyInput] = useState(!import.meta.env.VITE_GEMINI_API_KEY)
 
@@ -50,6 +51,7 @@ function App() {
       setUploadStatus('')
       setErrorMessage('')
       setExtractionStatus('')
+      setCleanedQuestions('') // Clear previous results
       extractTextFromPDF(file)
     } else {
       setSelectedFile(null)
@@ -57,6 +59,7 @@ function App() {
       setExtractedText('')
       setErrorMessage('')
       setExtractionStatus('')
+      setCleanedQuestions('')
     }
   }
 
@@ -115,10 +118,14 @@ function App() {
         } else {
           setExtractedText(ocrText)
           setExtractionStatus('OCR completed successfully!')
+          // Automatically process with AI after OCR
+          await autoProcessWithGemini(ocrText)
         }
       } else {
         setExtractedText(fullText.trim())
         setExtractionStatus(`Successfully extracted text from ${pdf.numPages} pages!`)
+        // Automatically process with AI after text extraction
+        await autoProcessWithGemini(fullText.trim())
       }
     } catch (error) {
       console.error('Error extracting text from PDF:', error)
@@ -226,6 +233,67 @@ function App() {
     }
   }
 
+  const autoProcessWithGemini = async (text) => {
+    if (!geminiApiKey.trim()) {
+      setErrorMessage('Please enter your Google Gemini API key to automatically process the extracted text.')
+      return
+    }
+
+    setIsAutoProcessing(true)
+    setIsProcessingWithGemini(true)
+    setErrorMessage('')
+    setExtractionStatus('Automatically processing text with Google Gemini AI...')
+
+    try {
+      const genAI = new GoogleGenerativeAI(geminiApiKey.trim())
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+
+      const prompt = `You are given OCR-scanned text from a question paper. The text is unstructured and may contain grammar errors, layout issues, and irrelevant content like instructions or metadata.
+
+Your task is to:
+1.Extract only the exam questions, and remove all other non-question content (instructions, titles, page numbers, etc).
+2.Ensure each question starts on a new line, and is numbered correctly.
+3.Fix grammar, spelling, and punctuation issues only for the questions.
+4.Maintain the original section headers (e.g., Section A, Section B) if they exist.
+5.Do not add or invent any content.
+
+Here is the OCR text to process:
+
+${text}`
+
+      const result = await model.generateContent(prompt)
+      const response = await result.response
+      const cleanedText = response.text()
+
+      setCleanedQuestions(cleanedText)
+      setExtractionStatus('Text successfully processed and cleaned with Google Gemini AI!')
+    } catch (error) {
+      console.error('Gemini API Error:', error)
+      let errorMsg = 'Failed to automatically process text with Google Gemini AI. '
+      
+      if (error.message.includes('API_KEY_INVALID') || error.message.includes('401')) {
+        errorMsg += 'Invalid API key. Please check your Google Gemini API key.'
+      } else if (error.message.includes('QUOTA_EXCEEDED') || error.message.includes('429')) {
+        errorMsg += 'API quota exceeded. Please check your usage limits.'
+      } else if (error.message.includes('SAFETY')) {
+        errorMsg += 'Content was blocked by safety filters.'
+      } else if (error.message.includes('404') || error.message.includes('not found')) {
+        errorMsg += 'Model not available. The API might have been updated. Please try again or contact support.'
+      } else if (error.message.includes('403')) {
+        errorMsg += 'Access forbidden. Please check your API key permissions.'
+      } else if (error.message.includes('500')) {
+        errorMsg += 'Server error. Please try again in a few moments.'
+      } else {
+        errorMsg += `Error: ${error.message || 'Unknown error occurred.'}`
+      }
+      
+      setErrorMessage(errorMsg)
+    } finally {
+      setIsAutoProcessing(false)
+      setIsProcessingWithGemini(false)
+    }
+  }
+
   const processTextWithGemini = async (text) => {
     if (!geminiApiKey.trim()) {
       setErrorMessage('Please enter your Google Gemini API key to process the text.')
@@ -240,14 +308,14 @@ function App() {
       const genAI = new GoogleGenerativeAI(geminiApiKey.trim())
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
 
-      const prompt = `You are given OCR-scanned text from a question paper. The text is unstructured and contains grammar errors, typos, and layout issues.
+      const prompt = `You are given OCR-scanned text from a question paper. The text is unstructured and may contain grammar errors, layout issues, and irrelevant content like instructions or metadata.
+
 Your task is to:
-1. Correct grammar, fix punctuation, and clean up any misspellings.
-2. Convert the text into a well-formatted list of exam questions.
-3. Ensure each question is complete, coherent, and starts on a new line.
-4. Maintain the original sections (Section A, Section B, Section C).
-5. Keep original question numbering where possible.
-6. Do not invent or add content. Only rephrase for clarity.
+1.Extract only the exam questions, and remove all other non-question content (instructions, titles, page numbers, etc).
+2.Ensure each question starts on a new line, and is numbered correctly.
+3.Fix grammar, spelling, and punctuation issues only for the questions.
+4.Maintain the original section headers (e.g., Section A, Section B) if they exist.
+5.Do not add or invent any content.
 
 Here is the OCR text to process:
 
@@ -327,6 +395,7 @@ ${text}`
     setExtractionStatus('')
     setCleanedQuestions('')
     setIsProcessingWithGemini(false)
+    setIsAutoProcessing(false)
   }
 
   const formatFileSize = (bytes) => {
@@ -449,10 +518,10 @@ ${text}`
           </div>
         )}
 
-        {/* Text Extraction Section */}
-        {(isExtracting || isOCRProcessing || extractedText) && (
+        {/* Processing Status Section */}
+        {(isExtracting || isOCRProcessing || isAutoProcessing) && (
           <div className="text-extraction-section">
-            <h2>Extracted Text</h2>
+            <h2>Processing PDF</h2>
             {isExtracting ? (
               <div className="extraction-loading">
                 <div className="loading-spinner"></div>
@@ -469,54 +538,73 @@ ${text}`
                   ></div>
                 </div>
               </div>
-            ) : (
-              <div className="extracted-text-container">
-                <div className="text-controls">
-                  <button 
-                    className="copy-btn"
-                    onClick={() => navigator.clipboard.writeText(extractedText)}
-                    title="Copy text to clipboard"
-                    disabled={!extractedText}
-                  >
-                    📋 Copy Text
-                  </button>
-                  <button 
-                    className="process-gemini-btn"
-                    onClick={() => processTextWithGemini(extractedText)}
-                    title="Process with Google Gemini AI"
-                    disabled={!extractedText || isProcessingWithGemini || !geminiApiKey.trim()}
-                  >
-                    {isProcessingWithGemini ? '🔄 Processing...' : '🤖 Clean with AI'}
-                  </button>
-                </div>
-                <div className="extracted-text">
-                  {extractedText ? (
-                    <pre>{extractedText}</pre>
-                  ) : (
-                    <p className="no-text">No text could be extracted from this PDF.</p>
-                  )}
-                </div>
+            ) : isAutoProcessing ? (
+              <div className="extraction-loading">
+                <div className="loading-spinner"></div>
+                <p>{extractionStatus || 'Processing text with AI...'}</p>
               </div>
-            )}
+            ) : null}
           </div>
         )}
 
         {/* Cleaned Questions Section */}
         {cleanedQuestions && (
           <div className="cleaned-questions-section">
-            <h2>🤖 AI-Cleaned Questions</h2>
+            <h2>📄 Extracted Questions</h2>
             <div className="cleaned-questions-container">
               <div className="text-controls">
                 <button 
                   className="copy-btn"
                   onClick={() => navigator.clipboard.writeText(cleanedQuestions)}
-                  title="Copy cleaned questions to clipboard"
+                  title="Copy questions to clipboard"
                 >
-                  📋 Copy Cleaned Questions
+                  📋 Copy Questions
+                </button>
+                {/* Optional: Add manual re-process button for edge cases */}
+                <button 
+                  className="process-gemini-btn"
+                  onClick={() => processTextWithGemini(extractedText)}
+                  title="Re-process with AI if needed"
+                  disabled={!extractedText || isProcessingWithGemini || !geminiApiKey.trim()}
+                >
+                  {isProcessingWithGemini ? '🔄 Re-processing...' : '🔄 Re-process'}
                 </button>
               </div>
               <div className="cleaned-questions-text">
                 <pre>{cleanedQuestions}</pre>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Fallback: Show raw text if AI processing failed and no cleaned questions */}
+        {extractedText && !cleanedQuestions && !isExtracting && !isOCRProcessing && !isAutoProcessing && (
+          <div className="text-extraction-section">
+            <h2>📄 Raw Extracted Text</h2>
+            <div className="api-key-warning">
+              <p>⚠️ AI processing was not completed. Please set up your Google Gemini API key above to automatically clean and format the extracted text.</p>
+            </div>
+            <div className="extracted-text-container">
+              <div className="text-controls">
+                <button 
+                  className="copy-btn"
+                  onClick={() => navigator.clipboard.writeText(extractedText)}
+                  title="Copy raw text to clipboard"
+                  disabled={!extractedText}
+                >
+                  📋 Copy Raw Text
+                </button>
+                <button 
+                  className="process-gemini-btn"
+                  onClick={() => processTextWithGemini(extractedText)}
+                  title="Process with Google Gemini AI"
+                  disabled={!extractedText || isProcessingWithGemini || !geminiApiKey.trim()}
+                >
+                  {isProcessingWithGemini ? '🔄 Processing...' : '🤖 Clean with AI'}
+                </button>
+              </div>
+              <div className="extracted-text">
+                <pre>{extractedText}</pre>
               </div>
             </div>
           </div>

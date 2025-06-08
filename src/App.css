@@ -536,6 +536,23 @@ h1 {
   transform: none;
 }
 
+/* API Key Warning */
+.api-key-warning {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.api-key-warning p {
+  margin: 0;
+  color: #856404;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
 /* Cleaned Questions Section */
 .cleaned-questions-section {
   margin-top: 30px;
