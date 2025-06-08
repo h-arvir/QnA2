@@ -8,7 +8,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
 
 function App() {
-  const [selectedFile, setSelectedFile] = useState(null)
+  const [selectedFiles, setSelectedFiles] = useState([]) // Changed to array for multiple files
   const [uploadStatus, setUploadStatus] = useState('')
   const [isDragOver, setIsDragOver] = useState(false)
   const [extractedText, setExtractedText] = useState('') // Keep for internal processing
@@ -22,17 +22,22 @@ function App() {
   const [isAutoProcessing, setIsAutoProcessing] = useState(false) // New state for auto-processing
   const [geminiApiKey, setGeminiApiKey] = useState(import.meta.env.VITE_GEMINI_API_KEY || '')
   const [showApiKeyInput, setShowApiKeyInput] = useState(!import.meta.env.VITE_GEMINI_API_KEY)
+  
+  // New states for multiple file processing
+  const [processingProgress, setProcessingProgress] = useState({})
+  const [fileResults, setFileResults] = useState({})
+  const [overallProgress, setOverallProgress] = useState(0)
 
   const handleFileSelect = (event) => {
-    const file = event.target.files[0]
-    validateAndSetFile(file)
+    const files = Array.from(event.target.files)
+    validateAndSetFiles(files)
   }
 
   const handleDrop = (event) => {
     event.preventDefault()
     setIsDragOver(false)
-    const file = event.dataTransfer.files[0]
-    validateAndSetFile(file)
+    const files = Array.from(event.dataTransfer.files)
+    validateAndSetFiles(files)
   }
 
   const handleDragOver = (event) => {
@@ -45,21 +50,100 @@ function App() {
     setIsDragOver(false)
   }
 
-  const validateAndSetFile = (file) => {
-    if (file && file.type === 'application/pdf') {
-      setSelectedFile(file)
-      setUploadStatus('')
-      setErrorMessage('')
-      setExtractionStatus('')
-      setCleanedQuestions('') // Clear previous results
-      extractTextFromPDF(file)
-    } else {
-      setSelectedFile(null)
-      setUploadStatus('Please select a valid PDF file.')
+  const validateAndSetFiles = (files) => {
+    const validFiles = files.filter(file => file.type === 'application/pdf')
+    const invalidFiles = files.filter(file => file.type !== 'application/pdf')
+    
+    if (validFiles.length === 0) {
+      setSelectedFiles([])
+      setUploadStatus('Please select valid PDF files.')
       setExtractedText('')
       setErrorMessage('')
       setExtractionStatus('')
       setCleanedQuestions('')
+      setFileResults({})
+      setProcessingProgress({})
+      return
+    }
+    
+    if (invalidFiles.length > 0) {
+      setUploadStatus(`${invalidFiles.length} non-PDF files were ignored. Processing ${validFiles.length} PDF files.`)
+    } else {
+      setUploadStatus('')
+    }
+    
+    setSelectedFiles(validFiles)
+    setErrorMessage('')
+    setExtractionStatus('')
+    setCleanedQuestions('') // Clear previous results
+    setFileResults({})
+    setProcessingProgress({})
+    
+    // Start processing all files
+    processMultiplePDFs(validFiles)
+  }
+
+  const processMultiplePDFs = async (files) => {
+    setIsExtracting(true)
+    setIsOCRProcessing(false)
+    setIsAutoProcessing(false)
+    setOverallProgress(0)
+    setExtractionStatus(`Starting to process ${files.length} PDF files...`)
+    
+    // Initialize progress tracking for each file
+    const initialProgress = {}
+    files.forEach((file, index) => {
+      initialProgress[file.name] = {
+        status: 'waiting',
+        progress: 0,
+        text: '',
+        error: null
+      }
+    })
+    setProcessingProgress(initialProgress)
+    
+    try {
+      // Process all files in parallel
+      const processingPromises = files.map((file, index) => 
+        extractTextFromSinglePDF(file, index, files.length)
+      )
+      
+      const results = await Promise.allSettled(processingPromises)
+      
+      // Combine all successful results
+      let combinedText = ''
+      let successCount = 0
+      let errorCount = 0
+      
+      results.forEach((result, index) => {
+        const fileName = files[index].name
+        if (result.status === 'fulfilled' && result.value) {
+          combinedText += `\n\n=== ${fileName} ===\n${result.value}\n`
+          successCount++
+        } else {
+          errorCount++
+          console.error(`Failed to process ${fileName}:`, result.reason)
+        }
+      })
+      
+      if (combinedText.trim()) {
+        setExtractedText(combinedText.trim())
+        setExtractionStatus(`Successfully processed ${successCount} of ${files.length} PDF files!`)
+        
+        // Automatically process combined text with AI
+        await autoProcessWithGemini(combinedText.trim())
+      } else {
+        setErrorMessage(`Failed to extract text from all ${files.length} PDF files.`)
+      }
+      
+      setOverallProgress(100)
+      
+    } catch (error) {
+      console.error('Error processing multiple PDFs:', error)
+      setErrorMessage(`Error processing PDF files: ${error.message}`)
+    } finally {
+      setIsExtracting(false)
+      setIsOCRProcessing(false)
     }
   }
 
@@ -233,6 +317,149 @@ function App() {
     }
   }
 
+  const extractTextFromSinglePDF = async (file, fileIndex, totalFiles) => {
+    const fileName = file.name
+    
+    // Update progress for this specific file
+    const updateFileProgress = (status, progress = 0, error = null) => {
+      setProcessingProgress(prev => ({
+        ...prev,
+        [fileName]: { status, progress, error }
+      }))
+      
+      // Update overall progress
+      const completedFiles = fileIndex
+      const currentFileProgress = progress / 100
+      const overallPercent = ((completedFiles + currentFileProgress) / totalFiles) * 100
+      setOverallProgress(Math.round(overallPercent))
+    }
+    
+    try {
+      updateFileProgress('processing', 0)
+      
+      const arrayBuffer = await file.arrayBuffer()
+      updateFileProgress('reading', 20)
+      
+      const pdf = await pdfjsLib.getDocument(arrayBuffer).promise
+      let fullText = ''
+      let hasTextContent = false
+      
+      updateFileProgress('extracting', 40)
+      
+      // First, try to extract text normally
+      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        const page = await pdf.getPage(pageNum)
+        const textContent = await page.getTextContent()
+        const pageText = textContent.items.map(item => item.str).join(' ').trim()
+        
+        if (pageText.length > 0) {
+          hasTextContent = true
+          fullText += `Page ${pageNum}:\n${pageText}\n\n`
+        }
+        
+        // Update progress based on page extraction
+        const pageProgress = 40 + (pageNum / pdf.numPages) * 40
+        updateFileProgress('extracting', Math.round(pageProgress))
+      }
+      
+      // If no text was found, try OCR on images
+      if (!hasTextContent || fullText.trim().length === 0) {
+        updateFileProgress('ocr', 80)
+        const ocrText = await extractTextWithOCRSingle(pdf, fileName, updateFileProgress)
+        
+        if (ocrText.includes('Error:')) {
+          updateFileProgress('error', 100, ocrText)
+          throw new Error(ocrText)
+        } else {
+          updateFileProgress('completed', 100)
+          return ocrText
+        }
+      } else {
+        updateFileProgress('completed', 100)
+        return fullText.trim()
+      }
+    } catch (error) {
+      console.error(`Error extracting text from ${fileName}:`, error)
+      updateFileProgress('error', 100, error.message)
+      throw error
+    }
+  }
+
+  const extractTextWithOCRSingle = async (pdf, fileName, updateProgress) => {
+    let worker = null
+    let ocrText = ''
+    
+    try {
+      worker = await createWorker('eng')
+      
+      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        try {
+          const page = await pdf.getPage(pageNum)
+          const viewport = page.getViewport({ scale: 2.0 })
+          
+          // Create canvas to render PDF page
+          const canvas = document.createElement('canvas')
+          const context = canvas.getContext('2d')
+          canvas.height = viewport.height
+          canvas.width = viewport.width
+          
+          // Render PDF page to canvas
+          await page.render({
+            canvasContext: context,
+            viewport: viewport
+          }).promise
+          
+          // Convert canvas to image data for OCR
+          const imageData = canvas.toDataURL('image/png')
+          
+          // Perform OCR on the image
+          const { data: { text } } = await worker.recognize(imageData)
+          
+          if (text.trim().length > 0) {
+            ocrText += `Page ${pageNum} (OCR):\n${text.trim()}\n\n`
+          } else {
+            ocrText += `Page ${pageNum} (OCR): [No readable text found]\n\n`
+          }
+          
+          // Update progress
+          const ocrProgress = 80 + (pageNum / pdf.numPages) * 20
+          updateProgress('ocr', Math.round(ocrProgress))
+          
+        } catch (pageError) {
+          console.error(`Error processing page ${pageNum} of ${fileName}:`, pageError)
+          ocrText += `Page ${pageNum} (OCR): [Error processing page]\n\n`
+        }
+      }
+      
+      if (ocrText.trim().length === 0) {
+        return `Error: No text could be extracted from ${fileName} using OCR. The images might not contain readable text or the PDF might be corrupted.`
+      }
+      
+      return ocrText.trim()
+    } catch (error) {
+      console.error(`OCR Error for ${fileName}:`, error)
+      let errorMsg = `Error: OCR processing failed for ${fileName}. `
+      
+      if (error.message.includes('network')) {
+        errorMsg += 'Network error while downloading OCR models. Please check your internet connection.'
+      } else if (error.message.includes('memory')) {
+        errorMsg += 'Insufficient memory for OCR processing. Try with a smaller PDF.'
+      } else {
+        errorMsg += `${error.message || 'Unknown OCR error occurred.'}`
+      }
+      
+      return errorMsg
+    } finally {
+      if (worker) {
+        try {
+          await worker.terminate()
+        } catch (terminateError) {
+          console.error(`Error terminating OCR worker for ${fileName}:`, terminateError)
+        }
+      }
+    }
+  }
+
   const autoProcessWithGemini = async (text) => {
     if (!geminiApiKey.trim()) {
       setErrorMessage('Please enter your Google Gemini API key to automatically process the extracted text.')
@@ -354,8 +581,8 @@ ${text}`
   }
 
   const handleUpload = async () => {
-    if (!selectedFile) {
-      setUploadStatus('Please select a PDF file first.')
+    if (!selectedFiles || selectedFiles.length === 0) {
+      setUploadStatus('Please select PDF files first.')
       return
     }
 
@@ -365,7 +592,9 @@ ${text}`
     try {
       // Create FormData for file upload
       const formData = new FormData()
-      formData.append('pdf', selectedFile)
+      selectedFiles.forEach((file, index) => {
+        formData.append(`pdf_${index}`, file)
+      })
       
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 2000))
@@ -376,8 +605,8 @@ ${text}`
       //   body: formData
       // })
       
-      setUploadStatus('PDF uploaded successfully!')
-      console.log('File uploaded:', selectedFile.name)
+      setUploadStatus(`${selectedFiles.length} PDF files uploaded successfully!`)
+      console.log('Files uploaded:', selectedFiles.map(f => f.name))
       
     } catch (error) {
       setUploadStatus('Upload failed. Please try again.')
@@ -385,17 +614,26 @@ ${text}`
     }
   }
 
-  const handleRemoveFile = () => {
-    setSelectedFile(null)
-    setUploadStatus('')
-    setExtractedText('')
-    setIsOCRProcessing(false)
-    setOcrProgress(0)
-    setErrorMessage('')
-    setExtractionStatus('')
-    setCleanedQuestions('')
-    setIsProcessingWithGemini(false)
-    setIsAutoProcessing(false)
+  const handleRemoveFile = (fileToRemove = null) => {
+    if (fileToRemove) {
+      // Remove specific file
+      setSelectedFiles(prev => prev.filter(file => file !== fileToRemove))
+    } else {
+      // Remove all files
+      setSelectedFiles([])
+      setUploadStatus('')
+      setExtractedText('')
+      setIsOCRProcessing(false)
+      setOcrProgress(0)
+      setErrorMessage('')
+      setExtractionStatus('')
+      setCleanedQuestions('')
+      setIsProcessingWithGemini(false)
+      setIsAutoProcessing(false)
+      setProcessingProgress({})
+      setFileResults({})
+      setOverallProgress(0)
+    }
   }
 
   const formatFileSize = (bytes) => {
@@ -420,19 +658,20 @@ ${text}`
         >
           <div className="upload-content">
             <div className="upload-icon">📄</div>
-            <h3>Drag & Drop your PDF here</h3>
+            <h3>Drag & Drop your PDFs here</h3>
             <p>or</p>
             <label htmlFor="file-input" className="file-input-label">
-              Choose File
+              Choose Files
             </label>
             <input
               id="file-input"
               type="file"
               accept=".pdf"
+              multiple
               onChange={handleFileSelect}
               className="file-input"
             />
-            <p className="file-info">Only PDF files are allowed</p>
+            <p className="file-info">Select multiple PDF files for batch processing</p>
           </div>
         </div>
 
@@ -466,21 +705,54 @@ ${text}`
           )}
         </div>
 
-        {selectedFile && (
-          <div className="file-preview">
-            <div className="file-details">
-              <div className="file-icon">📄</div>
-              <div className="file-info-details">
-                <h4>{selectedFile.name}</h4>
-                <p>{formatFileSize(selectedFile.size)}</p>
-              </div>
+        {selectedFiles && selectedFiles.length > 0 && (
+          <div className="files-preview">
+            <div className="files-header">
+              <h3>Selected Files ({selectedFiles.length})</h3>
               <button 
-                className="remove-btn"
-                onClick={handleRemoveFile}
-                title="Remove file"
+                className="remove-all-btn"
+                onClick={() => handleRemoveFile()}
+                title="Remove all files"
               >
-                ✕
+                Clear All
               </button>
+            </div>
+            <div className="files-list">
+              {selectedFiles.map((file, index) => (
+                <div key={index} className="file-details">
+                  <div className="file-icon">📄</div>
+                  <div className="file-info-details">
+                    <h4>{file.name}</h4>
+                    <p>{formatFileSize(file.size)}</p>
+                    {processingProgress[file.name] && (
+                      <div className="file-progress">
+                        <span className="progress-status">
+                          {processingProgress[file.name].status === 'waiting' && '⏳ Waiting...'}
+                          {processingProgress[file.name].status === 'processing' && '🔄 Processing...'}
+                          {processingProgress[file.name].status === 'reading' && '📖 Reading...'}
+                          {processingProgress[file.name].status === 'extracting' && '📝 Extracting...'}
+                          {processingProgress[file.name].status === 'ocr' && '🔍 OCR Processing...'}
+                          {processingProgress[file.name].status === 'completed' && '✅ Completed'}
+                          {processingProgress[file.name].status === 'error' && '❌ Error'}
+                        </span>
+                        <div className="progress-bar-small">
+                          <div 
+                            className="progress-fill-small" 
+                            style={{ width: `${processingProgress[file.name].progress}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <button 
+                    className="remove-btn"
+                    onClick={() => handleRemoveFile(file)}
+                    title="Remove this file"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -494,9 +766,9 @@ ${text}`
         <button 
           className="upload-btn"
           onClick={handleUpload}
-          disabled={!selectedFile || uploadStatus === 'Uploading...'}
+          disabled={!selectedFiles || selectedFiles.length === 0 || uploadStatus === 'Uploading...'}
         >
-          {uploadStatus === 'Uploading...' ? 'Uploading...' : 'Upload PDF'}
+          {uploadStatus === 'Uploading...' ? 'Uploading...' : `Upload ${selectedFiles.length || 0} PDF${selectedFiles.length !== 1 ? 's' : ''}`}
         </button>
 
         {/* Error Message */}
@@ -521,11 +793,22 @@ ${text}`
         {/* Processing Status Section */}
         {(isExtracting || isOCRProcessing || isAutoProcessing) && (
           <div className="text-extraction-section">
-            <h2>Processing PDF</h2>
+            <h2>Processing {selectedFiles.length > 1 ? `${selectedFiles.length} PDFs` : 'PDF'}</h2>
             {isExtracting ? (
               <div className="extraction-loading">
                 <div className="loading-spinner"></div>
-                <p>{extractionStatus || 'Extracting text from PDF...'}</p>
+                <p>{extractionStatus || 'Extracting text from PDFs...'}</p>
+                {selectedFiles.length > 1 && (
+                  <div className="overall-progress">
+                    <p>Overall Progress: {overallProgress}%</p>
+                    <div className="progress-bar">
+                      <div 
+                        className="progress-fill" 
+                        style={{ width: `${overallProgress}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : isOCRProcessing ? (
               <div className="extraction-loading">
