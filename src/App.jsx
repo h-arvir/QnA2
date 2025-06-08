@@ -2,6 +2,7 @@ import { useState } from 'react'
 import './App.css'
 import * as pdfjsLib from 'pdfjs-dist'
 import { createWorker } from 'tesseract.js'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 
 // Set up PDF.js worker - using local worker file
 pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
@@ -16,6 +17,10 @@ function App() {
   const [ocrProgress, setOcrProgress] = useState(0)
   const [errorMessage, setErrorMessage] = useState('')
   const [extractionStatus, setExtractionStatus] = useState('')
+  const [cleanedQuestions, setCleanedQuestions] = useState('')
+  const [isProcessingWithGemini, setIsProcessingWithGemini] = useState(false)
+  const [geminiApiKey, setGeminiApiKey] = useState(import.meta.env.VITE_GEMINI_API_KEY || '')
+  const [showApiKeyInput, setShowApiKeyInput] = useState(!import.meta.env.VITE_GEMINI_API_KEY)
 
   const handleFileSelect = (event) => {
     const file = event.target.files[0]
@@ -221,6 +226,59 @@ function App() {
     }
   }
 
+  const processTextWithGemini = async (text) => {
+    if (!geminiApiKey.trim()) {
+      setErrorMessage('Please enter your Google Gemini API key to process the text.')
+      return
+    }
+
+    setIsProcessingWithGemini(true)
+    setErrorMessage('')
+    setExtractionStatus('Processing text with Google Gemini AI...')
+
+    try {
+      const genAI = new GoogleGenerativeAI(geminiApiKey.trim())
+      const model = genAI.getGenerativeModel({ model: "gemini-pro" })
+
+      const prompt = `You are given OCR-scanned text from a question paper. The text is unstructured and contains grammar errors, typos, and layout issues.
+Your task is to:
+1. Correct grammar, fix punctuation, and clean up any misspellings.
+2. Convert the text into a well-formatted list of exam questions.
+3. Ensure each question is complete, coherent, and starts on a new line.
+4. Maintain the original sections (Section A, Section B, Section C).
+5. Keep original question numbering where possible.
+6. Do not invent or add content. Only rephrase for clarity.
+
+Here is the OCR text to process:
+
+${text}`
+
+      const result = await model.generateContent(prompt)
+      const response = await result.response
+      const cleanedText = response.text()
+
+      setCleanedQuestions(cleanedText)
+      setExtractionStatus('Text successfully processed with Google Gemini AI!')
+    } catch (error) {
+      console.error('Gemini API Error:', error)
+      let errorMsg = 'Failed to process text with Google Gemini AI. '
+      
+      if (error.message.includes('API_KEY_INVALID')) {
+        errorMsg += 'Invalid API key. Please check your Google Gemini API key.'
+      } else if (error.message.includes('QUOTA_EXCEEDED')) {
+        errorMsg += 'API quota exceeded. Please check your usage limits.'
+      } else if (error.message.includes('SAFETY')) {
+        errorMsg += 'Content was blocked by safety filters.'
+      } else {
+        errorMsg += `Error: ${error.message || 'Unknown error occurred.'}`
+      }
+      
+      setErrorMessage(errorMsg)
+    } finally {
+      setIsProcessingWithGemini(false)
+    }
+  }
+
   const handleUpload = async () => {
     if (!selectedFile) {
       setUploadStatus('Please select a PDF file first.')
@@ -261,6 +319,8 @@ function App() {
     setOcrProgress(0)
     setErrorMessage('')
     setExtractionStatus('')
+    setCleanedQuestions('')
+    setIsProcessingWithGemini(false)
   }
 
   const formatFileSize = (bytes) => {
@@ -299,6 +359,36 @@ function App() {
             />
             <p className="file-info">Only PDF files are allowed</p>
           </div>
+        </div>
+
+        {/* Google Gemini API Key Section */}
+        <div className="api-key-section">
+          <div className="api-key-header">
+            <h3>🤖 AI Text Processing</h3>
+            <button 
+              className="toggle-api-key-btn"
+              onClick={() => setShowApiKeyInput(!showApiKeyInput)}
+            >
+              {showApiKeyInput ? 'Hide' : 'Setup'} API Key
+            </button>
+          </div>
+          
+          {showApiKeyInput && (
+            <div className="api-key-input-container">
+              <label htmlFor="gemini-api-key">Google Gemini API Key:</label>
+              <input
+                id="gemini-api-key"
+                type="password"
+                placeholder="Enter your Google Gemini API key"
+                value={geminiApiKey}
+                onChange={(e) => setGeminiApiKey(e.target.value)}
+                className="api-key-input"
+              />
+              <p className="api-key-info">
+                Get your free API key from <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a>
+              </p>
+            </div>
+          )}
         </div>
 
         {selectedFile && (
@@ -384,6 +474,14 @@ function App() {
                   >
                     📋 Copy Text
                   </button>
+                  <button 
+                    className="process-gemini-btn"
+                    onClick={() => processTextWithGemini(extractedText)}
+                    title="Process with Google Gemini AI"
+                    disabled={!extractedText || isProcessingWithGemini || !geminiApiKey.trim()}
+                  >
+                    {isProcessingWithGemini ? '🔄 Processing...' : '🤖 Clean with AI'}
+                  </button>
                 </div>
                 <div className="extracted-text">
                   {extractedText ? (
@@ -394,6 +492,27 @@ function App() {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Cleaned Questions Section */}
+        {cleanedQuestions && (
+          <div className="cleaned-questions-section">
+            <h2>🤖 AI-Cleaned Questions</h2>
+            <div className="cleaned-questions-container">
+              <div className="text-controls">
+                <button 
+                  className="copy-btn"
+                  onClick={() => navigator.clipboard.writeText(cleanedQuestions)}
+                  title="Copy cleaned questions to clipboard"
+                >
+                  📋 Copy Cleaned Questions
+                </button>
+              </div>
+              <div className="cleaned-questions-text">
+                <pre>{cleanedQuestions}</pre>
+              </div>
+            </div>
           </div>
         )}
       </div>
