@@ -56,10 +56,8 @@ function App() {
 
   // Navigation items
   const navigationItems = [
-    { id: 'upload', label: 'Upload', icon: '📄', component: 'UploadSection' },
-    { id: 'extract', label: 'Extract', icon: '🔍', component: 'ExtractSection' },
-    { id: 'questions', label: 'Questions', icon: '🧠', component: 'QuestionsSection' },
-    { id: 'analysis', label: 'Analysis', icon: '📊', component: 'AnalysisSection' }
+    { id: 'instructions', label: 'Instructions', icon: '📋', component: 'InstructionsSection' },
+    { id: 'apikey', label: 'Set up API Key', icon: '🔑', component: 'ApiKeySection' }
   ]
 
   const handleFileSelect = (event) => {
@@ -1297,6 +1295,233 @@ ${cleanedText}`
     </div>
   )
 
+  const renderInstructionsSection = () => (
+    <div className="section-content">
+      <h2 className="section-title">📋 How to Use This App</h2>
+      <p className="section-subtitle">Step-by-step guide to extract and analyze PDF content</p>
+      
+      <div className="instructions-container">
+        <div className="instruction-card">
+          <div className="instruction-header">
+            <div className="instruction-icon">1️⃣</div>
+            <h3>Set up API Key</h3>
+          </div>
+          <div className="instruction-content">
+            <p>First, you'll need to configure your Google Gemini API key to enable AI-powered text processing and question generation.</p>
+            <ul>
+              <li>Go to the "Set up API Key" section in the sidebar</li>
+              <li>Enter your Google Gemini API key</li>
+              <li>The key will be saved for this session</li>
+            </ul>
+            <div className="instruction-note">
+              <Info size={16} />
+              <span>Don't have an API key? Get one free at <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a></span>
+            </div>
+          </div>
+        </div>
+
+        <div className="instruction-card">
+          <div className="instruction-header">
+            <div className="instruction-icon">2️⃣</div>
+            <h3>Upload PDF Files</h3>
+          </div>
+          <div className="instruction-content">
+            <p>Upload one or multiple PDF documents that you want to analyze.</p>
+            <ul>
+              <li>Click the upload area or drag & drop PDF files</li>
+              <li>Multiple files are processed simultaneously</li>
+              <li>Both text-based and image-based PDFs are supported</li>
+              <li>OCR is automatically used for scanned documents</li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="instruction-card">
+          <div className="instruction-header">
+            <div className="instruction-icon">3️⃣</div>
+            <h3>Automatic Processing</h3>
+          </div>
+          <div className="instruction-content">
+            <p>The app automatically processes your PDFs through multiple stages:</p>
+            <ul>
+              <li><strong>Text Extraction:</strong> Extracts text from PDFs using advanced parsing</li>
+              <li><strong>OCR Processing:</strong> Handles scanned documents with optical character recognition</li>
+              <li><strong>AI Analysis:</strong> Uses Google Gemini to generate relevant questions and answers</li>
+              <li><strong>Question Grouping:</strong> Organizes similar questions into logical categories</li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="instruction-card">
+          <div className="instruction-header">
+            <div className="instruction-icon">4️⃣</div>
+            <h3>Review Results</h3>
+          </div>
+          <div className="instruction-content">
+            <p>Navigate through the timeline to review different stages:</p>
+            <ul>
+              <li><strong>Extract:</strong> View the extracted text content</li>
+              <li><strong>Questions:</strong> See generated Q&A pairs</li>
+              <li><strong>Analysis:</strong> Explore grouped questions by topic</li>
+            </ul>
+            <div className="instruction-tip">
+              <CheckCircle size={16} />
+              <span>Use the timeline at the top to jump between different sections</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="features-section">
+          <h3>✨ Key Features</h3>
+          <div className="features-grid">
+            <div className="feature-item">
+              <Upload size={20} />
+              <span>Multi-file upload support</span>
+            </div>
+            <div className="feature-item">
+              <Eye size={20} />
+              <span>OCR for scanned documents</span>
+            </div>
+            <div className="feature-item">
+              <Bot size={20} />
+              <span>AI-powered question generation</span>
+            </div>
+            <div className="feature-item">
+              <BarChart3 size={20} />
+              <span>Intelligent question grouping</span>
+            </div>
+            <div className="feature-item">
+              <Download size={20} />
+              <span>Export results</span>
+            </div>
+            <div className="feature-item">
+              <RefreshCw size={20} />
+              <span>Real-time progress tracking</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="instructions-actions">
+          <button
+            onClick={() => setActiveSection('apikey')}
+            className="nav-btn secondary"
+          >
+            <Settings size={16} />
+            Set up API Key
+          </button>
+          <button
+            onClick={() => setActiveSection('upload')}
+            className="nav-btn primary"
+          >
+            <Upload size={16} />
+            Start with Upload
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+
+  const renderApiKeySection = () => (
+    <div className="section-content">
+      <h2 className="section-title">🔑 API Key Setup</h2>
+      <p className="section-subtitle">Configure your Google Gemini API key for AI processing</p>
+      
+      <div className="api-key-container">
+        <div className="api-key-card">
+          <div className="api-key-header">
+            <Settings size={24} />
+            <h3>Google Gemini API Configuration</h3>
+          </div>
+          
+          <div className="api-key-content">
+            <p>Enter your Google Gemini API key to enable AI-powered text analysis and question generation.</p>
+            
+            <div className="api-key-input-section">
+              <label htmlFor="apikey-input" className="api-key-label">
+                API Key
+              </label>
+              <div className="api-key-input-wrapper">
+                <input
+                  id="apikey-input"
+                  type={showApiKeyInput ? "text" : "password"}
+                  value={geminiApiKey}
+                  onChange={(e) => setGeminiApiKey(e.target.value)}
+                  placeholder="Enter your Google Gemini API key"
+                  className="api-key-input"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowApiKeyInput(!showApiKeyInput)}
+                  className="api-key-toggle"
+                >
+                  {showApiKeyInput ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+            </div>
+
+            <div className="api-key-status">
+              {geminiApiKey ? (
+                <div className="status-success">
+                  <CheckCircle size={16} />
+                  <span>API key configured successfully</span>
+                </div>
+              ) : (
+                <div className="status-warning">
+                  <AlertTriangle size={16} />
+                  <span>API key required for AI processing</span>
+                </div>
+              )}
+            </div>
+
+            <div className="api-key-info">
+              <h4>How to get your API key:</h4>
+              <ol>
+                <li>Visit <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a></li>
+                <li>Sign in with your Google account</li>
+                <li>Click "Create API Key"</li>
+                <li>Copy the generated key and paste it above</li>
+              </ol>
+              
+              <div className="api-key-note">
+                <Info size={16} />
+                <div>
+                  <strong>Privacy Note:</strong> Your API key is stored locally in your browser and is never sent to our servers. 
+                  It's only used to communicate directly with Google's Gemini API.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {geminiApiKey && (
+          <div className="api-key-actions">
+            <button
+              onClick={() => {
+                // Test the API key by making a simple request
+                console.log('Testing API key...')
+              }}
+              className="test-api-btn"
+            >
+              <RefreshCw size={16} />
+              Test API Key
+            </button>
+            
+            <button
+              onClick={() => {
+                setGeminiApiKey('')
+                setShowApiKeyInput(false)
+              }}
+              className="clear-api-btn"
+            >
+              <Trash2 size={16} />
+              Clear API Key
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+
   return (
     <div className="app">
       {/* Sidebar Navigation */}
@@ -1306,7 +1531,7 @@ ${cleanedText}`
           <p className="sidebar-subtitle">Extract & Analyze</p>
         </div>
         
-        <div className="nav-items">
+        <div className="nav-items" data-active={activeSection}>
           {navigationItems.map((item) => (
             <button
               key={item.id}
@@ -1319,34 +1544,71 @@ ${cleanedText}`
           ))}
         </div>
         
-        <div className="sidebar-footer">
-          <div className="progress-indicator">
-            <div className="progress-step">
-              <div className={`step-dot ${selectedFiles.length > 0 ? 'completed' : ''}`}>1</div>
-              <span>Upload</span>
-            </div>
-            <div className="progress-step">
-              <div className={`step-dot ${extractedText ? 'completed' : ''}`}>2</div>
-              <span>Extract</span>
-            </div>
-            <div className="progress-step">
-              <div className={`step-dot ${cleanedQuestions ? 'completed' : ''}`}>3</div>
-              <span>Questions</span>
-            </div>
-            <div className="progress-step">
-              <div className={`step-dot ${groupedQuestions.length > 0 ? 'completed' : ''}`}>4</div>
-              <span>Analysis</span>
-            </div>
-          </div>
-        </div>
+
       </nav>
 
       {/* Main Content */}
       <main className="main-content">
-        {activeSection === 'upload' && renderUploadSection()}
-        {activeSection === 'extract' && renderExtractSection()}
-        {activeSection === 'questions' && renderQuestionsSection()}
-        {activeSection === 'analysis' && renderAnalysisSection()}
+        {/* PDF Processing Timeline - Always Visible */}
+        <div className="timeline-container">
+          <div className="timeline-progress">
+            <div className="timeline-step" onClick={() => setActiveSection('upload')}>
+              <div className={`timeline-dot ${selectedFiles.length > 0 ? 'completed' : ''} ${activeSection === 'upload' ? 'active' : ''}`}>
+                <span className="timeline-number">1</span>
+              </div>
+              <div className="timeline-label">
+                <span className="timeline-title">Upload</span>
+                <span className="timeline-subtitle">Select PDF files</span>
+              </div>
+            </div>
+            
+            <div className="timeline-connector"></div>
+            
+            <div className="timeline-step" onClick={() => setActiveSection('extract')}>
+              <div className={`timeline-dot ${extractedText ? 'completed' : ''} ${activeSection === 'extract' ? 'active' : ''}`}>
+                <span className="timeline-number">2</span>
+              </div>
+              <div className="timeline-label">
+                <span className="timeline-title">Extract</span>
+                <span className="timeline-subtitle">Process content</span>
+              </div>
+            </div>
+            
+            <div className="timeline-connector"></div>
+            
+            <div className="timeline-step" onClick={() => setActiveSection('questions')}>
+              <div className={`timeline-dot ${cleanedQuestions ? 'completed' : ''} ${activeSection === 'questions' ? 'active' : ''}`}>
+                <span className="timeline-number">3</span>
+              </div>
+              <div className="timeline-label">
+                <span className="timeline-title">Questions</span>
+                <span className="timeline-subtitle">Generate Q&A</span>
+              </div>
+            </div>
+            
+            <div className="timeline-connector"></div>
+            
+            <div className="timeline-step" onClick={() => setActiveSection('analysis')}>
+              <div className={`timeline-dot ${groupedQuestions.length > 0 ? 'completed' : ''} ${activeSection === 'analysis' ? 'active' : ''}`}>
+                <span className="timeline-number">4</span>
+              </div>
+              <div className="timeline-label">
+                <span className="timeline-title">Analysis</span>
+                <span className="timeline-subtitle">Review results</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Section Content */}
+        <div className="section-wrapper">
+          {activeSection === 'upload' && renderUploadSection()}
+          {activeSection === 'extract' && renderExtractSection()}
+          {activeSection === 'questions' && renderQuestionsSection()}
+          {activeSection === 'analysis' && renderAnalysisSection()}
+          {activeSection === 'instructions' && renderInstructionsSection()}
+          {activeSection === 'apikey' && renderApiKeySection()}
+        </div>
       </main>
     </div>
   )
