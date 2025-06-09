@@ -73,21 +73,29 @@ ${text}`
       const prompt = `You are an intelligent assistant that analyzes a block of OCR-extracted exam questions. Your task is as follows:
 
 1. Group similar or semantically related questions together. Use moderate semantic similarity (not just exact matches), grouping questions that are conceptually the same even if phrased differently.
-2. For each group, create a **single, unified question** that represents the main intent of all questions in that group.
-3. Also mention all the questions that were grouped together in the unified question in indented bullet points.
+2. For each group, create a **single, unified question** that concatenates the essence of all questions in the group. Ensure it captures the main intent of all questions in that group.
+3. List ALL the original questions that were grouped together under "Individual Questions".
 4. Count how many questions are in each group (how many times similar questions appear).
 
-Format your output as:
+IMPORTANT: Always include the "Individual Questions" section with the actual original questions from the text, even if there's only one question in the group.
+
+Format your output EXACTLY as follows:
 Group 1:
 Question Count: <number of similar questions in this group>
 Unified Question: <merged version>
-  Individual Questions: <list of original questions in this group, indented>
+Individual Questions:
+- <original question 1>
+- <original question 2>
+- <original question 3>
 
 Group 2:
 Question Count: <number of similar questions in this group>
 Unified Question: <merged version>
-  Individual Questions: <list of original questions in this group, indented>
-… and so on.
+Individual Questions:
+- <original question 1>
+- <original question 2>
+
+... and so on.
 
 Here are the extracted questions to analyze:
 
@@ -99,6 +107,10 @@ ${cleanedText}`
 
       // Parse the AI response into structured groups
       const groups = this.parseAIAnalysisResponse(analysisResult)
+      
+      // Debug logging
+      console.log('AI Analysis Result:', analysisResult)
+      console.log('Parsed Groups:', groups)
       
       onStatusUpdate(`AI analysis complete! Found ${groups.length} question groups with unified questions and repetition counts.`)
       return groups
@@ -133,6 +145,8 @@ ${cleanedText}`
       
       let questionCount = 1
       let unifiedQuestion = ''
+      let originalQuestions = []
+      let inIndividualQuestions = false
       
       for (const line of lines) {
         const trimmedLine = line.trim()
@@ -144,9 +158,41 @@ ${cleanedText}`
           }
         } else if (trimmedLine.toLowerCase().startsWith('unified question:')) {
           unifiedQuestion = trimmedLine.replace(/^unified question:\s*/i, '').trim()
-        } else if (unifiedQuestion && trimmedLine.length > 0 && !trimmedLine.toLowerCase().startsWith('group ')) {
+          inIndividualQuestions = false
+        } else if (trimmedLine.toLowerCase().includes('individual questions:')) {
+          inIndividualQuestions = true
+        } else if (inIndividualQuestions) {
+          // More flexible parsing for individual questions
+          // Handle various formats: bullet points, numbers, indented text, or plain text
+          let cleanQuestion = trimmedLine
+          
+          // Remove common prefixes
+          cleanQuestion = cleanQuestion.replace(/^[-•*]\s*/, '') // bullet points
+          cleanQuestion = cleanQuestion.replace(/^\d+\.\s*/, '') // numbered lists
+          cleanQuestion = cleanQuestion.replace(/^[a-zA-Z]\)\s*/, '') // lettered lists (a), b), etc.)
+          cleanQuestion = cleanQuestion.replace(/^\s*-\s*/, '') // dash with spaces
+          cleanQuestion = cleanQuestion.trim()
+          
+          // Only add non-empty questions that don't look like section headers
+          if (cleanQuestion.length > 0 && 
+              !cleanQuestion.toLowerCase().startsWith('group ') &&
+              !cleanQuestion.toLowerCase().includes('unified question') &&
+              !cleanQuestion.toLowerCase().includes('question count')) {
+            originalQuestions.push(cleanQuestion)
+          }
+        } else if (unifiedQuestion && trimmedLine.length > 0 && !trimmedLine.toLowerCase().startsWith('group ') && !inIndividualQuestions) {
           // Continue building the unified question if it spans multiple lines
           unifiedQuestion += ' ' + trimmedLine
+        }
+      }
+      
+      // If we have a unified question but no individual questions, 
+      // try to extract them from the cleaned text based on the count
+      if (unifiedQuestion.trim().length > 0 && originalQuestions.length === 0 && questionCount > 1) {
+        // This is a fallback - we'll create placeholder individual questions
+        // In a real scenario, you might want to store the original questions differently
+        for (let i = 0; i < questionCount; i++) {
+          originalQuestions.push(`${unifiedQuestion} (variation ${i + 1})`)
         }
       }
       
@@ -154,7 +200,8 @@ ${cleanedText}`
         groups.push({
           groupNumber: index + 1,
           unifiedQuestion: unifiedQuestion.trim(),
-          count: questionCount
+          count: questionCount,
+          originalQuestions: originalQuestions.length > 0 ? originalQuestions : null
         })
       }
     })

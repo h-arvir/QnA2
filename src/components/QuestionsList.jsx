@@ -23,8 +23,8 @@ const QuestionsList = ({
   if (!cleanedQuestions) {
     return (
       <div className="section-content">
-        <h2 className="section-title">🧠 Extracted Questions</h2>
-        <p className="section-subtitle">AI-processed questions from your documents</p>
+        {/* <h2 className="section-title">🧠 Extracted Questions</h2>
+        <p className="section-subtitle">AI-processed questions from your documents</p> */}
         
         <div className="empty-state">
           <div className="empty-icon">
@@ -45,8 +45,8 @@ const QuestionsList = ({
 
   return (
     <div className="section-content">
-      <h2 className="section-title">🧠 Extracted Questions</h2>
-      <p className="section-subtitle">AI-processed questions from your documents</p>
+      {/* <h2 className="section-title">🧠 Extracted Questions</h2>
+      <p className="section-subtitle">AI-processed questions from your documents</p> */}
       
       <div className="cleaned-questions-section">
         <h2>

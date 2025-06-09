@@ -88,8 +88,8 @@ const FileUpload = ({
 
   return (
     <div className="section-content">
-      <h2 className="section-title">📄 Upload PDFs</h2>
-      <p className="section-subtitle">Upload your PDF documents for text extraction</p>
+      {/* <h2 className="section-title">📄 Upload PDFs</h2>
+      <p className="section-subtitle">Upload your PDF documents for text extraction</p> */}
       
       <div 
         className={`upload-area ${isDragOver ? 'drag-over' : ''}`}
