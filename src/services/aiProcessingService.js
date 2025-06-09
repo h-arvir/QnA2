@@ -70,36 +70,10 @@ ${text}`
       const genAI = new GoogleGenerativeAI(apiKey.trim())
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
 
-      const prompt = `You are an intelligent assistant that analyzes a block of OCR-extracted exam questions. Your task is as follows:
+      const prompt = `You are an assistant that analyzes OCR-extracted exam questions. Your task is to group only those questions that exhibit high conceptual similarity — meaning they focus on the same core idea, topic, or subtopic. Do not group questions that mix definitions with applications, advantages, or examples. Avoid merging core concepts with tools or models, low-level technical components with high-level overviews, or questions from different subjects or domains. Also, do not group questions that target different learning objectives, such as a definition versus a comparison. If a question does not clearly belong with others, assign it to its own group.
 
-1. Group only questions that have **high conceptual similarity** — meaning they ask about the **same topic or subtopic**, not just related areas. Do NOT group:
-- Definitions with applications or advantages.
-- Core concepts (like virtualization) with service models (like SaaS).
-- Technical components (e.g., hypervisors, VMs) with high-level ideas (e.g., cloud characteristics).
-- If a question does not clearly belong to any existing group with high similarity, assign it to a **single-question group** to preserve accuracy.
-
-
-If the core focus or learning outcome of two questions is different, DO NOT group them — even if they both mention ‘cloud computing.’
-
-
-2. Prefer tighter conceptual grouping by topics such as:
-   - Definitions and characteristics
-   - Virtualization (server, application, hypervisors)
-   - Cloud architectures
-   - Security principles
-   - Service models (SaaS, IaaS, etc.)
-   - Cloud providers and tools (AWS, Azure, IBM SmartCloud)
-   - Distributed systems history
-   - Short factual questions (Section-C style)
-
-3. For each group:
-   - Create a **single, unified question** that captures the essence of all grouped questions.
-   - List **ALL original questions** under the heading “Individual Questions”.
-   - Provide the count of how many questions were grouped.
-
-4. Keep unrelated questions in **separate groups**, even if they contain overlapping words.
-
-5. IMPORTANT: Do NOT over-merge. It is better to have multiple small, accurate groups than one large, mixed-topic group.
+Group questions based on tightly bound themes such as definitions and characteristics, technical architectures or components, service models and providers, security or virtualization principles, historical background of a subject, and short factual questions like those found in one-mark sections.
+It is critical not to over-merge. It is better to have multiple small and accurate groups than fewer large and imprecise ones.
 
 Output Format:
 Group <number>:
