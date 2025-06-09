@@ -108,31 +108,7 @@ const QuestionsList = ({
         </div>
       </div>
 
-      {/* Question Analysis Prompt */}
-      {cleanedQuestions && (!groupedQuestions || groupedQuestions.length === 0) && !isGroupingQuestions && (
-        <div className="analysis-prompt-section">
-          <h2>
-            <Search size={24} />
-            Question Analysis
-          </h2>
-          <div className="analysis-prompt">
-            <p>
-              <CheckCircle size={20} />
-              Questions have been extracted successfully!
-            </p>
-            <p>Click the button below to analyze and group similar questions together.</p>
-            <button 
-              className="analyze-main-btn"
-              onClick={() => onAnalyzeQuestions(cleanedQuestions)}
-              title="Analyze questions for similarity and group them"
-              disabled={!cleanedQuestions || isGroupingQuestions}
-            >
-              <Search size={20} />
-              Analyze & Group Questions
-            </button>
-          </div>
-        </div>
-      )}
+
     </div>
   )
 }

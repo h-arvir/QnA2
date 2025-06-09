@@ -173,32 +173,7 @@ const FileUpload = ({
         </div>
       )}
 
-      <button 
-        className="upload-btn"
-        onClick={onUpload}
-        disabled={!selectedFiles || selectedFiles.length === 0 || uploadStatus === 'Uploading...'}
-      >
-        {uploadStatus === 'Uploading...' ? (
-          <>
-            <Loader2 size={20} className="animate-spin" />
-            Uploading...
-          </>
-        ) : (
-          <>
-            <Upload size={20} />
-            Upload {selectedFiles.length || 0} PDF{selectedFiles.length !== 1 ? 's' : ''}
-          </>
-        )}
-      </button>
 
-      {/* API Key Setup - Inline */}
-      <ApiKeySetup
-        geminiApiKey={geminiApiKey}
-        onApiKeyChange={onApiKeyChange}
-        showApiKeyInput={showApiKeyInput}
-        onToggleApiKeyInput={onToggleApiKeyInput}
-        isInline={true}
-      />
 
       {/* Error Message */}
       <StatusMessage message={errorMessage} type="error" />
