@@ -196,4 +196,67 @@ ${cleanedText}`
     
     return groups
   }
+
+  static async generateAnswer(question, context, apiKey, onStatusUpdate = () => {}) {
+    if (!question || question.trim().length === 0) {
+      throw new Error('Question is required to generate an answer.')
+    }
+
+    if (!apiKey.trim()) {
+      throw new Error('Please enter your Google Gemini API key to generate answers.')
+    }
+
+    try {
+      onStatusUpdate('Generating detailed answer with AI...')
+
+      const genAI = new GoogleGenerativeAI(apiKey.trim())
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+
+      const prompt = `You are an expert educational assistant. Your task is to provide a comprehensive, detailed, and well-structured answer to the given question.
+
+Guidelines for your response:
+1. Provide a clear, detailed explanation that demonstrates deep understanding
+2. Structure your answer with proper headings and bullet points where appropriate
+3. Include relevant examples, definitions, and context
+4. Make the answer educational and easy to understand
+5. If the question requires technical details, provide them in a logical sequence
+6. Use proper formatting with line breaks for readability
+7. Aim for completeness while maintaining clarity
+
+${context ? `Context from the document: ${context}` : ''}
+
+Question: ${question}
+
+Please provide a comprehensive answer:`
+
+      const result = await model.generateContent(prompt)
+      const response = await result.response
+      const answer = response.text()
+
+      onStatusUpdate('Answer generated successfully!')
+      return answer.trim()
+      
+    } catch (error) {
+      console.error('Error generating answer:', error)
+      let errorMsg = 'Failed to generate answer. '
+      
+      if (error.message.includes('API_KEY_INVALID') || error.message.includes('401')) {
+        errorMsg += 'Invalid API key. Please check your Google Gemini API key.'
+      } else if (error.message.includes('QUOTA_EXCEEDED') || error.message.includes('429')) {
+        errorMsg += 'API quota exceeded. Please check your usage limits.'
+      } else if (error.message.includes('SAFETY')) {
+        errorMsg += 'Content was blocked by safety filters.'
+      } else if (error.message.includes('404') || error.message.includes('not found')) {
+        errorMsg += 'Model not available. The API might have been updated.'
+      } else if (error.message.includes('403')) {
+        errorMsg += 'Access forbidden. Please check your API key permissions.'
+      } else if (error.message.includes('500')) {
+        errorMsg += 'Server error. Please try again in a few moments.'
+      } else {
+        errorMsg += `Error: ${error.message || 'Unknown error occurred.'}`
+      }
+      
+      throw new Error(errorMsg)
+    }
+  }
 }

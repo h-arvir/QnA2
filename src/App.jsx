@@ -201,6 +201,9 @@ function App() {
               groupedQuestions={groupedQuestions}
               isGroupingQuestions={isGroupingQuestions}
               onNavigateToQuestions={() => setActiveSection(SECTION_IDS.QUESTIONS)}
+              geminiApiKey={geminiApiKey}
+              extractedText={extractedText}
+              cleanedQuestions={cleanedQuestions}
             />
           )}
 
