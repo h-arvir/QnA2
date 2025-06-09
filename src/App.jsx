@@ -19,13 +19,17 @@ import {
   CheckCircle,
   Settings,
   Download,
-  Loader2
+  Loader2,
+  BarChart3
 } from 'lucide-react'
 
 // Set up PDF.js worker - using local worker file
 pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
 
 function App() {
+  // Navigation state
+  const [activeSection, setActiveSection] = useState('upload')
+  
   const [selectedFiles, setSelectedFiles] = useState([]) // Changed to array for multiple files
   const [uploadStatus, setUploadStatus] = useState('')
   const [isDragOver, setIsDragOver] = useState(false)
@@ -49,6 +53,14 @@ function App() {
   // New states for question grouping
   const [groupedQuestions, setGroupedQuestions] = useState([])
   const [isGroupingQuestions, setIsGroupingQuestions] = useState(false)
+
+  // Navigation items
+  const navigationItems = [
+    { id: 'upload', label: 'Upload', icon: '📄', component: 'UploadSection' },
+    { id: 'extract', label: 'Extract', icon: '🔍', component: 'ExtractSection' },
+    { id: 'questions', label: 'Questions', icon: '🧠', component: 'QuestionsSection' },
+    { id: 'analysis', label: 'Analysis', icon: '📊', component: 'AnalysisSection' }
+  ]
 
   const handleFileSelect = (event) => {
     const files = Array.from(event.target.files)
@@ -786,450 +798,556 @@ ${cleanedText}`
     return groups
   }
 
-  return (
-    <div className="app">
-      <div className="container">
-        <h1>PDF Upload & Text Extraction</h1>
-        <p className="subtitle">Upload your PDF documents and extract text with OCR support</p>
-        
-        <div 
-          className={`upload-area ${isDragOver ? 'drag-over' : ''}`}
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-        >
-          <div className="upload-content">
-            <div className="upload-icon">
-              <Upload size={64} />
-            </div>
-            <h3>Drag & Drop your PDFs here</h3>
-            <p>or</p>
-            <label htmlFor="file-input" className="file-input-label">
-              <FileText size={20} />
-              Choose Files
-            </label>
-            <input
-              id="file-input"
-              type="file"
-              accept=".pdf"
-              multiple
-              onChange={handleFileSelect}
-              className="file-input"
-            />
-            <p className="file-info">Select multiple PDF files for batch processing</p>
+  // Component sections
+  const renderUploadSection = () => (
+    <div className="section-content">
+      <h2 className="section-title">📄 Upload PDFs</h2>
+      <p className="section-subtitle">Upload your PDF documents for text extraction</p>
+      
+      <div 
+        className={`upload-area ${isDragOver ? 'drag-over' : ''}`}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+      >
+        <div className="upload-content">
+          <div className="upload-icon">
+            <Upload size={64} />
           </div>
+          <h3>Drag & Drop your PDFs here</h3>
+          <p>or</p>
+          <label htmlFor="file-input" className="file-input-label">
+            <FileText size={20} />
+            Choose Files
+          </label>
+          <input
+            id="file-input"
+            type="file"
+            accept=".pdf"
+            multiple
+            onChange={handleFileSelect}
+            className="file-input"
+          />
+          <p className="file-info">Select multiple PDF files for batch processing</p>
         </div>
+      </div>
 
-        {/* Google Gemini API Key Section */}
-        <div className="api-key-section">
-          <div className="api-key-header">
+      {/* Google Gemini API Key Section */}
+      <div className="api-key-section">
+        <div className="api-key-header">
+          <h3>
+            <Bot size={24} />
+            AI Text Processing
+          </h3>
+          <button 
+            className="toggle-api-key-btn"
+            onClick={() => setShowApiKeyInput(!showApiKeyInput)}
+          >
+            {showApiKeyInput ? <EyeOff size={16} /> : <Settings size={16} />}
+            {showApiKeyInput ? 'Hide' : 'Setup'} API Key
+          </button>
+        </div>
+        
+        {showApiKeyInput && (
+          <div className="api-key-input-container">
+            <label htmlFor="gemini-api-key">Google Gemini API Key:</label>
+            <input
+              id="gemini-api-key"
+              type="password"
+              placeholder="Enter your Google Gemini API key"
+              value={geminiApiKey}
+              onChange={(e) => setGeminiApiKey(e.target.value)}
+              className="api-key-input"
+            />
+            <p className="api-key-info">
+              Get your free API key from <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a>
+            </p>
+          </div>
+        )}
+      </div>
+
+      {selectedFiles && selectedFiles.length > 0 && (
+        <div className="files-preview">
+          <div className="files-header">
             <h3>
-              <Bot size={24} />
-              AI Text Processing
+              <FileText size={20} />
+              Selected Files ({selectedFiles.length})
             </h3>
             <button 
-              className="toggle-api-key-btn"
-              onClick={() => setShowApiKeyInput(!showApiKeyInput)}
+              className="remove-all-btn"
+              onClick={() => handleRemoveFile()}
+              title="Remove all files"
             >
-              {showApiKeyInput ? <EyeOff size={16} /> : <Settings size={16} />}
-              {showApiKeyInput ? 'Hide' : 'Setup'} API Key
+              <Trash2 size={16} />
+              Clear All
             </button>
           </div>
-          
-          {showApiKeyInput && (
-            <div className="api-key-input-container">
-              <label htmlFor="gemini-api-key">Google Gemini API Key:</label>
-              <input
-                id="gemini-api-key"
-                type="password"
-                placeholder="Enter your Google Gemini API key"
-                value={geminiApiKey}
-                onChange={(e) => setGeminiApiKey(e.target.value)}
-                className="api-key-input"
-              />
-              <p className="api-key-info">
-                Get your free API key from <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a>
-              </p>
-            </div>
-          )}
-        </div>
-
-        {selectedFiles && selectedFiles.length > 0 && (
-          <div className="files-preview">
-            <div className="files-header">
-              <h3>
-                <FileText size={20} />
-                Selected Files ({selectedFiles.length})
-              </h3>
-              <button 
-                className="remove-all-btn"
-                onClick={() => handleRemoveFile()}
-                title="Remove all files"
-              >
-                <Trash2 size={16} />
-                Clear All
-              </button>
-            </div>
-            <div className="files-list">
-              {selectedFiles.map((file, index) => (
-                <div key={index} className="file-details">
-                  <div className="file-icon">
-                    <FileText size={32} />
-                  </div>
-                  <div className="file-info-details">
-                    <h4>{file.name}</h4>
-                    <p>{formatFileSize(file.size)}</p>
-                    {processingProgress[file.name] && (
-                      <div className="file-progress">
-                        <span className="progress-status">
-                          {processingProgress[file.name].status === 'waiting' && (
-                            <>
-                              <Loader2 size={12} className="animate-spin" />
-                              Waiting...
-                            </>
-                          )}
-                          {processingProgress[file.name].status === 'processing' && (
-                            <>
-                              <Loader2 size={12} className="animate-spin" />
-                              Processing...
-                            </>
-                          )}
-                          {processingProgress[file.name].status === 'reading' && (
-                            <>
-                              <FileText size={12} />
-                              Reading...
-                            </>
-                          )}
-                          {processingProgress[file.name].status === 'extracting' && (
-                            <>
-                              <Search size={12} />
-                              Extracting...
-                            </>
-                          )}
-                          {processingProgress[file.name].status === 'ocr' && (
-                            <>
-                              <Search size={12} />
-                              OCR Processing...
-                            </>
-                          )}
-                          {processingProgress[file.name].status === 'completed' && (
-                            <>
-                              <CheckCircle size={12} />
-                              Completed
-                            </>
-                          )}
-                          {processingProgress[file.name].status === 'error' && (
-                            <>
-                              <AlertTriangle size={12} />
-                              Error
-                            </>
-                          )}
-                        </span>
-                        <div className="progress-bar-small">
-                          <div 
-                            className="progress-fill-small" 
-                            style={{ width: `${processingProgress[file.name].progress}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <button 
-                    className="remove-btn"
-                    onClick={() => handleRemoveFile(file)}
-                    title="Remove this file"
-                  >
-                    <X size={16} />
-                  </button>
+          <div className="files-list">
+            {selectedFiles.map((file, index) => (
+              <div key={index} className="file-details">
+                <div className="file-icon">
+                  <FileText size={32} />
                 </div>
-              ))}
-            </div>
+                <div className="file-info-details">
+                  <h4>{file.name}</h4>
+                  <p>{formatFileSize(file.size)}</p>
+                  {processingProgress[file.name] && (
+                    <div className="file-progress">
+                      <span className="progress-status">
+                        {processingProgress[file.name].status === 'waiting' && (
+                          <>
+                            <Loader2 size={12} className="animate-spin" />
+                            Waiting...
+                          </>
+                        )}
+                        {processingProgress[file.name].status === 'processing' && (
+                          <>
+                            <Loader2 size={12} className="animate-spin" />
+                            Processing...
+                          </>
+                        )}
+                        {processingProgress[file.name].status === 'reading' && (
+                          <>
+                            <FileText size={12} />
+                            Reading...
+                          </>
+                        )}
+                        {processingProgress[file.name].status === 'extracting' && (
+                          <>
+                            <Search size={12} />
+                            Extracting...
+                          </>
+                        )}
+                        {processingProgress[file.name].status === 'ocr' && (
+                          <>
+                            <Search size={12} />
+                            OCR Processing...
+                          </>
+                        )}
+                        {processingProgress[file.name].status === 'completed' && (
+                          <>
+                            <CheckCircle size={12} />
+                            Completed
+                          </>
+                        )}
+                        {processingProgress[file.name].status === 'error' && (
+                          <>
+                            <AlertTriangle size={12} />
+                            Error
+                          </>
+                        )}
+                      </span>
+                      <div className="progress-bar-small">
+                        <div 
+                          className="progress-fill-small" 
+                          style={{ width: `${processingProgress[file.name].progress}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <button 
+                  className="remove-btn"
+                  onClick={() => handleRemoveFile(file)}
+                  title="Remove this file"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            ))}
           </div>
-        )}
+        </div>
+      )}
 
-        {uploadStatus && (
-          <div className={`status-message ${uploadStatus.includes('success') ? 'success' : uploadStatus.includes('failed') ? 'error' : 'info'}`}>
-            <div className="status-icon">
-              {uploadStatus.includes('success') ? (
-                <CheckCircle size={20} />
-              ) : uploadStatus.includes('failed') ? (
-                <AlertTriangle size={20} />
-              ) : (
-                <Info size={20} />
+      {uploadStatus && (
+        <div className={`status-message ${uploadStatus.includes('success') ? 'success' : uploadStatus.includes('failed') ? 'error' : 'info'}`}>
+          <div className="status-icon">
+            {uploadStatus.includes('success') ? (
+              <CheckCircle size={20} />
+            ) : uploadStatus.includes('failed') ? (
+              <AlertTriangle size={20} />
+            ) : (
+              <Info size={20} />
+            )}
+          </div>
+          {uploadStatus}
+        </div>
+      )}
+
+      <button 
+        className="upload-btn"
+        onClick={handleUpload}
+        disabled={!selectedFiles || selectedFiles.length === 0 || uploadStatus === 'Uploading...'}
+      >
+        {uploadStatus === 'Uploading...' ? (
+          <>
+            <Loader2 size={20} className="animate-spin" />
+            Uploading...
+          </>
+        ) : (
+          <>
+            <Upload size={20} />
+            Upload {selectedFiles.length || 0} PDF{selectedFiles.length !== 1 ? 's' : ''}
+          </>
+        )}
+      </button>
+    </div>
+  )
+
+  const renderExtractSection = () => (
+    <div className="section-content">
+      <h2 className="section-title">🔍 Text Extraction</h2>
+      <p className="section-subtitle">Extract and process text from uploaded PDFs</p>
+      
+      {/* Error Message */}
+      {errorMessage && (
+        <div className="error-message">
+          <div className="error-icon">
+            <AlertTriangle size={24} />
+          </div>
+          <div className="error-content">
+            <h3>Processing Error</h3>
+            <p>{errorMessage}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Extraction Status */}
+      {extractionStatus && !errorMessage && (
+        <div className="status-message info">
+          <div className="status-icon">
+            <Info size={20} />
+          </div>
+          <p>{extractionStatus}</p>
+        </div>
+      )}
+
+      {/* Processing Status Section */}
+      {(isExtracting || isOCRProcessing || isAutoProcessing) && (
+        <div className="text-extraction-section">
+          <h2>
+            <Loader2 size={24} className="animate-spin" />
+            Processing {selectedFiles.length > 1 ? `${selectedFiles.length} PDFs` : 'PDF'}
+          </h2>
+          {isExtracting ? (
+            <div className="extraction-loading">
+              <div className="loading-spinner"></div>
+              <p>{extractionStatus || 'Extracting text from PDFs...'}</p>
+              {selectedFiles.length > 1 && (
+                <div className="overall-progress">
+                  <p>Overall Progress: {overallProgress}%</p>
+                  <div className="progress-bar">
+                    <div 
+                      className="progress-fill" 
+                      style={{ width: `${overallProgress}%` }}
+                    ></div>
+                  </div>
+                </div>
               )}
             </div>
-            {uploadStatus}
-          </div>
-        )}
-
-        <button 
-          className="upload-btn"
-          onClick={handleUpload}
-          disabled={!selectedFiles || selectedFiles.length === 0 || uploadStatus === 'Uploading...'}
-        >
-          {uploadStatus === 'Uploading...' ? (
-            <>
-              <Loader2 size={20} className="animate-spin" />
-              Uploading...
-            </>
-          ) : (
-            <>
-              <Upload size={20} />
-              Upload {selectedFiles.length || 0} PDF{selectedFiles.length !== 1 ? 's' : ''}
-            </>
-          )}
-        </button>
-
-        {/* Error Message */}
-        {errorMessage && (
-          <div className="error-message">
-            <div className="error-icon">
-              <AlertTriangle size={24} />
-            </div>
-            <div className="error-content">
-              <h3>Processing Error</h3>
-              <p>{errorMessage}</p>
-            </div>
-          </div>
-        )}
-
-        {/* Extraction Status */}
-        {extractionStatus && !errorMessage && (
-          <div className="status-message info">
-            <div className="status-icon">
-              <Info size={20} />
-            </div>
-            <p>{extractionStatus}</p>
-          </div>
-        )}
-
-        {/* Processing Status Section */}
-        {(isExtracting || isOCRProcessing || isAutoProcessing) && (
-          <div className="text-extraction-section">
-            <h2>
-              <Loader2 size={24} className="animate-spin" />
-              Processing {selectedFiles.length > 1 ? `${selectedFiles.length} PDFs` : 'PDF'}
-            </h2>
-            {isExtracting ? (
-              <div className="extraction-loading">
-                <div className="loading-spinner"></div>
-                <p>{extractionStatus || 'Extracting text from PDFs...'}</p>
-                {selectedFiles.length > 1 && (
-                  <div className="overall-progress">
-                    <p>Overall Progress: {overallProgress}%</p>
-                    <div className="progress-bar">
-                      <div 
-                        className="progress-fill" 
-                        style={{ width: `${overallProgress}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : isOCRProcessing ? (
-              <div className="extraction-loading">
-                <div className="loading-spinner"></div>
-                <p>{extractionStatus || `Running OCR on PDF images... (${ocrProgress}%)`}</p>
-                <div className="progress-bar">
-                  <div 
-                    className="progress-fill" 
-                    style={{ width: `${ocrProgress}%` }}
-                  ></div>
-                </div>
-              </div>
-            ) : isAutoProcessing ? (
-              <div className="extraction-loading">
-                <div className="loading-spinner"></div>
-                <p>{extractionStatus || 'Processing text with AI...'}</p>
-              </div>
-            ) : null}
-          </div>
-        )}
-
-        {/* Cleaned Questions Section */}
-        {cleanedQuestions && (
-          <div className="cleaned-questions-section">
-            <h2>
-              <FileText size={24} />
-              Extracted Questions
-            </h2>
-            <div className="cleaned-questions-container">
-              <div className="text-controls">
-                <button 
-                  className="copy-btn"
-                  onClick={() => navigator.clipboard.writeText(cleanedQuestions)}
-                  title="Copy questions to clipboard"
-                >
-                  <Copy size={16} />
-                  Copy Questions
-                </button>
-                {/* Optional: Add manual re-process button for edge cases */}
-                <button 
-                  className="process-gemini-btn"
-                  onClick={() => processTextWithGemini(extractedText)}
-                  title="Re-process with AI if needed"
-                  disabled={!extractedText || isProcessingWithGemini || !geminiApiKey.trim()}
-                >
-                  {isProcessingWithGemini ? (
-                    <>
-                      <Loader2 size={16} className="animate-spin" />
-                      Re-processing...
-                    </>
-                  ) : (
-                    <>
-                      <RefreshCw size={16} />
-                      Re-process
-                    </>
-                  )}
-                </button>
-                <button 
-                  className="analyze-btn"
-                  onClick={() => analyzeQuestions(cleanedQuestions)}
-                  title="Analyze questions for similarity and group them"
-                  disabled={!cleanedQuestions || isGroupingQuestions}
-                >
-                  {isGroupingQuestions ? (
-                    <>
-                      <Loader2 size={16} className="animate-spin" />
-                      Analyzing...
-                    </>
-                  ) : (
-                    <>
-                      <Search size={16} />
-                      Analyze & Group Questions
-                    </>
-                  )}
-                </button>
-              </div>
-              <div className="cleaned-questions-text">
-                <pre>{cleanedQuestions}</pre>
+          ) : isOCRProcessing ? (
+            <div className="extraction-loading">
+              <div className="loading-spinner"></div>
+              <p>{extractionStatus || `Running OCR on PDF images... (${ocrProgress}%)`}</p>
+              <div className="progress-bar">
+                <div 
+                  className="progress-fill" 
+                  style={{ width: `${ocrProgress}%` }}
+                ></div>
               </div>
             </div>
-          </div>
-        )}
+          ) : isAutoProcessing ? (
+            <div className="extraction-loading">
+              <div className="loading-spinner"></div>
+              <p>{extractionStatus || 'Processing text with AI...'}</p>
+            </div>
+          ) : null}
+        </div>
+      )}
 
-        {/* Question Analysis Prompt */}
-        {cleanedQuestions && (!groupedQuestions || groupedQuestions.length === 0) && !isGroupingQuestions && (
-          <div className="analysis-prompt-section">
-            <h2>
-              <Search size={24} />
-              Question Analysis
-            </h2>
-            <div className="analysis-prompt">
-              <p>
-                <CheckCircle size={20} />
-                Questions have been extracted successfully!
-              </p>
-              <p>Click the button below to analyze and group similar questions together.</p>
+      {/* Fallback: Show raw text if AI processing failed and no cleaned questions */}
+      {extractedText && !cleanedQuestions && !isExtracting && !isOCRProcessing && !isAutoProcessing && (
+        <div className="text-extraction-section">
+          <h2>📄 Raw Extracted Text</h2>
+          <div className="api-key-warning">
+            <p>⚠️ AI processing was not completed. Please set up your Google Gemini API key above to automatically clean and format the extracted text.</p>
+          </div>
+          <div className="extracted-text-container">
+            <div className="text-controls">
               <button 
-                className="analyze-main-btn"
+                className="copy-btn"
+                onClick={() => navigator.clipboard.writeText(extractedText)}
+                title="Copy raw text to clipboard"
+                disabled={!extractedText}
+              >
+                📋 Copy Raw Text
+              </button>
+              <button 
+                className="process-gemini-btn"
+                onClick={() => processTextWithGemini(extractedText)}
+                title="Process with Google Gemini AI"
+                disabled={!extractedText || isProcessingWithGemini || !geminiApiKey.trim()}
+              >
+                {isProcessingWithGemini ? '🔄 Processing...' : '🤖 Clean with AI'}
+              </button>
+            </div>
+            <div className="extracted-text">
+              <pre>{extractedText}</pre>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+
+  const renderQuestionsSection = () => (
+    <div className="section-content">
+      <h2 className="section-title">🧠 Extracted Questions</h2>
+      <p className="section-subtitle">AI-processed questions from your documents</p>
+      
+      {/* Cleaned Questions Section */}
+      {cleanedQuestions && (
+        <div className="cleaned-questions-section">
+          <h2>
+            <FileText size={24} />
+            Extracted Questions
+          </h2>
+          <div className="cleaned-questions-container">
+            <div className="text-controls">
+              <button 
+                className="copy-btn"
+                onClick={() => navigator.clipboard.writeText(cleanedQuestions)}
+                title="Copy questions to clipboard"
+              >
+                <Copy size={16} />
+                Copy Questions
+              </button>
+              {/* Optional: Add manual re-process button for edge cases */}
+              <button 
+                className="process-gemini-btn"
+                onClick={() => processTextWithGemini(extractedText)}
+                title="Re-process with AI if needed"
+                disabled={!extractedText || isProcessingWithGemini || !geminiApiKey.trim()}
+              >
+                {isProcessingWithGemini ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    Re-processing...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw size={16} />
+                    Re-process
+                  </>
+                )}
+              </button>
+              <button 
+                className="analyze-btn"
                 onClick={() => analyzeQuestions(cleanedQuestions)}
                 title="Analyze questions for similarity and group them"
                 disabled={!cleanedQuestions || isGroupingQuestions}
               >
-                <Search size={20} />
-                Analyze & Group Questions
+                {isGroupingQuestions ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    Analyzing...
+                  </>
+                ) : (
+                  <>
+                    <Search size={16} />
+                    Analyze & Group Questions
+                  </>
+                )}
               </button>
             </div>
-          </div>
-        )}
-
-        {/* Question Groups Section */}
-        {groupedQuestions && groupedQuestions.length > 0 && (
-          <div className="question-groups-section">
-            <h2>
-              <Bot size={24} />
-              AI Question Analysis & Grouping
-            </h2>
-            <div className="groups-summary">
-              <p>Found <strong>{groupedQuestions.length}</strong> unified question groups with repetition counts.</p>
+            <div className="cleaned-questions-text">
+              <pre>{cleanedQuestions}</pre>
             </div>
-            
-            {isGroupingQuestions && (
-              <div className="grouping-loading">
-                <div className="loading-spinner"></div>
-                <p>AI is analyzing and grouping questions...</p>
-              </div>
-            )}
-            
-            <div className="question-groups-container">
-              {groupedQuestions.map((group, groupIndex) => (
-                <div key={groupIndex} className="question-group">
-                  <div className="group-header">
-                    <h3>Group {group.groupNumber || groupIndex + 1}</h3>
-                    <span className="group-count">
-                      {group.count === 1 ? '1 question' : `${group.count} similar questions`}
+          </div>
+        </div>
+      )}
+
+      {/* Question Analysis Prompt */}
+      {cleanedQuestions && (!groupedQuestions || groupedQuestions.length === 0) && !isGroupingQuestions && (
+        <div className="analysis-prompt-section">
+          <h2>
+            <Search size={24} />
+            Question Analysis
+          </h2>
+          <div className="analysis-prompt">
+            <p>
+              <CheckCircle size={20} />
+              Questions have been extracted successfully!
+            </p>
+            <p>Click the button below to analyze and group similar questions together.</p>
+            <button 
+              className="analyze-main-btn"
+              onClick={() => analyzeQuestions(cleanedQuestions)}
+              title="Analyze questions for similarity and group them"
+              disabled={!cleanedQuestions || isGroupingQuestions}
+            >
+              <Search size={20} />
+              Analyze & Group Questions
+            </button>
+          </div>
+        </div>
+      )}
+
+      {!cleanedQuestions && !isExtracting && !isOCRProcessing && !isAutoProcessing && (
+        <div className="empty-state">
+          <div className="empty-icon">
+            <FileText size={64} />
+          </div>
+          <h3>No Questions Extracted Yet</h3>
+          <p>Upload and process PDF files to see extracted questions here.</p>
+          <button 
+            className="nav-btn"
+            onClick={() => setActiveSection('upload')}
+          >
+            Go to Upload
+          </button>
+        </div>
+      )}
+    </div>
+  )
+
+  const renderAnalysisSection = () => (
+    <div className="section-content">
+      <h2 className="section-title">📊 Question Analysis</h2>
+      <p className="section-subtitle">AI-powered analysis and grouping of similar questions</p>
+      
+      {/* Question Groups Section */}
+      {groupedQuestions && groupedQuestions.length > 0 && (
+        <div className="question-groups-section">
+          <h2>
+            <Bot size={24} />
+            AI Question Analysis & Grouping
+          </h2>
+          <div className="groups-summary">
+            <p>Found <strong>{groupedQuestions.length}</strong> unified question groups with repetition counts.</p>
+          </div>
+          
+          {isGroupingQuestions && (
+            <div className="grouping-loading">
+              <div className="loading-spinner"></div>
+              <p>AI is analyzing and grouping questions...</p>
+            </div>
+          )}
+          
+          <div className="question-groups-container">
+            {groupedQuestions.map((group, groupIndex) => (
+              <div key={groupIndex} className="question-group">
+                <div className="group-header">
+                  <h3>Group {group.groupNumber || groupIndex + 1}</h3>
+                  <span className="group-count">
+                    {group.count === 1 ? '1 question' : `${group.count} similar questions`}
+                  </span>
+                </div>
+                
+                <div className="unified-question">
+                  <div className="question-header">
+                    <h4>❓ Unified Question:</h4>
+                    <span className="repetition-badge">
+                      {group.count}x repeated
                     </span>
                   </div>
-                  
-                  <div className="unified-question">
-                    <div className="question-header">
-                      <h4>❓ Unified Question:</h4>
-                      <span className="repetition-badge">
-                        {group.count}x repeated
-                      </span>
-                    </div>
-                    <div className="question-text">
-                      {group.unifiedQuestion}
-                    </div>
+                  <div className="question-text">
+                    {group.unifiedQuestion}
                   </div>
                 </div>
-              ))}
-            </div>
-            
-            <div className="groups-controls">
-              <button 
-                className="copy-btn"
-                onClick={() => {
-                  const groupedText = groupedQuestions.map((group, index) => {
-                    let text = `Group ${group.groupNumber || index + 1}:\n`
-                    text += `Question Count: ${group.count} (repeated ${group.count}x)\n`
-                    text += `Unified Question: ${group.unifiedQuestion}\n`
-                    return text
-                  }).join('\n' + '='.repeat(50) + '\n\n')
-                  navigator.clipboard.writeText(groupedText)
-                }}
-                title="Copy unified questions to clipboard"
-              >
-                📋 Copy Questions
-              </button>
-            </div>
+              </div>
+            ))}
           </div>
-        )}
+          
+          <div className="groups-controls">
+            <button 
+              className="copy-btn"
+              onClick={() => {
+                const groupedText = groupedQuestions.map((group, index) => {
+                  let text = `Group ${group.groupNumber || index + 1}:\n`
+                  text += `Question Count: ${group.count} (repeated ${group.count}x)\n`
+                  text += `Unified Question: ${group.unifiedQuestion}\n`
+                  return text
+                }).join('\n' + '='.repeat(50) + '\n\n')
+                navigator.clipboard.writeText(groupedText)
+              }}
+              title="Copy unified questions to clipboard"
+            >
+              📋 Copy Questions
+            </button>
+          </div>
+        </div>
+      )}
 
-        {/* Fallback: Show raw text if AI processing failed and no cleaned questions */}
-        {extractedText && !cleanedQuestions && !isExtracting && !isOCRProcessing && !isAutoProcessing && (
-          <div className="text-extraction-section">
-            <h2>📄 Raw Extracted Text</h2>
-            <div className="api-key-warning">
-              <p>⚠️ AI processing was not completed. Please set up your Google Gemini API key above to automatically clean and format the extracted text.</p>
+      {(!groupedQuestions || groupedQuestions.length === 0) && !isGroupingQuestions && (
+        <div className="empty-state">
+          <div className="empty-icon">
+            <BarChart3 size={64} />
+          </div>
+          <h3>No Analysis Available</h3>
+          <p>Extract questions first, then analyze them to see grouped results here.</p>
+          <button 
+            className="nav-btn"
+            onClick={() => setActiveSection('questions')}
+          >
+            Go to Questions
+          </button>
+        </div>
+      )}
+    </div>
+  )
+
+  return (
+    <div className="app">
+      {/* Sidebar Navigation */}
+      <nav className="sidebar">
+        <div className="sidebar-header">
+          <h1 className="sidebar-title">PDF Q&A</h1>
+          <p className="sidebar-subtitle">Extract & Analyze</p>
+        </div>
+        
+        <div className="nav-items">
+          {navigationItems.map((item) => (
+            <button
+              key={item.id}
+              className={`nav-item ${activeSection === item.id ? 'active' : ''}`}
+              onClick={() => setActiveSection(item.id)}
+            >
+              <span className="nav-icon">{item.icon}</span>
+              <span className="nav-label">{item.label}</span>
+            </button>
+          ))}
+        </div>
+        
+        <div className="sidebar-footer">
+          <div className="progress-indicator">
+            <div className="progress-step">
+              <div className={`step-dot ${selectedFiles.length > 0 ? 'completed' : ''}`}>1</div>
+              <span>Upload</span>
             </div>
-            <div className="extracted-text-container">
-              <div className="text-controls">
-                <button 
-                  className="copy-btn"
-                  onClick={() => navigator.clipboard.writeText(extractedText)}
-                  title="Copy raw text to clipboard"
-                  disabled={!extractedText}
-                >
-                  📋 Copy Raw Text
-                </button>
-                <button 
-                  className="process-gemini-btn"
-                  onClick={() => processTextWithGemini(extractedText)}
-                  title="Process with Google Gemini AI"
-                  disabled={!extractedText || isProcessingWithGemini || !geminiApiKey.trim()}
-                >
-                  {isProcessingWithGemini ? '🔄 Processing...' : '🤖 Clean with AI'}
-                </button>
-              </div>
-              <div className="extracted-text">
-                <pre>{extractedText}</pre>
-              </div>
+            <div className="progress-step">
+              <div className={`step-dot ${extractedText ? 'completed' : ''}`}>2</div>
+              <span>Extract</span>
+            </div>
+            <div className="progress-step">
+              <div className={`step-dot ${cleanedQuestions ? 'completed' : ''}`}>3</div>
+              <span>Questions</span>
+            </div>
+            <div className="progress-step">
+              <div className={`step-dot ${groupedQuestions.length > 0 ? 'completed' : ''}`}>4</div>
+              <span>Analysis</span>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      </nav>
+
+      {/* Main Content */}
+      <main className="main-content">
+        {activeSection === 'upload' && renderUploadSection()}
+        {activeSection === 'extract' && renderExtractSection()}
+        {activeSection === 'questions' && renderQuestionsSection()}
+        {activeSection === 'analysis' && renderAnalysisSection()}
+      </main>
     </div>
   )
 }
