@@ -37,7 +37,7 @@ export const useQuestionAnalysis = (state) => {
       toast.dismiss('analyze')
       toast.success('Analysis completed! Questions have been grouped successfully.', {
         duration: 4000,
-        icon: '✅',
+       // icon: '✅',
       })
       // Navigate to analysis section after successful analysis
       setTimeout(() => setActiveSection('analysis'), 2000)

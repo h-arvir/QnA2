@@ -157,7 +157,7 @@ export const useFileProcessing = (state) => {
       toast.dismiss('clean-ai')
       toast.success('Processing completed! Questions have been cleaned and formatted.', {
         duration: 4000,
-        icon: '🤖',
+       // icon: '🤖',
       })
       // Navigate to questions section after successful processing
       setTimeout(() => setActiveSection('questions'), 2000)
