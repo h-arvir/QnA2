@@ -72,32 +72,40 @@ ${text}`
 
       const prompt = `You are an intelligent assistant that analyzes a block of OCR-extracted exam questions. Your task is as follows:
 
-1. Group similar or semantically related questions together. Use moderate semantic similarity (not just exact matches), grouping questions that are conceptually the same even if phrased differently.
-2. For each group, create a **single, unified question** that concatenates the essence of all questions in the group. Ensure it captures the main intent of all questions in that group.
-3. List ALL the original questions that were grouped together under "Individual Questions".
-4. Count how many questions are in each group (how many times similar questions appear).
+1. Group only those questions that are **conceptually equivalent or near-equivalent**. Do NOT group questions merely because they share keywords. Focus on **meaning**.
+   - Example: "Define cloud computing" and "What are the characteristics of cloud computing?" can be grouped.
+   - But do NOT group "What is virtualization?" with "Define cloud computing" — they are different core topics.
 
-IMPORTANT: Always include the "Individual Questions" section with the actual original questions from the text, even if there's only one question in the group.
+2. Prefer tighter conceptual grouping by topics such as:
+   - Definitions and characteristics
+   - Virtualization (server, application, hypervisors)
+   - Cloud architectures
+   - Security principles
+   - Service models (SaaS, IaaS, etc.)
+   - Cloud providers and tools (AWS, Azure, IBM SmartCloud)
+   - Distributed systems history
+   - Short factual questions (Section-C style)
 
-Format your output EXACTLY as follows:
-Group 1:
-Question Count: <number of similar questions in this group>
+3. For each group:
+   - Create a **single, unified question** that captures the essence of all grouped questions.
+   - List **ALL original questions** under the heading “Individual Questions”.
+   - Provide the count of how many questions were grouped.
+
+4. Keep unrelated questions in **separate groups**, even if they contain overlapping words.
+
+5. IMPORTANT: Do NOT over-merge. It is better to have multiple small, accurate groups than one large, mixed-topic group.
+
+Output Format:
+Group <number>:
+Question Count: <number>
 Unified Question: <merged version>
 Individual Questions:
 - <original question 1>
 - <original question 2>
-- <original question 3>
-
-Group 2:
-Question Count: <number of similar questions in this group>
-Unified Question: <merged version>
-Individual Questions:
-- <original question 1>
-- <original question 2>
-
-... and so on.
+...
 
 Here are the extracted questions to analyze:
+
 
 ${cleanedText}`
 
