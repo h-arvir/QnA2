@@ -1,4 +1,5 @@
 import { FileManagementService } from '../services/fileManagementService'
+import toast from 'react-hot-toast'
 
 export const useFileManagement = (state, fileProcessing) => {
   const {
@@ -44,8 +45,16 @@ export const useFileManagement = (state, fileProcessing) => {
     
     if (validation.invalidFiles.length > 0) {
       setUploadStatus(`${validation.invalidFiles.length} non-PDF files were ignored. Processing ${validation.validFiles.length} PDF files.`)
+      toast.warning(`${validation.invalidFiles.length} non-PDF files were ignored. Processing ${validation.validFiles.length} PDF files.`, {
+        duration: 4000,
+        icon: '⚠️',
+      })
     } else {
       setUploadStatus('')
+      toast.success(`${validation.validFiles.length} PDF file${validation.validFiles.length > 1 ? 's' : ''} selected and processing started!`, {
+        duration: 3000,
+        icon: '📁',
+      })
     }
     
     setSelectedFiles(validation.validFiles)

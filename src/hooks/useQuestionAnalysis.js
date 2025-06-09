@@ -1,4 +1,5 @@
 import { AIProcessingService } from '../services/aiProcessingService'
+import toast from 'react-hot-toast'
 
 export const useQuestionAnalysis = (state) => {
   const {
@@ -32,6 +33,12 @@ export const useQuestionAnalysis = (state) => {
       )
       
       setGroupedQuestions(groups)
+      // Show success notification
+      toast.dismiss('analyze')
+      toast.success('Analysis completed! Questions have been grouped successfully.', {
+        duration: 4000,
+        icon: '✅',
+      })
       // Navigate to analysis section after successful analysis
       setTimeout(() => setActiveSection('analysis'), 2000)
       

@@ -1,4 +1,5 @@
 import { Loader2 } from 'lucide-react'
+import toast from 'react-hot-toast'
 
 const ExtractedText = ({ 
   extractedText, 
@@ -18,7 +19,10 @@ const ExtractedText = ({
         <div className="text-controls">
           <button 
             className="copy-btn"
-            onClick={() => navigator.clipboard.writeText(extractedText)}
+            onClick={() => {
+              navigator.clipboard.writeText(extractedText)
+              toast.success('Raw text copied to clipboard!')
+            }}
             title="Copy raw text to clipboard"
             disabled={!extractedText}
           >
@@ -26,7 +30,10 @@ const ExtractedText = ({
           </button>
           <button 
             className="process-gemini-btn"
-            onClick={() => onProcessWithGemini(extractedText)}
+            onClick={() => {
+              toast.loading('Cleaning text with AI...', { id: 'clean-ai' })
+              onProcessWithGemini(extractedText)
+            }}
             title="Process with Google Gemini AI"
             disabled={!extractedText || isProcessingWithGemini || !geminiApiKey.trim()}
           >

@@ -7,6 +7,7 @@ import {
   Upload,
   CheckCircle 
 } from 'lucide-react'
+import toast from 'react-hot-toast'
 
 const QuestionsList = ({ 
   cleanedQuestions, 
@@ -56,7 +57,10 @@ const QuestionsList = ({
           <div className="text-controls">
             <button 
               className="copy-btn"
-              onClick={() => navigator.clipboard.writeText(cleanedQuestions)}
+              onClick={() => {
+                navigator.clipboard.writeText(cleanedQuestions)
+                toast.success('Questions copied to clipboard!')
+              }}
               title="Copy questions to clipboard"
             >
               <Copy size={16} />
@@ -65,7 +69,10 @@ const QuestionsList = ({
             
             <button 
               className="process-gemini-btn"
-              onClick={() => onProcessWithGemini(extractedText)}
+              onClick={() => {
+                toast.loading('Re-processing questions with AI...', { id: 'reprocess' })
+                onProcessWithGemini(extractedText)
+              }}
               title="Re-process with AI if needed"
               disabled={!extractedText || isProcessingWithGemini || !geminiApiKey.trim()}
             >
@@ -84,7 +91,10 @@ const QuestionsList = ({
             
             <button 
               className="analyze-btn"
-              onClick={() => onAnalyzeQuestions(cleanedQuestions)}
+              onClick={() => {
+                toast.loading('Analyzing questions...', { id: 'analyze' })
+                onAnalyzeQuestions(cleanedQuestions)
+              }}
               title="Analyze questions for similarity and group them"
               disabled={!cleanedQuestions || isGroupingQuestions}
             >

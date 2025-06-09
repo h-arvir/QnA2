@@ -1,6 +1,7 @@
 import { PDFProcessingService } from '../services/pdfProcessingService'
 import { AIProcessingService } from '../services/aiProcessingService'
 import { FileManagementService } from '../services/fileManagementService'
+import toast from 'react-hot-toast'
 
 export const useFileProcessing = (state) => {
   const {
@@ -57,10 +58,20 @@ export const useFileProcessing = (state) => {
         setExtractedText(combinedResult.combinedText)
         setExtractionStatus(`Successfully processed ${combinedResult.successCount} of ${files.length} PDF files!`)
         
+        // Show success notification for file processing
+        toast.success(`Successfully processed ${combinedResult.successCount} of ${files.length} PDF files!`, {
+          duration: 3000,
+          icon: '📄',
+        })
+        
         // Automatically process combined text with AI
         await autoProcessWithGemini(combinedResult.combinedText)
       } else {
         setErrorMessage(`Failed to extract text from all ${files.length} PDF files.`)
+        toast.error(`Failed to extract text from all ${files.length} PDF files.`, {
+          duration: 5000,
+          icon: '❌',
+        })
       }
       
       setOverallProgress(100)
@@ -141,6 +152,13 @@ export const useFileProcessing = (state) => {
       )
 
       setCleanedQuestions(cleanedText)
+      // Show success notification
+      toast.dismiss('reprocess')
+      toast.dismiss('clean-ai')
+      toast.success('Processing completed! Questions have been cleaned and formatted.', {
+        duration: 4000,
+        icon: '🤖',
+      })
       // Navigate to questions section after successful processing
       setTimeout(() => setActiveSection('questions'), 2000)
     } catch (error) {

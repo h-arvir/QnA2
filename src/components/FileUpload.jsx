@@ -9,6 +9,7 @@ import {
   AlertTriangle,
   Search
 } from 'lucide-react'
+import toast from 'react-hot-toast'
 import ApiKeySetup from './ApiKeySetup'
 import ProcessingStatus from './ProcessingStatus'
 import StatusMessage from './StatusMessage'
@@ -127,7 +128,10 @@ const FileUpload = ({
             </h3>
             <button 
               className="remove-all-btn"
-              onClick={() => onRemoveFile()}
+              onClick={() => {
+                onRemoveFile()
+                toast.success('All files cleared!')
+              }}
               title="Remove all files"
             >
               <Trash2 size={16} />
@@ -147,7 +151,10 @@ const FileUpload = ({
                 </div>
                 <button 
                   className="remove-btn"
-                  onClick={() => onRemoveFile(file)}
+                  onClick={() => {
+                    onRemoveFile(file)
+                    toast.success(`${file.name} removed!`)
+                  }}
                   title="Remove this file"
                 >
                   <X size={16} />

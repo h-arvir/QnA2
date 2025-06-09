@@ -1,4 +1,5 @@
 import './App.css'
+import { Toaster } from 'react-hot-toast'
 
 // Import components
 import FileUpload from './components/FileUpload'
@@ -67,6 +68,67 @@ function App() {
 
   return (
     <div className="app">
+      {/* Toast Notifications */}
+      <Toaster
+        position="top-right"
+        gutter={12}
+        containerStyle={{
+          top: 20,
+          right: 20,
+        }}
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: 'var(--bg-primary)',
+            color: 'var(--text-primary)',
+            border: '1px solid var(--border-primary)',
+            borderRadius: 'var(--radius-lg)',
+            boxShadow: 'var(--shadow-xl)',
+            fontFamily: 'var(--font-family)',
+            fontSize: 'var(--text-sm)',
+            fontWeight: '500',
+            padding: '16px 20px',
+            maxWidth: '400px',
+            backdropFilter: 'blur(10px)',
+          },
+          success: {
+            duration: 3000,
+            style: {
+              background: 'var(--success-50)',
+              color: 'var(--success-700)',
+              border: '1px solid var(--success-200)',
+            },
+            iconTheme: {
+              primary: 'var(--success-500)',
+              secondary: 'var(--success-50)',
+            },
+          },
+          error: {
+            duration: 5000,
+            style: {
+              background: 'var(--error-50)',
+              color: 'var(--error-700)',
+              border: '1px solid var(--error-200)',
+            },
+            iconTheme: {
+              primary: 'var(--error-500)',
+              secondary: 'var(--error-50)',
+            },
+          },
+          loading: {
+            style: {
+              background: 'var(--info-50)',
+              color: 'var(--info-700)',
+              border: '1px solid var(--info-200)',
+            },
+            iconTheme: {
+              primary: 'var(--info-500)',
+              secondary: 'var(--info-50)',
+            },
+          },
+        }}
+      />
+
       {/* Sidebar Navigation */}
       <Sidebar
         activeSection={activeSection}
