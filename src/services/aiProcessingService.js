@@ -72,9 +72,15 @@ ${text}`
 
       const prompt = `You are an intelligent assistant that analyzes a block of OCR-extracted exam questions. Your task is as follows:
 
-1. Group only those questions that are **conceptually equivalent or near-equivalent**. Do NOT group questions merely because they share keywords. Focus on **meaning**.
-   - Example: "Define cloud computing" and "What are the characteristics of cloud computing?" can be grouped.
-   - But do NOT group "What is virtualization?" with "Define cloud computing" — they are different core topics.
+1. Group only questions that have **high conceptual similarity** — meaning they ask about the **same topic or subtopic**, not just related areas. Do NOT group:
+- Definitions with applications or advantages.
+- Core concepts (like virtualization) with service models (like SaaS).
+- Technical components (e.g., hypervisors, VMs) with high-level ideas (e.g., cloud characteristics).
+- If a question does not clearly belong to any existing group with high similarity, assign it to a **single-question group** to preserve accuracy.
+
+
+If the core focus or learning outcome of two questions is different, DO NOT group them — even if they both mention ‘cloud computing.’
+
 
 2. Prefer tighter conceptual grouping by topics such as:
    - Definitions and characteristics
