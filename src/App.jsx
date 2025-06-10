@@ -1,4 +1,4 @@
-import './App.css'
+import './styles/index.css'
 import { Toaster } from 'react-hot-toast'
 
 // Import components

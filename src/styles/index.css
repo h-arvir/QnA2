@@ -1,0 +1,29 @@
+/* Main CSS Entry Point - Imports all modular styles */
+
+/* Import all component styles in logical order */
+@import './base.css';
+@import './sidebar.css';
+@import './timeline.css';
+@import './upload.css';
+@import './forms.css';
+@import './cards.css';
+@import './questions.css';
+@import './animations.css';
+@import './responsive.css';
+@import './utilities.css';
+
+/* 
+  This file serves as the main entry point for all styles.
+  Each imported file contains styles for specific components or functionality:
+  
+  - base.css: Core app layout and basic components
+  - sidebar.css: Navigation sidebar styles
+  - timeline.css: Progress timeline component
+  - upload.css: File upload and management
+  - forms.css: Form inputs and API key sections
+  - cards.css: Card components and status messages
+  - questions.css: Question groups, analysis, and answers
+  - animations.css: All keyframes and animations
+  - responsive.css: Media queries and responsive design
+  - utilities.css: Utility classes and helper styles
+*/

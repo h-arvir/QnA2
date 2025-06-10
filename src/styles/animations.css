@@ -1,0 +1,229 @@
+/* Animations and Keyframes */
+
+/* Pulse animation for the sticky background when changing */
+@keyframes stickyPulse {
+  0% {
+    box-shadow: 
+      0 4px 12px rgba(227, 97, 140, 0.15),
+      0 0 0 1px rgba(227, 97, 140, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+  50% {
+    box-shadow: 
+      0 6px 20px rgba(227, 97, 140, 0.25),
+      0 0 0 2px rgba(227, 97, 140, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  100% {
+    box-shadow: 
+      0 4px 12px rgba(227, 97, 140, 0.15),
+      0 0 0 1px rgba(227, 97, 140, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+}
+
+/* Enhanced connector animations */
+@keyframes progressFill {
+  from {
+    width: 0%;
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Spin animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Progress bar shine effect */
+@keyframes progress-shine {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Main content animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Alternative slideDown for answer sections */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    max-height: 200px;
+    transform: translateY(0);
+  }
+}
+
+@keyframes softPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes gentleFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Toast Notification Animations */
+@keyframes toast-enter {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes toast-exit {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes toast-bounce {
+  0%, 20%, 53%, 80%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  40%, 43% {
+    transform: translate3d(0, -8px, 0);
+  }
+  70% {
+    transform: translate3d(0, -4px, 0);
+  }
+  90% {
+    transform: translate3d(0, -2px, 0);
+  }
+}
+
+@keyframes toast-pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Custom toast styles */
+.toast-container {
+  animation: toast-enter 0.35s cubic-bezier(0.21, 1.02, 0.73, 1) forwards;
+}
+
+.toast-container[data-visible="false"] {
+  animation: toast-exit 0.4s cubic-bezier(0.06, 0.71, 0.55, 1) forwards;
+}
+
+/* Success toast bounce effect */
+.toast-container[data-type="success"] {
+  animation: toast-enter 0.35s cubic-bezier(0.21, 1.02, 0.73, 1) forwards,
+             toast-bounce 0.6s ease-in-out 0.35s;
+}
+
+/* Loading toast pulse effect */
+.toast-container[data-type="loading"] {
+  animation: toast-enter 0.35s cubic-bezier(0.21, 1.02, 0.73, 1) forwards,
+             toast-pulse 2s ease-in-out infinite 0.35s;
+}
+
+/* Enhanced toast styling */
+.toast-container > div {
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  transition: all 0.2s ease-in-out;
+}
+
+.toast-container > div:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Custom progress bar for loading toasts */
+.toast-loading-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: var(--primary-500);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  animation: loading-progress 3s ease-in-out infinite;
+}
+
+@keyframes loading-progress {
+  0% {
+    width: 0%;
+    opacity: 0.8;
+  }
+  50% {
+    width: 70%;
+    opacity: 1;
+  }
+  100% {
+    width: 100%;
+    opacity: 0.8;
+  }
+}

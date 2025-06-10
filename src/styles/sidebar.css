@@ -1,0 +1,155 @@
+/* Sidebar Navigation Styles */
+
+.sidebar {
+  width: 280px;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-primary);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  z-index: 100;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-header {
+  padding: var(--spacing-3xl) var(--spacing-xl);
+  border-bottom: 1px solid var(--border-primary);
+  background: var(--gradient-primary);
+  color: white;
+}
+
+.sidebar-title {
+  font-family: var(--font-serif);
+  font-size: var(--text-3xl);
+  font-weight: 800;
+  margin: 0 0 var(--spacing-xs) 0;
+  letter-spacing: -0.02em;
+}
+
+.sidebar-subtitle {
+  font-size: var(--text-sm);
+  opacity: 0.9;
+  margin: 0;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.nav-items {
+  flex: 1;
+  padding: var(--spacing-xl) 0;
+  position: relative;
+}
+
+/* Sticky background slider */
+.nav-items::before {
+  content: '';
+  position: absolute;
+  left: var(--spacing-sm);
+  right: var(--spacing-sm);
+  height: 48px; /* Slightly smaller than nav-item for padding effect */
+  background: linear-gradient(135deg, var(--primary-50) 0%, var(--primary-100) 100%);
+  border-radius: var(--radius-lg);
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform: translateY(4px);
+  opacity: 0;
+  z-index: 0;
+  box-shadow: 
+    0 4px 12px rgba(227, 97, 140, 0.15),
+    0 0 0 1px rgba(227, 97, 140, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  animation: stickyPulse 0.6s ease-out;
+}
+
+/* Position the sticky background based on active item */
+.nav-items[data-active="instructions"]::before {
+  transform: translateY(4px);
+  opacity: 1;
+}
+
+.nav-items[data-active="apikey"]::before {
+  transform: translateY(60px);
+  opacity: 1;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  width: 100%;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--text-base);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  text-align: left;
+  position: relative;
+  z-index: 1;
+  height: 56px;
+  box-sizing: border-box;
+}
+
+.nav-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--primary-500);
+  transform: scaleY(0);
+  transition: transform var(--transition-normal);
+}
+
+.nav-item:hover {
+  color: var(--text-primary);
+  transform: translateX(4px);
+}
+
+.nav-item.active {
+  color: var(--primary-700);
+  font-weight: 600;
+}
+
+.nav-item.active::before {
+  transform: scaleY(1);
+}
+
+.nav-item.active .nav-icon {
+  transform: scale(1.1);
+  color: var(--primary-600);
+}
+
+.nav-item.active .nav-label {
+  transform: translateX(2px);
+}
+
+/* Enhanced hover effect for non-active items */
+.nav-item:not(.active):hover {
+  background: rgba(227, 97, 140, 0.05);
+  border-radius: var(--radius-lg);
+}
+
+.nav-item:not(.active):hover .nav-icon {
+  transform: scale(1.05);
+  transition: transform 0.2s ease;
+}
+
+/* Smooth transitions for icons and labels */
+.nav-icon, .nav-label {
+  transition: all 0.3s ease;
+}
+
+.nav-icon {
+  font-size: var(--text-xl);
+  min-width: 24px;
+}
+
+.nav-label {
+  flex: 1;
+}
