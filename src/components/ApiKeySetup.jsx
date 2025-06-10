@@ -62,8 +62,8 @@ const ApiKeySetup = ({
       <div className="api-key-container">
         <div className="api-key-card">
           <div className="api-key-header">
-            <Settings size={24} />
-            <h3>Google Gemini API Configuration</h3>
+            {/* <Settings size={24} /> */}
+            <h3>⚙️    Google Gemini API Configuration</h3>
           </div>
           
           <div className="api-key-content">
@@ -128,7 +128,7 @@ const ApiKeySetup = ({
 
         {geminiApiKey && (
           <div className="api-key-actions">
-            <button
+            {/* <button
               onClick={() => {
                 // Test the API key by making a simple request
                 console.log('Testing API key...')
@@ -137,7 +137,7 @@ const ApiKeySetup = ({
             >
               <RefreshCw size={16} />
               Test API Key
-            </button>
+            </button> */}
             
             <button
               onClick={() => {
