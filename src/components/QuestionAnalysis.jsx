@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React from 'react'
 import { Bot, BarChart3, Copy, List, Layers, Lightbulb, Loader2, Eye, EyeOff } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { AIProcessingService } from '../services/aiProcessingService'
@@ -9,19 +9,18 @@ const QuestionAnalysis = ({
   onNavigateToQuestions,
   geminiApiKey,
   extractedText,
-  cleanedQuestions
+  cleanedQuestions,
+  answers,
+  setAnswers,
+  loadingAnswers,
+  setLoadingAnswers,
+  hiddenAnswers,
+  setHiddenAnswers,
+  groupViewModes,
+  setGroupViewModes
 }) => {
-  // State to track view mode for each group independently
-  const [groupViewModes, setGroupViewModes] = useState({})
-  
-  // State to track answers for questions
-  const [answers, setAnswers] = useState({})
-  
-  // State to track loading status for each question
-  const [loadingAnswers, setLoadingAnswers] = useState({})
-  
-  // State to track which answers are hidden
-  const [hiddenAnswers, setHiddenAnswers] = useState({})
+  // Note: All state is now managed at the app level and passed as props
+  // This ensures answers persist when navigating between sections
   
   // Function to toggle view mode for a specific group
   const toggleGroupViewMode = (groupIndex, mode) => {

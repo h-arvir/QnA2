@@ -8,7 +8,11 @@ export const useQuestionAnalysis = (state) => {
     setErrorMessage,
     setExtractionStatus,
     setActiveSection,
-    geminiApiKey
+    geminiApiKey,
+    setAnswers,
+    setLoadingAnswers,
+    setHiddenAnswers,
+    setGroupViewModes
   } = state
 
   const analyzeQuestions = async (cleanedText) => {
@@ -25,6 +29,12 @@ export const useQuestionAnalysis = (state) => {
     try {
       setIsGroupingQuestions(true)
       setErrorMessage('')
+      
+      // Clear previous answers when analyzing new questions
+      setAnswers({})
+      setLoadingAnswers({})
+      setHiddenAnswers({})
+      setGroupViewModes({})
 
       const groups = await AIProcessingService.analyzeQuestions(
         cleanedText,

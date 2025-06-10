@@ -34,6 +34,12 @@ export const useAppState = () => {
   // Question analysis state
   const [groupedQuestions, setGroupedQuestions] = useState([])
   const [isGroupingQuestions, setIsGroupingQuestions] = useState(false)
+  
+  // Answer persistence state
+  const [answers, setAnswers] = useState({})
+  const [loadingAnswers, setLoadingAnswers] = useState({})
+  const [hiddenAnswers, setHiddenAnswers] = useState({})
+  const [groupViewModes, setGroupViewModes] = useState({})
 
   // Reset functions
   const resetFileState = () => {
@@ -52,6 +58,10 @@ export const useAppState = () => {
     setOverallProgress(0)
     setGroupedQuestions([])
     setIsGroupingQuestions(false)
+    setAnswers({})
+    setLoadingAnswers({})
+    setHiddenAnswers({})
+    setGroupViewModes({})
   }
 
   const resetProcessingState = () => {
@@ -62,6 +72,8 @@ export const useAppState = () => {
     setFileResults({})
     setProcessingProgress({})
     setGroupedQuestions([])
+    // Note: We don't reset answers, loadingAnswers, hiddenAnswers, and groupViewModes here
+    // as they should persist when just resetting processing state
   }
 
   return {
@@ -118,6 +130,16 @@ export const useAppState = () => {
     setGroupedQuestions,
     isGroupingQuestions,
     setIsGroupingQuestions,
+    
+    // Answer persistence
+    answers,
+    setAnswers,
+    loadingAnswers,
+    setLoadingAnswers,
+    hiddenAnswers,
+    setHiddenAnswers,
+    groupViewModes,
+    setGroupViewModes,
     
     // Reset functions
     resetFileState,

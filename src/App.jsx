@@ -51,7 +51,15 @@ function App() {
     cleanedQuestions,
     groupedQuestions,
     isProcessingWithGemini,
-    isGroupingQuestions
+    isGroupingQuestions,
+    answers,
+    setAnswers,
+    loadingAnswers,
+    setLoadingAnswers,
+    hiddenAnswers,
+    setHiddenAnswers,
+    groupViewModes,
+    setGroupViewModes
   } = state
 
   const {
@@ -204,6 +212,14 @@ function App() {
               geminiApiKey={geminiApiKey}
               extractedText={extractedText}
               cleanedQuestions={cleanedQuestions}
+              answers={answers}
+              setAnswers={setAnswers}
+              loadingAnswers={loadingAnswers}
+              setLoadingAnswers={setLoadingAnswers}
+              hiddenAnswers={hiddenAnswers}
+              setHiddenAnswers={setHiddenAnswers}
+              groupViewModes={groupViewModes}
+              setGroupViewModes={setGroupViewModes}
             />
           )}
 
