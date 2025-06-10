@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Bot, BarChart3, Copy, List, Layers, Lightbulb, Loader2 } from 'lucide-react'
+import { Bot, BarChart3, Copy, List, Layers, Lightbulb, Loader2, Eye, EyeOff } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { AIProcessingService } from '../services/aiProcessingService'
 
@@ -19,6 +19,9 @@ const QuestionAnalysis = ({
   
   // State to track loading status for each question
   const [loadingAnswers, setLoadingAnswers] = useState({})
+  
+  // State to track which answers are hidden
+  const [hiddenAnswers, setHiddenAnswers] = useState({})
   
   // Function to toggle view mode for a specific group
   const toggleGroupViewMode = (groupIndex, mode) => {
@@ -89,11 +92,19 @@ const QuestionAnalysis = ({
     }
   }
   
-  // Function to toggle answer visibility
+  // Function to toggle answer visibility (for the old close button)
   const toggleAnswer = (questionKey) => {
     setAnswers(prev => ({
       ...prev,
       [questionKey]: prev[questionKey] ? null : undefined
+    }))
+  }
+
+  // Function to toggle answer visibility (for the new hide/show button)
+  const toggleAnswerVisibility = (questionKey) => {
+    setHiddenAnswers(prev => ({
+      ...prev,
+      [questionKey]: !prev[questionKey]
     }))
   }
 
@@ -220,37 +231,59 @@ const QuestionAnalysis = ({
                             <span className="repetition-badge">
                               {group.count}x repeated
                             </span>
-                            <button 
-                              className="answer-btn"
-                              onClick={() => {
-                                const questionKey = `unified-${groupIndex}`
-                                if (answers[questionKey]) {
-                                  toggleAnswer(questionKey)
-                                } else {
-                                  handleGenerateAnswer(questionKey, group.unifiedQuestion)
-                                }
-                              }}
-                              title="Generate answer for this question"
-                              disabled={loadingAnswers[`unified-${groupIndex}`]}
-                            >
-                              {loadingAnswers[`unified-${groupIndex}`] ? (
-                                <>
-                                  <Loader2 size={14} className="animate-spin" />
-                                  Generating...
-                                </>
-                              ) : (
-                                <>
-                                  <Lightbulb size={14} />
-                                  💡Ans.
-                                </>
+                            <div className="question-action-buttons">
+                              <button 
+                                className="answer-btn"
+                                onClick={() => {
+                                  const questionKey = `unified-${groupIndex}`
+                                  if (answers[questionKey]) {
+                                    toggleAnswer(questionKey)
+                                  } else {
+                                    handleGenerateAnswer(questionKey, group.unifiedQuestion)
+                                  }
+                                }}
+                                title="Generate answer for this question"
+                                disabled={loadingAnswers[`unified-${groupIndex}`]}
+                              >
+                                {loadingAnswers[`unified-${groupIndex}`] ? (
+                                  <>
+                                    <Loader2 size={14} className="animate-spin" />
+                                    Generating...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Lightbulb size={14} />
+                                    💡Ans.
+                                  </>
+                                )}
+                              </button>
+                              
+                              {answers[`unified-${groupIndex}`] && (
+                                <button 
+                                  className="hide-answer-btn"
+                                  onClick={() => toggleAnswerVisibility(`unified-${groupIndex}`)}
+                                  title={hiddenAnswers[`unified-${groupIndex}`] ? "Show answer" : "Hide answer"}
+                                >
+                                  {hiddenAnswers[`unified-${groupIndex}`] ? (
+                                    <>
+                                      <Eye size={14} />
+                                      Show
+                                    </>
+                                  ) : (
+                                    <>
+                                      <EyeOff size={14} />
+                                      Hide
+                                    </>
+                                  )}
+                                </button>
                               )}
-                            </button>
+                            </div>
                           </div>
                         </div>
                         <div className="question-text">
                           {group.unifiedQuestion}
                         </div>
-                        {answers[`unified-${groupIndex}`] && (
+                        {answers[`unified-${groupIndex}`] && !hiddenAnswers[`unified-${groupIndex}`] && (
                           <div className="answer-section">
                             <div className="answer-header">
                               <h5>💡 Answer:</h5>
@@ -264,13 +297,6 @@ const QuestionAnalysis = ({
                                   title="Copy answer to clipboard"
                                 >
                                   <Copy size={12} />
-                                </button>
-                                <button 
-                                  className="close-answer-btn"
-                                  onClick={() => toggleAnswer(`unified-${groupIndex}`)}
-                                  title="Hide answer"
-                                >
-                                  ×
                                 </button>
                               </div>
                             </div>
@@ -300,32 +326,54 @@ const QuestionAnalysis = ({
                                   <div className="individual-question-content">
                                     <span className="question-number">{qIndex + 1}.</span>
                                     <span className="question-text">{question}</span>
-                                    <button 
-                                      className="answer-btn individual-answer-btn"
-                                      onClick={() => {
-                                        if (answers[questionKey]) {
-                                          toggleAnswer(questionKey)
-                                        } else {
-                                          handleGenerateAnswer(questionKey, question)
-                                        }
-                                      }}
-                                      title="Generate answer for this question"
-                                      disabled={loadingAnswers[questionKey]}
-                                    >
-                                      {loadingAnswers[questionKey] ? (
-                                        <>
-                                          <Loader2 size={12} className="animate-spin" />
-                                          Generating...
-                                        </>
-                                      ) : (
-                                        <>
-                                          <Lightbulb size={12} />
-                                          💡Ans.
-                                        </>
+                                    <div className="individual-question-actions">
+                                      <button 
+                                        className="answer-btn individual-answer-btn"
+                                        onClick={() => {
+                                          if (answers[questionKey]) {
+                                            toggleAnswer(questionKey)
+                                          } else {
+                                            handleGenerateAnswer(questionKey, question)
+                                          }
+                                        }}
+                                        title="Generate answer for this question"
+                                        disabled={loadingAnswers[questionKey]}
+                                      >
+                                        {loadingAnswers[questionKey] ? (
+                                          <>
+                                            <Loader2 size={12} className="animate-spin" />
+                                            Generating...
+                                          </>
+                                        ) : (
+                                          <>
+                                            <Lightbulb size={12} />
+                                            💡Ans.
+                                          </>
+                                        )}
+                                      </button>
+                                      
+                                      {answers[questionKey] && (
+                                        <button 
+                                          className="hide-answer-btn individual-hide-btn"
+                                          onClick={() => toggleAnswerVisibility(questionKey)}
+                                          title={hiddenAnswers[questionKey] ? "Show answer" : "Hide answer"}
+                                        >
+                                          {hiddenAnswers[questionKey] ? (
+                                            <>
+                                              <Eye size={12} />
+                                              Show
+                                            </>
+                                          ) : (
+                                            <>
+                                              <EyeOff size={12} />
+                                              Hide
+                                            </>
+                                          )}
+                                        </button>
                                       )}
-                                    </button>
+                                    </div>
                                   </div>
-                                  {answers[questionKey] && (
+                                  {answers[questionKey] && !hiddenAnswers[questionKey] && (
                                     <div className="individual-answer-section">
                                       <div className="answer-header">
                                         <h6>💡 Answer:</h6>
@@ -339,13 +387,6 @@ const QuestionAnalysis = ({
                                             title="Copy answer to clipboard"
                                           >
                                             <Copy size={10} />
-                                          </button>
-                                          <button 
-                                            className="close-answer-btn"
-                                            onClick={() => toggleAnswer(questionKey)}
-                                            title="Hide answer"
-                                          >
-                                            ×
                                           </button>
                                         </div>
                                       </div>

@@ -191,6 +191,16 @@
     gap: var(--spacing-xs);
     align-items: flex-end;
   }
+  
+  .question-action-buttons {
+    flex-direction: column;
+    align-items: flex-end;
+  }
+  
+  .individual-question-actions {
+    flex-direction: column;
+    align-items: flex-end;
+  }
 }
 
 /* Mobile screens */
