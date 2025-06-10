@@ -1,0 +1,304 @@
+/* Floating Navigation Styles */
+
+.floating-navigation {
+  position: fixed;
+  right: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.floating-nav-line {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  pointer-events: auto;
+}
+
+.floating-nav-line::before {
+  content: '';
+  position: fixed;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  height: 100vh;
+  width: 2px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    var(--primary-200) 10%,
+    var(--primary-400) 50%,
+    var(--primary-200) 90%,
+    transparent 100%
+  );
+  transform: translateX(-50%);
+  border-radius: 1px;
+  opacity: 0.4;
+  z-index: -1;
+  transition: opacity var(--transition-normal);
+}
+
+/* Make line more prominent on hover */
+.floating-navigation:hover .floating-nav-line::before {
+  opacity: 0.7;
+}
+
+.floating-nav-dot {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid var(--primary-300);
+  background: var(--bg-primary);
+  cursor: pointer;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  z-index: 2;
+  overflow: hidden;
+}
+
+.floating-nav-dot:hover {
+  transform: scale(1.1);
+  border-color: var(--primary-500);
+  box-shadow: 0 6px 20px rgba(227, 97, 140, 0.3);
+  background: var(--bg-secondary);
+}
+
+.floating-nav-dot.active {
+  background: var(--primary-500);
+  border-color: var(--primary-600);
+  box-shadow: 0 6px 20px rgba(227, 97, 140, 0.4);
+  transform: scale(1.15);
+}
+
+.floating-nav-dot.active:hover {
+  transform: scale(1.2);
+}
+
+.dot-number {
+  position: absolute;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-muted);
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 3;
+}
+
+.dot-icon {
+  font-size: 18px;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 1;
+  transform: scale(1);
+}
+
+.floating-nav-dot.active .dot-icon {
+  filter: brightness(0) invert(1);
+}
+
+.floating-nav-dot.active .dot-number {
+  color: white;
+}
+
+/* Animation when timeline is hidden */
+.floating-navigation.timeline-hidden .floating-nav-dot {
+  width: 56px;
+  height: 56px;
+  border-width: 3px;
+  box-shadow: 0 6px 20px rgba(227, 97, 140, 0.3), 0 0 30px rgba(227, 97, 140, 0.1);
+  border-color: var(--primary-400);
+}
+
+.floating-navigation.timeline-hidden .dot-number {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.floating-navigation.timeline-hidden .dot-icon {
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+.floating-navigation.timeline-hidden .floating-nav-line {
+  gap: 24px;
+}
+
+.floating-navigation.timeline-hidden .floating-nav-line::before {
+  opacity: 0.8;
+  width: 3px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    var(--primary-300) 10%,
+    var(--primary-500) 50%,
+    var(--primary-300) 90%,
+    transparent 100%
+  );
+}
+
+/* Subtle pulse animation when timeline is hidden */
+.floating-navigation.timeline-hidden .floating-nav-dot.active {
+  animation: gentlePulse 3s infinite, mergeFromTimeline 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes gentlePulse {
+  0%, 100% {
+    box-shadow: 0 6px 20px rgba(227, 97, 140, 0.3), 0 0 30px rgba(227, 97, 140, 0.1);
+  }
+  50% {
+    box-shadow: 0 8px 25px rgba(227, 97, 140, 0.4), 0 0 40px rgba(227, 97, 140, 0.15);
+  }
+}
+
+.dot-label {
+  position: absolute;
+  right: 60px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  padding: 6px 12px;
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--transition-normal);
+  border: 1px solid var(--border-primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+}
+
+.floating-nav-dot:hover .dot-label {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-50%) translateX(-8px);
+}
+
+.dot-label::after {
+  content: '';
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 6px solid transparent;
+  border-left-color: var(--bg-primary);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .floating-navigation {
+    right: 20px;
+  }
+  
+  .floating-nav-dot {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .dot-icon {
+    font-size: 16px;
+  }
+  
+  .dot-label {
+    right: 50px;
+    font-size: var(--text-xs);
+    padding: 4px 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .floating-navigation {
+    right: 15px;
+  }
+  
+  .floating-nav-dot {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .dot-icon {
+    font-size: 14px;
+  }
+  
+  /* Hide labels on very small screens */
+  .dot-label {
+    display: none;
+  }
+}
+
+/* Animation for smooth entrance */
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+.floating-navigation {
+  animation: fadeInRight 0.6s ease-out;
+}
+
+/* Merge animation when timeline disappears */
+@keyframes mergeFromTimeline {
+  0% {
+    transform: translateX(-200px) scale(0.8);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateX(-100px) scale(0.9);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.floating-navigation.timeline-hidden .floating-nav-dot {
+  animation: mergeFromTimeline 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Stagger the animation for each dot */
+.floating-navigation.timeline-hidden .floating-nav-dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.floating-navigation.timeline-hidden .floating-nav-dot:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.floating-navigation.timeline-hidden .floating-nav-dot:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+/* Pulse animation for active dot */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 6px 20px rgba(227, 97, 140, 0.4);
+  }
+  50% {
+    box-shadow: 0 6px 25px rgba(227, 97, 140, 0.6);
+  }
+  100% {
+    box-shadow: 0 6px 20px rgba(227, 97, 140, 0.4);
+  }
+}
+
+.floating-nav-dot.active {
+  animation: pulse 2s infinite;
+}

@@ -9,6 +9,7 @@
   z-index: 50;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   backdrop-filter: blur(8px);
+  transition: all 0.3s ease-out;
 }
 
 .timeline-progress {

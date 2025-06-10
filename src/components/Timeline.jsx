@@ -1,3 +1,5 @@
+import React, { useState, useEffect } from 'react'
+
 const Timeline = ({ 
   activeSection, 
   onSectionChange, 
@@ -5,6 +7,16 @@ const Timeline = ({
   cleanedQuestions, 
   groupedQuestions 
 }) => {
+  const [scrollY, setScrollY] = useState(0)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY)
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
   const timelineSteps = [
     {
       id: 'upload',
@@ -29,8 +41,19 @@ const Timeline = ({
     }
   ]
 
+  // Calculate opacity based on scroll position
+  const opacity = Math.max(0.3, 1 - (scrollY / 200))
+  const scale = Math.max(0.95, 1 - (scrollY / 1000))
+
   return (
-    <div className="timeline-container">
+    <div 
+      className="timeline-container" 
+      style={{ 
+        opacity,
+        transform: `scale(${scale})`,
+        filter: scrollY > 50 ? 'blur(0.5px)' : 'none'
+      }}
+    >
       <div className="timeline-progress">
         {timelineSteps.map((step, index) => (
           <div key={step.id}>

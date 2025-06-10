@@ -9,6 +9,7 @@ import QuestionAnalysis from './components/QuestionAnalysis'
 import Timeline from './components/Timeline'
 import Sidebar from './components/Sidebar'
 import InstructionsSection from './components/InstructionsSection'
+import FloatingNavigation from './components/FloatingNavigation'
 
 // Import custom hooks
 import { useAppState } from './hooks/useAppState'
@@ -142,6 +143,12 @@ function App() {
         activeSection={activeSection}
         onSectionChange={setActiveSection}
         navigationItems={NAVIGATION_ITEMS}
+      />
+
+      {/* Floating Navigation */}
+      <FloatingNavigation
+        activeSection={activeSection}
+        onSectionChange={setActiveSection}
       />
 
       {/* Main Content */}

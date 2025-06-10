@@ -8,6 +8,7 @@
 @import './forms.css';
 @import './cards.css';
 @import './questions.css';
+@import './floating-navigation.css';
 @import './animations.css';
 @import './responsive.css';
 @import './utilities.css';
@@ -23,6 +24,7 @@
   - forms.css: Form inputs and API key sections
   - cards.css: Card components and status messages
   - questions.css: Question groups, analysis, and answers
+  - floating-navigation.css: Floating navigation dots on the right side
   - animations.css: All keyframes and animations
   - responsive.css: Media queries and responsive design
   - utilities.css: Utility classes and helper styles
