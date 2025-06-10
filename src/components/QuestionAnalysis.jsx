@@ -346,7 +346,7 @@ const QuestionAnalysis = ({
                                         ) : (
                                           <>
                                             <Lightbulb size={12} />
-                                            💡Ans.
+                                            Ans.
                                           </>
                                         )}
                                       </button>
