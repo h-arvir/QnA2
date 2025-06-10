@@ -33,12 +33,19 @@
 }
 
 /* Control Buttons */
-.text-controls,
+.text-controls {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
 .groups-controls {
   display: flex;
   gap: var(--spacing-md);
   margin-bottom: var(--spacing-lg);
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .copy-btn,

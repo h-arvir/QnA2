@@ -252,7 +252,7 @@ const QuestionAnalysis = ({
                                 ) : (
                                   <>
                                     <Lightbulb size={14} />
-                                    💡Ans.
+                                    Ans.
                                   </>
                                 )}
                               </button>
@@ -448,7 +448,7 @@ const QuestionAnalysis = ({
                 }).join('\n' + '='.repeat(50) + '\n\n')
                 
                 navigator.clipboard.writeText(groupedText)
-                toast.success('All groups copied to clipboard with their current view modes!')
+                toast.success('All groups copied to clipboard!')
               }}
               title="Copy all groups with their current view modes to clipboard"
             >
