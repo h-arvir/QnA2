@@ -70,12 +70,33 @@ ${text}`
       const genAI = new GoogleGenerativeAI(apiKey.trim())
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
 
-      const prompt = `You are an assistant that analyzes OCR-extracted exam questions. Your task is to group only those questions that exhibit high conceptual similarity — meaning they focus on the same core idea, topic, or subtopic. Do not group questions that mix definitions with applications, advantages, or examples. Avoid merging core concepts with tools or models, low-level technical components with high-level overviews, or questions from different subjects or domains. Also, do not group questions that target different learning objectives, such as a definition versus a comparison. If a question does not clearly belong with others, assign it to its own group.
+      const prompt = `You are an assistant that analyzes OCR-extracted exam questions. Your task is to:
 
-Group questions based on tightly bound themes such as definitions and characteristics, technical architectures or components, service models and providers, security or virtualization principles, historical background of a subject, and short factual questions like those found in one-mark sections.
-It is critical not to over-merge. It is better to have multiple small and accurate groups than fewer large and imprecise ones.
+1. First, identify and parse section headers (Section A, Section B, Section C, etc.) from the text
+2. Categorize questions by marks based on sections:
+   - Section A and Section B questions = 5 Marks
+   - Section C questions = 2 Marks
+3. Within each marks category, group only those questions that ask for the same concept and expect the same type of response (e.g., advantages, disadvantages, or explanation), differing only in phrasing or examples.
+4. When unifying repeated questions, merge unique subparts from each into a single comprehensive question. For example, if one asks for a definition and characteristics, and another asks for a definition and architecture, the unified question should be: “Define [concept], its characteristics and architecture.
+5.Do not group questions that combine a concept definition with its architecture, advantages, applications, or examples.
+5. Avoid merging core concepts with tools or models, or questions from different learning objectives
+6. It is better to have multiple small and accurate groups than fewer large and imprecise ones
 
 Output Format:
+MARKS_GROUP: 5 Marks
+SECTIONS: Section A, Section B
+
+Group <number>:
+Question Count: <number>
+Unified Question: <merged version>
+Individual Questions:
+- <original question 1>
+- <original question 2>
+...
+
+MARKS_GROUP: 2 Marks
+SECTIONS: Section C
+
 Group <number>:
 Question Count: <number>
 Unified Question: <merged version>
@@ -86,22 +107,22 @@ Individual Questions:
 
 Here are the extracted questions to analyze:
 
-
 ${cleanedText}`
 
       const result = await model.generateContent(prompt)
       const response = await result.response
       const analysisResult = response.text()
 
-      // Parse the AI response into structured groups
-      const groups = this.parseAIAnalysisResponse(analysisResult)
+      // Parse the AI response into structured groups by marks
+      const groupsByMarks = this.parseAIAnalysisResponseByMarks(analysisResult)
       
       // Debug logging
       console.log('AI Analysis Result:', analysisResult)
-      console.log('Parsed Groups:', groups)
+      console.log('Parsed Groups by Marks:', groupsByMarks)
       
-      onStatusUpdate(`AI analysis complete! Found ${groups.length} question groups with unified questions and repetition counts.`)
-      return groups
+      const totalGroups = groupsByMarks.reduce((sum, marksGroup) => sum + marksGroup.groups.length, 0)
+      onStatusUpdate(`AI analysis complete! Found ${totalGroups} question groups organized by marks (5 Marks and 2 Marks).`)
+      return groupsByMarks
       
     } catch (error) {
       console.error('Error analyzing questions with AI:', error)
@@ -121,12 +142,65 @@ ${cleanedText}`
     }
   }
 
-  // Function to parse AI analysis response into structured groups
-  static parseAIAnalysisResponse(analysisText) {
+  // Function to parse AI analysis response into structured groups by marks
+  static parseAIAnalysisResponseByMarks(analysisText) {
+    const markGroups = []
+    
+    // Split by "MARKS_GROUP:" pattern
+    const marksSections = analysisText.split(/MARKS_GROUP:\s*/i).filter(section => section.trim().length > 0)
+    
+    marksSections.forEach((marksSection) => {
+      const lines = marksSection.trim().split('\n')
+      if (lines.length === 0) return
+      
+      // Extract marks value from first line
+      const marksLine = lines[0].trim()
+      const marksMatch = marksLine.match(/(\d+)\s*marks?/i)
+      if (!marksMatch) return
+      
+      const marks = parseInt(marksMatch[1], 10)
+      
+      // Extract sections from second line if it exists
+      let sections = []
+      if (lines.length > 1 && lines[1].toLowerCase().includes('sections:')) {
+        const sectionsLine = lines[1].replace(/sections:\s*/i, '').trim()
+        sections = sectionsLine.split(',').map(s => s.trim()).filter(s => s.length > 0)
+      }
+      
+      // Parse groups within this marks section
+      const groupsText = lines.slice(2).join('\n')
+      const groups = this.parseGroupsFromText(groupsText)
+      
+      if (groups.length > 0) {
+        markGroups.push({
+          marks: marks,
+          sections: sections,
+          groups: groups
+        })
+      }
+    })
+    
+    // If no marks groups were found, fall back to old format
+    if (markGroups.length === 0) {
+      const groups = this.parseGroupsFromText(analysisText)
+      if (groups.length > 0) {
+        markGroups.push({
+          marks: null,
+          sections: [],
+          groups: groups
+        })
+      }
+    }
+    
+    return markGroups
+  }
+
+  // Helper function to parse groups from text
+  static parseGroupsFromText(text) {
     const groups = []
     
     // Split by "Group X:" pattern
-    const groupSections = analysisText.split(/Group \d+:/i).filter(section => section.trim().length > 0)
+    const groupSections = text.split(/Group \d+:/i).filter(section => section.trim().length > 0)
     
     groupSections.forEach((section, index) => {
       const lines = section.trim().split('\n').filter(line => line.trim().length > 0)
@@ -138,6 +212,12 @@ ${cleanedText}`
       
       for (const line of lines) {
         const trimmedLine = line.trim()
+        
+        // Skip marks group headers
+        if (trimmedLine.toLowerCase().includes('marks_group:') || 
+            trimmedLine.toLowerCase().includes('sections:')) {
+          continue
+        }
         
         if (trimmedLine.toLowerCase().startsWith('question count:')) {
           const countMatch = trimmedLine.match(/question count:\s*(\d+)/i)
@@ -151,7 +231,6 @@ ${cleanedText}`
           inIndividualQuestions = true
         } else if (inIndividualQuestions) {
           // More flexible parsing for individual questions
-          // Handle various formats: bullet points, numbers, indented text, or plain text
           let cleanQuestion = trimmedLine
           
           // Remove common prefixes
@@ -165,10 +244,16 @@ ${cleanedText}`
           if (cleanQuestion.length > 0 && 
               !cleanQuestion.toLowerCase().startsWith('group ') &&
               !cleanQuestion.toLowerCase().includes('unified question') &&
-              !cleanQuestion.toLowerCase().includes('question count')) {
+              !cleanQuestion.toLowerCase().includes('question count') &&
+              !cleanQuestion.toLowerCase().includes('marks_group:') &&
+              !cleanQuestion.toLowerCase().includes('sections:')) {
             originalQuestions.push(cleanQuestion)
           }
-        } else if (unifiedQuestion && trimmedLine.length > 0 && !trimmedLine.toLowerCase().startsWith('group ') && !inIndividualQuestions) {
+        } else if (unifiedQuestion && trimmedLine.length > 0 && 
+                   !trimmedLine.toLowerCase().startsWith('group ') && 
+                   !inIndividualQuestions &&
+                   !trimmedLine.toLowerCase().includes('marks_group:') &&
+                   !trimmedLine.toLowerCase().includes('sections:')) {
           // Continue building the unified question if it spans multiple lines
           unifiedQuestion += ' ' + trimmedLine
         }
@@ -177,8 +262,6 @@ ${cleanedText}`
       // If we have a unified question but no individual questions, 
       // try to extract them from the cleaned text based on the count
       if (unifiedQuestion.trim().length > 0 && originalQuestions.length === 0 && questionCount > 1) {
-        // This is a fallback - we'll create placeholder individual questions
-        // In a real scenario, you might want to store the original questions differently
         for (let i = 0; i < questionCount; i++) {
           originalQuestions.push(`${unifiedQuestion} (variation ${i + 1})`)
         }
@@ -195,6 +278,11 @@ ${cleanedText}`
     })
     
     return groups
+  }
+
+  // Function to parse AI analysis response into structured groups (legacy support)
+  static parseAIAnalysisResponse(analysisText) {
+    return this.parseGroupsFromText(analysisText)
   }
 
   static async generateAnswer(question, context, apiKey, onStatusUpdate = () => {}) {
