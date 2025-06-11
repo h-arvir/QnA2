@@ -31,6 +31,9 @@ export const useAppState = () => {
   const [fileResults, setFileResults] = useState({})
   const [overallProgress, setOverallProgress] = useState(0)
   
+  // Caching state
+  const [fileHashes, setFileHashes] = useState({})
+  
   // Question analysis state
   const [groupedQuestions, setGroupedQuestions] = useState([])
   const [isGroupingQuestions, setIsGroupingQuestions] = useState(false)
@@ -124,6 +127,10 @@ export const useAppState = () => {
     setFileResults,
     overallProgress,
     setOverallProgress,
+    
+    // Caching
+    fileHashes,
+    setFileHashes,
     
     // Question analysis
     groupedQuestions,

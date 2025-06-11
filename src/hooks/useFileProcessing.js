@@ -1,6 +1,7 @@
 import { PDFProcessingService } from '../services/pdfProcessingService'
 import { AIProcessingService } from '../services/aiProcessingService'
 import { FileManagementService } from '../services/fileManagementService'
+import { CacheService } from '../services/cacheService'
 import toast from 'react-hot-toast'
 
 export const useFileProcessing = (state) => {
@@ -15,7 +16,8 @@ export const useFileProcessing = (state) => {
     setErrorMessage,
     setCleanedQuestions,
     setActiveSection,
-    geminiApiKey
+    geminiApiKey,
+    setFileHashes // Add this to store file hashes for caching
   } = state
 
   const processMultiplePDFs = async (files) => {

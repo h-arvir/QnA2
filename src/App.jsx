@@ -1,5 +1,9 @@
 import './styles/index.css'
 import { Toaster } from 'react-hot-toast'
+import { useEffect } from 'react'
+
+// Import services
+import { CacheService } from './services/cacheService'
 
 // Import components
 import FileUpload from './components/FileUpload'
@@ -10,6 +14,7 @@ import Timeline from './components/Timeline'
 import Sidebar from './components/Sidebar'
 import InstructionsSection from './components/InstructionsSection'
 import FloatingNavigation from './components/FloatingNavigation'
+import CacheManagement from './components/CacheManagement'
 
 // Import custom hooks
 import { useAppState } from './hooks/useAppState'
@@ -21,6 +26,20 @@ import { useQuestionAnalysis } from './hooks/useQuestionAnalysis'
 import { NAVIGATION_ITEMS, SECTION_IDS } from './constants/appConstants'
 
 function App() {
+  // Initialize cache service on app startup
+  useEffect(() => {
+    const initializeCache = async () => {
+      try {
+        const stats = CacheService.initialize()
+        console.log('Cache Service initialized:', stats)
+      } catch (error) {
+        console.error('Failed to initialize cache service:', error)
+      }
+    }
+    
+    initializeCache()
+  }, [])
+
   // Initialize state management
   const state = useAppState()
   
@@ -244,6 +263,10 @@ function App() {
               onToggleApiKeyInput={() => setShowApiKeyInput(!showApiKeyInput)}
               isInline={false}
             />
+          )}
+
+          {activeSection === SECTION_IDS.CACHE && (
+            <CacheManagement />
           )}
         </div>
       </main>

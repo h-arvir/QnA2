@@ -1,9 +1,20 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import { CacheService } from './cacheService'
 
 export class AIProcessingService {
-  static async processTextWithGemini(text, apiKey, onStatusUpdate = () => {}) {
+  static async processTextWithGemini(text, apiKey, onStatusUpdate = () => {}, fileHash = null) {
     if (!apiKey.trim()) {
       throw new Error('Please enter your Google Gemini API key to process the text.')
+    }
+
+    // Check cache first if fileHash is provided
+    if (fileHash) {
+      onStatusUpdate('Checking cache for processed text...')
+      const cachedResult = await CacheService.getCacheData(fileHash, CacheService.STAGES.CLEANED_QUESTIONS)
+      if (cachedResult) {
+        onStatusUpdate('✅ Found cached processed text! Skipping API call to save credits.')
+        return cachedResult.cleanedText
+      }
     }
 
     onStatusUpdate('Processing text with Google Gemini AI...')
@@ -29,7 +40,21 @@ ${text}`
       const response = await result.response
       const cleanedText = response.text()
 
-      onStatusUpdate('Text successfully processed with Google Gemini AI!')
+      // Cache the result if fileHash is provided
+      if (fileHash) {
+        await CacheService.setCacheData(fileHash, CacheService.STAGES.CLEANED_QUESTIONS, {
+          cleanedText,
+          originalText: text,
+          processedAt: new Date().toISOString()
+        }, {
+          apiModel: 'gemini-1.5-flash',
+          stage: 'text_cleaning'
+        })
+        onStatusUpdate('Text successfully processed and cached! Future uploads of this file will skip API calls.')
+      } else {
+        onStatusUpdate('Text successfully processed with Google Gemini AI!')
+      }
+      
       return cleanedText
     } catch (error) {
       console.error('Gemini API Error:', error)
@@ -55,13 +80,23 @@ ${text}`
     }
   }
 
-  static async analyzeQuestions(cleanedText, apiKey, onStatusUpdate = () => {}) {
+  static async analyzeQuestions(cleanedText, apiKey, onStatusUpdate = () => {}, fileHash = null) {
     if (!cleanedText || cleanedText.trim().length === 0) {
       return []
     }
 
     if (!apiKey.trim()) {
       throw new Error('Please enter your Google Gemini API key to analyze questions.')
+    }
+
+    // Check cache first if fileHash is provided
+    if (fileHash) {
+      onStatusUpdate('Checking cache for question analysis...')
+      const cachedResult = await CacheService.getCacheData(fileHash, CacheService.STAGES.GROUPED_QUESTIONS)
+      if (cachedResult) {
+        onStatusUpdate('✅ Found cached question analysis! Skipping API call to save credits.')
+        return cachedResult.groupsByMarks
+      }
     }
 
     try {
@@ -120,8 +155,22 @@ ${cleanedText}`
       console.log('AI Analysis Result:', analysisResult)
       console.log('Parsed Groups by Marks:', groupsByMarks)
       
+      // Cache the result if fileHash is provided
+      if (fileHash) {
+        await CacheService.setCacheData(fileHash, CacheService.STAGES.GROUPED_QUESTIONS, {
+          groupsByMarks,
+          analysisResult,
+          cleanedText,
+          processedAt: new Date().toISOString()
+        }, {
+          apiModel: 'gemini-1.5-flash',
+          stage: 'question_analysis'
+        })
+      }
+      
       const totalGroups = groupsByMarks.reduce((sum, marksGroup) => sum + marksGroup.groups.length, 0)
-      onStatusUpdate(`AI analysis complete! Found ${totalGroups} question groups organized by marks (5 Marks and 2 Marks).`)
+      const cacheMessage = fileHash ? ' Results cached for future use!' : ''
+      onStatusUpdate(`AI analysis complete! Found ${totalGroups} question groups organized by marks (5 Marks and 2 Marks).${cacheMessage}`)
       return groupsByMarks
       
     } catch (error) {
@@ -285,13 +334,23 @@ ${cleanedText}`
     return this.parseGroupsFromText(analysisText)
   }
 
-  static async generateAnswer(question, context, apiKey, onStatusUpdate = () => {}) {
+  static async generateAnswer(question, context, apiKey, onStatusUpdate = () => {}, questionKey = null) {
     if (!question || question.trim().length === 0) {
       throw new Error('Question is required to generate an answer.')
     }
 
     if (!apiKey.trim()) {
       throw new Error('Please enter your Google Gemini API key to generate answers.')
+    }
+
+    // Check cache first if questionKey is provided
+    if (questionKey) {
+      onStatusUpdate('Checking cache for answer...')
+      const cachedResult = await CacheService.getCacheData(questionKey, CacheService.STAGES.GENERATED_ANSWERS)
+      if (cachedResult) {
+        onStatusUpdate('✅ Found cached answer! Skipping API call to save credits.')
+        return cachedResult.answer
+      }
     }
 
     try {
@@ -321,7 +380,22 @@ Please provide a comprehensive answer:`
       const response = await result.response
       const answer = response.text()
 
-      onStatusUpdate('Answer generated successfully!')
+      // Cache the result if questionKey is provided
+      if (questionKey) {
+        await CacheService.setCacheData(questionKey, CacheService.STAGES.GENERATED_ANSWERS, {
+          answer: answer.trim(),
+          question,
+          context,
+          processedAt: new Date().toISOString()
+        }, {
+          apiModel: 'gemini-1.5-flash',
+          stage: 'answer_generation'
+        })
+        onStatusUpdate('Answer generated and cached successfully!')
+      } else {
+        onStatusUpdate('Answer generated successfully!')
+      }
+      
       return answer.trim()
       
     } catch (error) {

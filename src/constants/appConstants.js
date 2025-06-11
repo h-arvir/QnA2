@@ -1,6 +1,7 @@
 export const NAVIGATION_ITEMS = [
   { id: 'instructions', label: 'Instructions', icon: '📋', component: 'InstructionsSection' },
-  { id: 'apikey', label: 'Set up API Key', icon: '🔑', component: 'ApiKeySection' }
+  { id: 'apikey', label: 'Set up API Key', icon: '🔑', component: 'ApiKeySection' },
+  { id: 'cache', label: 'Cache Management', icon: '💾', component: 'CacheManagement' }
 ]
 
 export const SECTION_IDS = {
@@ -8,7 +9,8 @@ export const SECTION_IDS = {
   QUESTIONS: 'questions',
   ANALYSIS: 'analysis',
   INSTRUCTIONS: 'instructions',
-  API_KEY: 'apikey'
+  API_KEY: 'apikey',
+  CACHE: 'cache'
 }
 
 export const FILE_TYPES = {

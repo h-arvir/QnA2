@@ -1,5 +1,6 @@
 import * as pdfjsLib from 'pdfjs-dist'
 import { createWorker } from 'tesseract.js'
+import { CacheService } from './cacheService'
 
 // Set up PDF.js worker - using local worker file
 pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
@@ -13,6 +14,21 @@ export class PDFProcessingService {
 
   static async extractTextFromPDF(file, onStatusUpdate = () => {}) {
     try {
+      // Generate file hash for caching
+      const fileHash = await CacheService.generateFileHash(file)
+      
+      // Check cache first
+      onStatusUpdate('Checking cache for extracted text...')
+      const cachedResult = await CacheService.getCacheData(fileHash, CacheService.STAGES.EXTRACTED_TEXT)
+      if (cachedResult) {
+        onStatusUpdate('✅ Found cached extracted text! Skipping PDF processing.')
+        return {
+          text: cachedResult.text,
+          fileHash,
+          fromCache: true
+        }
+      }
+      
       onStatusUpdate('Loading PDF...')
       
       // Initialize worker sources
@@ -50,12 +66,42 @@ export class PDFProcessingService {
         if (ocrText.includes('Error:')) {
           throw new Error(ocrText)
         } else {
-          onStatusUpdate('OCR completed successfully!')
-          return ocrText
+          // Cache OCR result
+          await CacheService.setCacheData(fileHash, CacheService.STAGES.EXTRACTED_TEXT, {
+            text: ocrText,
+            extractionMethod: 'OCR',
+            processedAt: new Date().toISOString()
+          }, {
+            fileName: file.name,
+            fileSize: file.size,
+            stage: 'text_extraction'
+          })
+          
+          onStatusUpdate('OCR completed successfully! Result cached for future use.')
+          return {
+            text: ocrText,
+            fileHash,
+            fromCache: false
+          }
         }
       } else {
-        onStatusUpdate(`Successfully extracted text from ${pdf.numPages} pages!`)
-        return fullText.trim()
+        // Cache normal text extraction result
+        await CacheService.setCacheData(fileHash, CacheService.STAGES.EXTRACTED_TEXT, {
+          text: fullText.trim(),
+          extractionMethod: 'PDF.js',
+          processedAt: new Date().toISOString()
+        }, {
+          fileName: file.name,
+          fileSize: file.size,
+          stage: 'text_extraction'
+        })
+        
+        onStatusUpdate(`Successfully extracted text from ${pdf.numPages} pages! Result cached for future use.`)
+        return {
+          text: fullText.trim(),
+          fileHash,
+          fromCache: false
+        }
       }
     } catch (error) {
       console.error('Error extracting text from PDF:', error)

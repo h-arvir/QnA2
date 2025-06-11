@@ -1,5 +1,5 @@
-import React from 'react'
-import { Bot, BarChart3, Copy, List, Layers, Lightbulb, Loader2, Eye, EyeOff } from 'lucide-react'
+import React, { useState, useMemo } from 'react'
+import { Bot, BarChart3, Copy, List, Layers, Lightbulb, Loader2, Eye, EyeOff, Search, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { AIProcessingService } from '../services/aiProcessingService'
 
@@ -21,6 +21,49 @@ const QuestionAnalysis = ({
 }) => {
   // Note: All state is now managed at the app level and passed as props
   // This ensures answers persist when navigating between sections
+  
+  // Search functionality state
+  const [searchQuery, setSearchQuery] = useState('')
+  
+  // Function to highlight search terms in text
+  const highlightSearchTerm = (text, searchTerm) => {
+    if (!searchTerm.trim()) return text
+    
+    const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
+    return text.replace(regex, '<mark class="search-highlight">$1</mark>')
+  }
+  
+  // Function to check if a question matches the search query
+  const matchesSearch = (question, searchTerm) => {
+    if (!searchTerm.trim()) return true
+    return question.toLowerCase().includes(searchTerm.toLowerCase())
+  }
+  
+  // Filtered grouped questions based on search query
+  const filteredGroupedQuestions = useMemo(() => {
+    if (!searchQuery.trim() || !groupedQuestions) return groupedQuestions
+    
+    return groupedQuestions.map(marksGroup => ({
+      ...marksGroup,
+      groups: marksGroup.groups?.filter(group => {
+        // Check if unified question matches
+        const unifiedMatches = matchesSearch(group.unifiedQuestion || '', searchQuery)
+        
+        // Check if any individual question matches
+        const individualMatches = group.originalQuestions?.some(q => 
+          matchesSearch(q.question || q, searchQuery)
+        ) || false
+        
+        return unifiedMatches || individualMatches
+      }) || []
+    })).filter(marksGroup => marksGroup.groups.length > 0)
+  }, [groupedQuestions, searchQuery])
+  
+  // Function to clear search
+  const clearSearch = () => {
+    setSearchQuery('')
+    toast.success('Search cleared', { duration: 1500, icon: '🔍' })
+  }
   
   // Function to toggle view mode for a specific group
   const toggleGroupViewMode = (groupIndex, mode) => {
@@ -55,7 +98,7 @@ const QuestionAnalysis = ({
       // Prepare context from the document
       const context = cleanedQuestions || extractedText || ''
       
-      // Generate answer using AI service
+      // Generate answer using AI service with caching
       const answer = await AIProcessingService.generateAnswer(
         questionText, 
         context, 
@@ -63,7 +106,8 @@ const QuestionAnalysis = ({
         (status) => {
           // Update loading toast with status
           toast.loading(status, { id: loadingToast })
-        }
+        },
+        questionKey // Pass questionKey for caching
       )
       
       // Set the generated answer
@@ -168,6 +212,49 @@ const QuestionAnalysis = ({
             )}
           </div>
           
+          {/* Search Bar */}
+          <div className="search-section">
+            <div className="search-container">
+              <div className="search-input-wrapper">
+                <Search size={18} className="search-icon" />
+                <input
+                  type="text"
+                  placeholder=" Search questions here ..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="search-input"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={clearSearch}
+                    className="clear-search-btn"
+                    title="Clear search"
+                  >
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
+              {searchQuery && (
+                <div className="search-results-info">
+                  {(() => {
+                    const totalFilteredGroups = filteredGroupedQuestions.reduce((sum, marksGroup) => {
+                      return sum + (marksGroup.groups ? marksGroup.groups.length : 0)
+                    }, 0)
+                    const totalGroups = groupedQuestions.reduce((sum, marksGroup) => {
+                      return sum + (marksGroup.groups ? marksGroup.groups.length : 0)
+                    }, 0)
+                    return (
+                      <span>
+                        Showing <strong>{totalFilteredGroups}</strong> of <strong>{totalGroups}</strong> groups
+                        {totalFilteredGroups === 0 && ' - No matches found'}
+                      </span>
+                    )
+                  })()}
+                </div>
+              )}
+            </div>
+          </div>
+          
           {isGroupingQuestions && (
             <div className="grouping-loading">
               <div className="loading-spinner"></div>
@@ -175,8 +262,25 @@ const QuestionAnalysis = ({
             </div>
           )}
           
+          {/* No Results Message */}
+          {searchQuery && filteredGroupedQuestions.length === 0 && (
+            <div className="no-search-results">
+              <div className="no-results-icon">
+                <Search size={48} />
+              </div>
+              <h3>No Questions Found</h3>
+              <p>No questions match your search term "<strong>{searchQuery}</strong>"</p>
+              <button 
+                onClick={clearSearch}
+                className="clear-search-action-btn"
+              >
+                Clear Search
+              </button>
+            </div>
+          )}
+          
           <div className="marks-groups-container">
-            {groupedQuestions.map((marksGroup, marksIndex) => (
+            {filteredGroupedQuestions.map((marksGroup, marksIndex) => (
               <div key={marksIndex} className="marks-group">
                 <div className="marks-group-header">
                   <h2 className="marks-title">
@@ -202,11 +306,9 @@ const QuestionAnalysis = ({
                       <div key={groupIndex} className="question-group">
                         <div className="group-header">
                           <h3>Group {group.groupNumber || groupIndex + 1}</h3>
-                          {!(marksGroup.sections && marksGroup.sections.includes('C')) && (
-                            <span className="group-count">
-                              {group.count === 1 ? '1 question' : `${group.count} similar questions`}
-                            </span>
-                          )}
+                          <span className="group-count">
+                            {group.count === 1 ? '1 question' : `${group.count} similar questions`}
+                          </span>
                         </div>
                         
                         {/* View Mode Toggle Buttons for this group */}
@@ -251,11 +353,9 @@ const QuestionAnalysis = ({
                         <div className="question-header">
                           <h4>❓ Unified Question:</h4>
                           <div className="question-header-actions">
-                            {!(marksGroup.sections && marksGroup.sections.includes('C')) && (
-                              <span className="repetition-badge">
-                                {group.count}x repeated
-                              </span>
-                            )}
+                            <span className="repetition-badge">
+                              {group.count}x repeated
+                            </span>
                             <div className="question-action-buttons">
                               <button 
                                 className="answer-btn"
@@ -305,9 +405,12 @@ const QuestionAnalysis = ({
                             </div>
                           </div>
                         </div>
-                        <div className="question-text">
-                          {group.unifiedQuestion}
-                        </div>
+                        <div 
+                          className="question-text"
+                          dangerouslySetInnerHTML={{ 
+                            __html: highlightSearchTerm(group.unifiedQuestion, searchQuery) 
+                          }}
+                        />
                         {answers[`unified-${globalGroupIndex}`] && !hiddenAnswers[`unified-${globalGroupIndex}`] && (
                           <div className="answer-section">
                             <div className="answer-header">
@@ -350,7 +453,12 @@ const QuestionAnalysis = ({
                                 <div key={qIndex} className="individual-question">
                                   <div className="individual-question-content">
                                     <span className="question-number">{qIndex + 1}.</span>
-                                    <span className="question-text">{question}</span>
+                                    <span 
+                                      className="question-text"
+                                      dangerouslySetInnerHTML={{ 
+                                        __html: highlightSearchTerm(question, searchQuery) 
+                                      }}
+                                    />
                                     <div className="individual-question-actions">
                                       <button 
                                         className="answer-btn individual-answer-btn"
