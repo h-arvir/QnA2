@@ -98,7 +98,7 @@ const QuestionAnalysis = ({
       // Prepare context from the document
       const context = cleanedQuestions || extractedText || ''
       
-      // Generate answer using AI service with caching
+      // Generate answer using AI service with content-based caching
       const answer = await AIProcessingService.generateAnswer(
         questionText, 
         context, 
@@ -106,8 +106,8 @@ const QuestionAnalysis = ({
         (status) => {
           // Update loading toast with status
           toast.loading(status, { id: loadingToast })
-        },
-        questionKey // Pass questionKey for caching
+        }
+        // Note: questionKey is no longer passed - caching now uses question content
       )
       
       // Set the generated answer

@@ -45,6 +45,41 @@ export class CacheService {
   }
 
   /**
+   * Generate a hash for question content to create unique cache keys
+   */
+  static async generateQuestionHash(questionText) {
+    try {
+      // Normalize the question text (trim, lowercase, remove extra spaces)
+      const normalizedQuestion = questionText.trim().toLowerCase().replace(/\s+/g, ' ')
+      
+      // Create a hash of the question content
+      const encoder = new TextEncoder()
+      const data = encoder.encode(normalizedQuestion)
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+      const hashArray = Array.from(new Uint8Array(hashBuffer))
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+      
+      // Return first 16 characters for shorter keys
+      return hashHex.substring(0, 16)
+    } catch (error) {
+      console.error('Error generating question hash:', error)
+      // Fallback to simple hash based on question length and first/last chars
+      const normalized = questionText.trim().toLowerCase()
+      return `fallback_${normalized.length}_${normalized.charCodeAt(0)}_${normalized.charCodeAt(normalized.length - 1)}`
+    }
+  }
+
+  /**
+   * Generate cache key for question-answer pairs
+   */
+  static async getQuestionCacheKey(questionText, contextHash = '') {
+    const questionHash = await this.generateQuestionHash(questionText)
+    // Include context hash if provided to differentiate same questions from different documents
+    const contextPart = contextHash ? `_${contextHash.substring(0, 8)}` : ''
+    return `${this.CACHE_PREFIX}question_${questionHash}${contextPart}`
+  }
+
+  /**
    * Get cache metadata
    */
   static getCacheMetadata() {

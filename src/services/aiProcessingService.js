@@ -334,7 +334,7 @@ ${cleanedText}`
     return this.parseGroupsFromText(analysisText)
   }
 
-  static async generateAnswer(question, context, apiKey, onStatusUpdate = () => {}, questionKey = null) {
+  static async generateAnswer(question, context, apiKey, onStatusUpdate = () => {}) {
     if (!question || question.trim().length === 0) {
       throw new Error('Question is required to generate an answer.')
     }
@@ -343,14 +343,16 @@ ${cleanedText}`
       throw new Error('Please enter your Google Gemini API key to generate answers.')
     }
 
-    // Check cache first if questionKey is provided
-    if (questionKey) {
-      onStatusUpdate('Checking cache for answer...')
-      const cachedResult = await CacheService.getCacheData(questionKey, CacheService.STAGES.GENERATED_ANSWERS)
-      if (cachedResult) {
-        onStatusUpdate('✅ Found cached answer! Skipping API call to save credits.')
-        return cachedResult.answer
-      }
+    // Generate a content-based cache key for the question
+    const contextHash = context ? await CacheService.generateQuestionHash(context.substring(0, 1000)) : ''
+    const contentBasedCacheKey = await CacheService.getQuestionCacheKey(question, contextHash)
+
+    // Check cache first using content-based key
+    onStatusUpdate('Checking cache for answer...')
+    const cachedResult = await CacheService.getCacheData(contentBasedCacheKey, CacheService.STAGES.GENERATED_ANSWERS)
+    if (cachedResult) {
+      onStatusUpdate('✅ Found cached answer! Skipping API call to save credits.')
+      return cachedResult.answer
     }
 
     try {
@@ -380,21 +382,18 @@ Please provide a comprehensive answer:`
       const response = await result.response
       const answer = response.text()
 
-      // Cache the result if questionKey is provided
-      if (questionKey) {
-        await CacheService.setCacheData(questionKey, CacheService.STAGES.GENERATED_ANSWERS, {
-          answer: answer.trim(),
-          question,
-          context,
-          processedAt: new Date().toISOString()
-        }, {
-          apiModel: 'gemini-1.5-flash',
-          stage: 'answer_generation'
-        })
-        onStatusUpdate('Answer generated and cached successfully!')
-      } else {
-        onStatusUpdate('Answer generated successfully!')
-      }
+      // Cache the result using content-based key
+      await CacheService.setCacheData(contentBasedCacheKey, CacheService.STAGES.GENERATED_ANSWERS, {
+        answer: answer.trim(),
+        question,
+        context: context ? context.substring(0, 2000) : '', // Store limited context to save space
+        processedAt: new Date().toISOString()
+      }, {
+        apiModel: 'gemini-1.5-flash',
+        stage: 'answer_generation',
+        questionHash: await CacheService.generateQuestionHash(question)
+      })
+      onStatusUpdate('Answer generated and cached successfully!')
       
       return answer.trim()
       
