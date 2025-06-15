@@ -160,28 +160,88 @@
   --transition-bounce: 500ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
-/* Dark Theme */
+/* Dark Theme - Futuristic High-Tech Design */
 [data-theme="dark"] {
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
-  --bg-tertiary: #334155;
-  --bg-accent: #475569;
+  /* Background Colors */
+  --bg-primary: #0F111A;        /* Deep navy black */
+  --bg-secondary: #1A1D2E;      /* Slightly lighter navy */
+  --bg-tertiary: #242842;       /* Medium navy for cards */
+  --bg-accent: #2A2D3E;         /* Steel gray with blue touch */
+  --bg-muted: #181B28;          /* Very dark navy */
+  --bg-glass: rgba(255, 255, 255, 0.05); /* Translucent white for glass effect */
+  --bg-glass-strong: rgba(255, 255, 255, 0.1);
   
-  --text-primary: #f8fafc;
-  --text-secondary: #e2e8f0;
-  --text-tertiary: #cbd5e1;
-  --text-muted: #94a3b8;
+  /* Text Colors */
+  --text-primary: #F1F1F1;      /* Near-white, soft gray */
+  --text-secondary: #9CA3AF;    /* Cool gray for secondary text */
+  --text-tertiary: #6B7280;     /* Muted gray */
+  --text-muted: #4B5563;        /* Very muted gray */
+  --text-inverse: #0F111A;      /* Dark text for light backgrounds */
   
-  --border-primary: #334155;
-  --border-secondary: #475569;
-  --border-accent: #64748b;
+  /* Border Colors */
+  --border-primary: #2A2D3E;    /* Steel gray with blue touch */
+  --border-secondary: #374151;  /* Slightly lighter border */
+  --border-accent: #4B5563;     /* Accent border */
+  --border-focus: #00D4FF;      /* Neon cyan for focus states */
   
-  /* Adjust shadows for dark mode */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
-  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  /* Brand Colors - Updated for dark theme */
+  --primary-50: rgba(0, 212, 255, 0.05);
+  --primary-100: rgba(0, 212, 255, 0.1);
+  --primary-200: rgba(0, 212, 255, 0.2);
+  --primary-300: rgba(0, 212, 255, 0.3);
+  --primary-400: rgba(0, 212, 255, 0.4);
+  --primary-500: #00D4FF;       /* Neon cyan - primary accent */
+  --primary-600: #00B8E6;
+  --primary-700: #009CCC;
+  --primary-800: #0080B3;
+  --primary-900: #006499;
+  --primary-950: #004866;
+  
+  /* Secondary Accent - Royal Purple */
+  --accent-50: rgba(142, 68, 173, 0.05);
+  --accent-100: rgba(142, 68, 173, 0.1);
+  --accent-200: rgba(142, 68, 173, 0.2);
+  --accent-300: rgba(142, 68, 173, 0.3);
+  --accent-400: rgba(142, 68, 173, 0.4);
+  --accent-500: #8E44AD;        /* Royal purple - secondary accent */
+  --accent-600: #7D3C98;
+  --accent-700: #6C3483;
+  --accent-800: #5B2C6F;
+  --accent-900: #4A235A;
+  --accent-950: #391B46;
+  
+  /* Enhanced Shadows for Dark Theme */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.3);
+  
+  /* Glow Effects */
+  --glow-cyan: 0 0 20px rgba(0, 212, 255, 0.3);
+  --glow-cyan-strong: 0 0 30px rgba(0, 212, 255, 0.5);
+  --glow-purple: 0 0 20px rgba(142, 68, 173, 0.3);
+  --glow-purple-strong: 0 0 30px rgba(142, 68, 173, 0.5);
+  --glow-soft: 0 0 15px rgba(255, 255, 255, 0.1);
+  
+  /* Futuristic Gradients */
+  --gradient-primary: linear-gradient(135deg, #00D4FF 0%, #0099CC 100%);
+  --gradient-secondary: linear-gradient(135deg, #8E44AD 0%, #6C3483 100%);
+  --gradient-accent: linear-gradient(135deg, #00D4FF 0%, #8E44AD 100%);
+  --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  --gradient-metallic: linear-gradient(135deg, #2A2D3E 0%, #374151 50%, #2A2D3E 100%);
+  --gradient-shine: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.1) 100%);
+  
+  /* Status Colors for Dark Theme */
+  --success-500: #10B981;
+  --success-600: #059669;
+  --warning-500: #F59E0B;
+  --warning-600: #D97706;
+  --error-500: #EF4444;
+  --error-600: #DC2626;
+  --info-500: #00D4FF;
+  --info-600: #00B8E6;
 }
 
 html {

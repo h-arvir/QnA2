@@ -15,6 +15,7 @@ import Sidebar from './components/Sidebar'
 import InstructionsSection from './components/InstructionsSection'
 import FloatingNavigation from './components/FloatingNavigation'
 import CacheManagement from './components/CacheManagement'
+import ThemeToggle from './components/ThemeToggle'
 
 // Import custom hooks
 import { useAppState } from './hooks/useAppState'
@@ -96,6 +97,11 @@ function App() {
 
   return (
     <div className="app">
+      {/* Theme Toggle */}
+      <div className="floating-theme-toggle">
+        <ThemeToggle />
+      </div>
+
       {/* Toast Notifications */}
       <Toaster
         position="top-right"

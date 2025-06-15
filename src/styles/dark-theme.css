@@ -1,0 +1,402 @@
+/* Futuristic Dark Theme - Advanced Components */
+
+/* Glass Morphism Effects */
+[data-theme="dark"] .glass-effect {
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: var(--shadow-lg), var(--glow-soft);
+}
+
+[data-theme="dark"] .glass-effect-strong {
+  background: var(--bg-glass-strong);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: var(--shadow-xl), var(--glow-soft);
+}
+
+/* Metallic Button Effects */
+[data-theme="dark"] .btn-metallic {
+  background: var(--gradient-metallic);
+  border: 1px solid var(--border-primary);
+  color: var(--text-primary);
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-normal);
+}
+
+[data-theme="dark"] .btn-metallic::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: var(--gradient-shine);
+  transition: left var(--transition-slow);
+  z-index: 1;
+}
+
+[data-theme="dark"] .btn-metallic:hover::before {
+  left: 100%;
+}
+
+[data-theme="dark"] .btn-metallic:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-xl), var(--glow-cyan);
+  border-color: var(--primary-500);
+}
+
+/* Primary Glowing Buttons */
+[data-theme="dark"] .btn-primary-glow {
+  background: var(--gradient-primary);
+  border: none;
+  color: var(--text-inverse);
+  box-shadow: var(--shadow-lg), var(--glow-cyan);
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="dark"] .btn-primary-glow::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+[data-theme="dark"] .btn-primary-glow:hover::after {
+  width: 300px;
+  height: 300px;
+}
+
+[data-theme="dark"] .btn-primary-glow:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-2xl), var(--glow-cyan-strong);
+}
+
+/* Secondary Purple Buttons */
+[data-theme="dark"] .btn-secondary-glow {
+  background: var(--gradient-secondary);
+  border: none;
+  color: var(--text-primary);
+  box-shadow: var(--shadow-lg), var(--glow-purple);
+  transition: all var(--transition-normal);
+}
+
+[data-theme="dark"] .btn-secondary-glow:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-2xl), var(--glow-purple-strong);
+}
+
+/* Futuristic Cards */
+[data-theme="dark"] .card-futuristic {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-normal);
+}
+
+[data-theme="dark"] .card-futuristic::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--gradient-accent);
+  opacity: 0.6;
+}
+
+[data-theme="dark"] .card-futuristic:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-2xl), var(--glow-soft);
+  border-color: var(--primary-500);
+}
+
+[data-theme="dark"] .card-futuristic:hover::before {
+  opacity: 1;
+  box-shadow: var(--glow-cyan);
+}
+
+/* Glowing Borders */
+[data-theme="dark"] .border-glow-cyan {
+  border: 1px solid var(--primary-500);
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+}
+
+[data-theme="dark"] .border-glow-purple {
+  border: 1px solid var(--accent-500);
+  box-shadow: 0 0 10px rgba(142, 68, 173, 0.3);
+}
+
+/* Interactive Elements with Glow */
+[data-theme="dark"] .interactive-glow {
+  transition: all var(--transition-normal);
+  border-radius: var(--radius-xl);
+}
+
+[data-theme="dark"] .interactive-glow:hover {
+  box-shadow: var(--glow-cyan);
+  transform: translateY(-1px);
+}
+
+[data-theme="dark"] .interactive-glow:focus {
+  outline: none;
+  box-shadow: var(--glow-cyan-strong);
+  border-color: var(--primary-500);
+}
+
+/* Thin Lines and Separators */
+[data-theme="dark"] .separator-thin {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--border-primary) 50%, transparent 100%);
+  margin: var(--spacing-lg) 0;
+}
+
+[data-theme="dark"] .separator-glow {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--primary-500) 50%, transparent 100%);
+  box-shadow: var(--glow-cyan);
+  margin: var(--spacing-lg) 0;
+}
+
+/* Form Inputs with Futuristic Styling */
+[data-theme="dark"] .input-futuristic {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-xl);
+  color: var(--text-primary);
+  padding: var(--spacing-md) var(--spacing-lg);
+  transition: all var(--transition-normal);
+  font-family: var(--font-mono);
+}
+
+[data-theme="dark"] .input-futuristic:focus {
+  outline: none;
+  border-color: var(--primary-500);
+  box-shadow: var(--glow-cyan);
+  background: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .input-futuristic::placeholder {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Toggle Switches with Glow */
+[data-theme="dark"] .toggle-futuristic {
+  position: relative;
+  width: 60px;
+  height: 30px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+[data-theme="dark"] .toggle-futuristic::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 24px;
+  height: 24px;
+  background: var(--gradient-primary);
+  border-radius: 50%;
+  transition: all var(--transition-normal);
+  box-shadow: var(--glow-cyan);
+}
+
+[data-theme="dark"] .toggle-futuristic.active {
+  background: var(--bg-accent);
+  border-color: var(--primary-500);
+  box-shadow: var(--glow-cyan);
+}
+
+[data-theme="dark"] .toggle-futuristic.active::before {
+  transform: translateX(30px);
+  box-shadow: var(--glow-cyan-strong);
+}
+
+/* Progress Bars */
+[data-theme="dark"] .progress-futuristic {
+  width: 100%;
+  height: 8px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  position: relative;
+}
+
+[data-theme="dark"] .progress-futuristic::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: var(--gradient-accent);
+  border-radius: var(--radius-full);
+  transition: width var(--transition-slow);
+  box-shadow: var(--glow-cyan);
+}
+
+/* Scrollbars */
+[data-theme="dark"] ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-full);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: var(--gradient-primary);
+  border-radius: var(--radius-full);
+  box-shadow: var(--glow-cyan);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--gradient-accent);
+  box-shadow: var(--glow-cyan-strong);
+}
+
+/* Tooltips */
+[data-theme="dark"] .tooltip-futuristic {
+  position: relative;
+}
+
+[data-theme="dark"] .tooltip-futuristic::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--transition-normal);
+  border: 1px solid var(--border-primary);
+  box-shadow: var(--shadow-lg), var(--glow-soft);
+  z-index: 1000;
+}
+
+[data-theme="dark"] .tooltip-futuristic:hover::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(-8px);
+}
+
+/* Loading Animations */
+[data-theme="dark"] .loading-pulse {
+  animation: pulse-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-glow {
+  from {
+    box-shadow: var(--glow-cyan);
+  }
+  to {
+    box-shadow: var(--glow-cyan-strong);
+  }
+}
+
+/* Floating Elements */
+[data-theme="dark"] .floating-element {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* High Contrast Text */
+[data-theme="dark"] .text-high-contrast {
+  color: var(--text-primary);
+  text-shadow: 0 0 10px rgba(241, 241, 241, 0.3);
+}
+
+/* Spacious Layout Utilities */
+[data-theme="dark"] .spacious-section {
+  padding: var(--spacing-5xl) var(--spacing-3xl);
+}
+
+[data-theme="dark"] .spacious-card {
+  padding: var(--spacing-3xl) var(--spacing-2xl);
+}
+
+/* Clean Typography Enhancements */
+[data-theme="dark"] .typography-clean h1,
+[data-theme="dark"] .typography-clean h2,
+[data-theme="dark"] .typography-clean h3 {
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  line-height: var(--leading-tight);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .typography-clean p {
+  line-height: var(--leading-relaxed);
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+/* Minimalist Components */
+[data-theme="dark"] .minimal-card {
+  background: transparent;
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-2xl);
+  transition: all var(--transition-normal);
+}
+
+[data-theme="dark"] .minimal-card:hover {
+  background: var(--bg-glass);
+  border-color: var(--primary-500);
+  box-shadow: var(--glow-soft);
+}
+
+/* Status Indicators with Glow */
+[data-theme="dark"] .status-success {
+  color: var(--success-500);
+  text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+}
+
+[data-theme="dark"] .status-warning {
+  color: var(--warning-500);
+  text-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+}
+
+[data-theme="dark"] .status-error {
+  color: var(--error-500);
+  text-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+}
+
+[data-theme="dark"] .status-info {
+  color: var(--info-500);
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+}

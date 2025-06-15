@@ -56,7 +56,7 @@ const ApiKeySetup = ({
 
   return (
     <div className="section-content">
-      <h2 className="section-title">🔑 API Key Setup</h2>
+      <h2 className="section-title"> API Key Setup</h2>
       <p className="section-subtitle">Configure your Google Gemini API key for AI processing</p>
       
       <div className="api-key-container">

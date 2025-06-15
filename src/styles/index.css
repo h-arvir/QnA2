@@ -2,6 +2,8 @@
 
 /* Import all component styles in logical order */
 @import './base.css';
+@import './dark-theme.css';
+@import './theme-toggle.css';
 @import './sidebar.css';
 @import './timeline.css';
 @import './upload.css';

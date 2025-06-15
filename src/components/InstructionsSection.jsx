@@ -13,7 +13,7 @@ import {
 const InstructionsSection = ({ onNavigateToSection }) => {
   return (
     <div className="section-content">
-      <h2 className="section-title">📋 How to Use This App</h2>
+      <h2 className="section-title"> How to Use This App</h2>
       <p className="section-subtitle">Complete guide to AI-powered PDF question extraction and analysis</p>
       
       <div className="instructions-container">

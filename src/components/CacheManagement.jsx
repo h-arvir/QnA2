@@ -88,7 +88,7 @@ const CacheManagement = () => {
 
   return (
     <div className="section-content">
-      <h2 className="section-title">💾 Cache Management</h2>
+      <h2 className="section-title">Cache Management</h2>
       <p className="section-subtitle">Manage cached processing results to save API credits</p>
       
       <div className="cache-management-container">
