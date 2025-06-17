@@ -22,7 +22,7 @@ const Timeline = ({
       id: 'upload',
       number: 1,
       title: 'Upload',
-      subtitle: 'Select & Process PDFs',
+      subtitle: 'Select  PDFs',
       completed: selectedFiles.length > 0
     },
     {
@@ -56,7 +56,7 @@ const Timeline = ({
     >
       <div className="timeline-progress">
         {timelineSteps.map((step, index) => (
-          <div key={step.id}>
+          <div key={step.id} className="timeline-item">
             <div className="timeline-step" onClick={() => onSectionChange(step.id)}>
               <div className={`timeline-dot ${step.completed ? 'completed' : ''} ${activeSection === step.id ? 'active' : ''}`}>
                 <span className="timeline-number">{step.number}</span>
@@ -66,7 +66,13 @@ const Timeline = ({
                 <span className="timeline-subtitle">{step.subtitle}</span>
               </div>
             </div>
-            {index < timelineSteps.length - 1 && <div className="timeline-connector"></div>}
+          </div>
+        ))}
+      </div>
+      <div className="timeline-connectors">
+        {timelineSteps.map((step, index) => (
+          <div key={`connector-${index}`} className="timeline-connector-container">
+            <div className={`timeline-connector ${step.completed ? 'completed' : ''}`}></div>
           </div>
         ))}
       </div>

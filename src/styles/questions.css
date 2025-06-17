@@ -630,17 +630,17 @@
 }
 
 .answer-text::-webkit-scrollbar-track {
-  background: var(--success-100);
+  background: var(--bg-tertiary);
   border-radius: var(--radius-sm);
 }
 
 .answer-text::-webkit-scrollbar-thumb {
-  background: var(--success-300);
+  background: var(--primary-500);
   border-radius: var(--radius-sm);
 }
 
 .answer-text::-webkit-scrollbar-thumb:hover {
-  background: var(--success-400);
+  background: var(--primary-600);
 }
 
 /* Group-level View Mode Toggle Controls */
