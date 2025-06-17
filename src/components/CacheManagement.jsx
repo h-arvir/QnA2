@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Database, Trash2, RefreshCw, Info, HardDrive, Clock, BarChart3 } from 'lucide-react'
+import { Database, Trash2, RefreshCw, Info, HardDrive, Clock, BarChart3, Sparkles, Brush, Coins } from 'lucide-react'
 import { CacheService } from '../services/cacheService'
 import toast from 'react-hot-toast'
 
@@ -34,7 +34,7 @@ const CacheManagement = () => {
       
       toast.success(`Cache cleared! Removed ${result.removedCount} entries, freed ${(result.removedSize / 1024 / 1024).toFixed(2)} MB`, {
         duration: 4000,
-        icon: '🗑️'
+        icon: <Trash2 size={16} />
       })
       
       // Reload stats
@@ -55,11 +55,11 @@ const CacheManagement = () => {
       if (result.cleanedCount > 0) {
         toast.success(`Cleanup complete! Removed ${result.cleanedCount} expired entries, freed ${(result.cleanedSize / 1024 / 1024).toFixed(2)} MB`, {
           duration: 4000,
-          icon: '🧹'
+          icon: <Brush size={16} />
         })
       } else {
         toast.success('No expired entries found. Cache is clean!', {
-          icon: '✨'
+          icon: <Sparkles size={16} />
         })
       }
       
@@ -200,19 +200,19 @@ const CacheManagement = () => {
           </div>
           <div className="cache-benefits">
             <div className="benefit-item">
-              <span className="benefit-icon">💰</span>
+              <span className="benefit-icon"><Coins size={20} /></span>
               <span>Reprocessing the same PDF costs 0 API credits</span>
             </div>
             <div className="benefit-item">
-              <span className="benefit-icon">⚡</span>
+              <span className="benefit-icon"><RefreshCw size={20} /></span>
               <span>Cached results load instantly</span>
             </div>
             <div className="benefit-item">
-              <span className="benefit-icon">🔄</span>
+              <span className="benefit-icon"><Database size={20} /></span>
               <span>Answers are cached per question for quick retrieval</span>
             </div>
             <div className="benefit-item">
-              <span className="benefit-icon">🧹</span>
+              <span className="benefit-icon"><Brush size={20} /></span>
               <span>Automatic cleanup removes old entries after 30 days</span>
             </div>
           </div>

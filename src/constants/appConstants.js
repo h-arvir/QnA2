@@ -1,7 +1,7 @@
 export const NAVIGATION_ITEMS = [
-  { id: 'instructions', label: 'Instructions', icon: '📋', component: 'InstructionsSection' },
-  { id: 'apikey', label: 'Set up API Key', icon: '🔑', component: 'ApiKeySection' },
-  { id: 'cache', label: 'Cache Management', icon: '💾', component: 'CacheManagement' }
+  { id: 'instructions', label: 'Instructions', iconName: 'FileText', component: 'InstructionsSection' },
+  { id: 'apikey', label: 'Set up API Key', iconName: 'Key', component: 'ApiKeySection' },
+  { id: 'cache', label: 'Cache Management', iconName: 'Database', component: 'CacheManagement' }
 ]
 
 export const SECTION_IDS = {

@@ -74,6 +74,11 @@
   opacity: 1;
 }
 
+.nav-items[data-active="cache"]::before {
+  transform: translateY(116px);
+  opacity: 1;
+}
+
 .nav-item {
   display: flex;
   align-items: center;
@@ -148,6 +153,10 @@
 .nav-icon {
   font-size: var(--text-xl);
   min-width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
 }
 
 .nav-label {

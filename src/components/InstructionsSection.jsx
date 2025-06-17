@@ -7,7 +7,12 @@ import {
   BarChart3, 
   Download, 
   RefreshCw,
-  Settings 
+  Settings,
+  Lamp,
+  Wrench,
+  Sparkles,
+  CircleIcon,
+  Hash
 } from 'lucide-react'
 
 const InstructionsSection = ({ onNavigateToSection }) => {
@@ -19,7 +24,10 @@ const InstructionsSection = ({ onNavigateToSection }) => {
       <div className="instructions-container">
         <div className="instruction-card">
           <div className="instruction-header">
-            <div className="instruction-icon">1️⃣</div>
+            <div className="instruction-icon">
+              <CircleIcon size={24} />
+              <span className="number-overlay">1</span>
+            </div>
             <h3>Set up API Key</h3>
           </div>
           <div className="instruction-content">
@@ -38,7 +46,10 @@ const InstructionsSection = ({ onNavigateToSection }) => {
 
         <div className="instruction-card">
           <div className="instruction-header">
-            <div className="instruction-icon">2️⃣</div>
+            <div className="instruction-icon">
+              <CircleIcon size={24} />
+              <span className="number-overlay">2</span>
+            </div>
             <h3>Upload PDF Files</h3>
           </div>
           <div className="instruction-content">
@@ -54,7 +65,10 @@ const InstructionsSection = ({ onNavigateToSection }) => {
 
         <div className="instruction-card">
           <div className="instruction-header">
-            <div className="instruction-icon">3️⃣</div>
+            <div className="instruction-icon">
+              <CircleIcon size={24} />
+              <span className="number-overlay">3</span>
+            </div>
             <h3>Automatic Processing</h3>
           </div>
           <div className="instruction-content">
@@ -75,7 +89,10 @@ const InstructionsSection = ({ onNavigateToSection }) => {
 
         <div className="instruction-card">
           <div className="instruction-header">
-            <div className="instruction-icon">4️⃣</div>
+            <div className="instruction-icon">
+              <CircleIcon size={24} />
+              <span className="number-overlay">4</span>
+            </div>
             <h3>Review & Analyze Results</h3>
           </div>
           <div className="instruction-content">
@@ -94,7 +111,10 @@ const InstructionsSection = ({ onNavigateToSection }) => {
 
         <div className="instruction-card">
           <div className="instruction-header">
-            <div className="instruction-icon">5️⃣</div>
+            <div className="instruction-icon">
+              <CircleIcon size={24} />
+              <span className="number-overlay">5</span>
+            </div>
             <h3>Advanced Features</h3>
           </div>
           <div className="instruction-content">
@@ -117,7 +137,7 @@ const InstructionsSection = ({ onNavigateToSection }) => {
 
         <div className="instruction-card">
           <div className="instruction-header">
-            <div className="instruction-icon">💡</div>
+            <div className="instruction-icon"><Lamp size={24} /></div>
             <h3>Navigation & Interface Tips</h3>
           </div>
           <div className="instruction-content">
@@ -139,7 +159,7 @@ const InstructionsSection = ({ onNavigateToSection }) => {
 
         <div className="instruction-card">
           <div className="instruction-header">
-            <div className="instruction-icon">🔧</div>
+            <div className="instruction-icon"><Wrench size={24} /></div>
             <h3>Troubleshooting</h3>
           </div>
           <div className="instruction-content">
@@ -161,7 +181,7 @@ const InstructionsSection = ({ onNavigateToSection }) => {
 
         
         <div className="features-section">
-          <h3>✨ Key Features</h3>
+          <h3><Sparkles size={20} /> Key Features</h3>
           <div className="features-grid">
             <div className="feature-item">
               <Upload size={20} />

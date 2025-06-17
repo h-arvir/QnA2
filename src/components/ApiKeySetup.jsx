@@ -7,7 +7,8 @@ import {
   AlertTriangle,
   Info,
   RefreshCw,
-  Trash2
+  Trash2,
+  Cog
 } from 'lucide-react'
 
 const ApiKeySetup = ({ 
@@ -63,7 +64,7 @@ const ApiKeySetup = ({
         <div className="api-key-card">
           <div className="api-key-header">
             {/* <Settings size={24} /> */}
-            <h3>⚙️    Google Gemini API Configuration</h3>
+            <h3><Cog size={24} />    Google Gemini API Configuration</h3>
           </div>
           
           <div className="api-key-content">
