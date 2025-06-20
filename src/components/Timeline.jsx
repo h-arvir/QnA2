@@ -21,19 +21,19 @@ const Timeline = ({
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
   
-  // Check for focus mode
+  // Check for answer focus mode
   useEffect(() => {
     const checkFocusMode = () => {
-      const focusMode = document.documentElement.getAttribute('data-focus') === 'true'
-      setIsFocusMode(focusMode)
+      const answerFocusMode = document.body.classList.contains('answer-focus-mode')
+      setIsFocusMode(answerFocusMode)
     }
     
     // Initial check
     checkFocusMode()
     
-    // Set up observer for attribute changes
+    // Set up observer for class changes on body
     const observer = new MutationObserver(checkFocusMode)
-    observer.observe(document.documentElement, { attributes: true })
+    observer.observe(document.body, { attributes: true, attributeFilter: ['class'] })
     
     return () => observer.disconnect()
   }, [])
