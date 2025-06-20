@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Bot, BarChart3, Copy, List, Layers, Lightbulb, Loader2, Eye, EyeOff, Search, X } from 'lucide-react'
+import { Bot, BarChart3, Copy, List, Layers, Lightbulb, Loader2, Eye, EyeOff, Search, X, Focus } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { AIProcessingService } from '../services/aiProcessingService'
 
@@ -24,6 +24,9 @@ const QuestionAnalysis = ({
   
   // Search functionality state
   const [searchQuery, setSearchQuery] = useState('')
+  
+  // Focus mode state
+  const [focusedAnswer, setFocusedAnswer] = useState(null)
   
   // Function to highlight search terms in text
   const highlightSearchTerm = (text, searchTerm) => {
@@ -63,6 +66,21 @@ const QuestionAnalysis = ({
   const clearSearch = () => {
     setSearchQuery('')
     toast.success('Search cleared', { duration: 1500, icon: '🔍' })
+  }
+  
+  // Function to toggle focus mode for an answer
+  const toggleFocusMode = (questionKey) => {
+    if (focusedAnswer === questionKey) {
+      setFocusedAnswer(null)
+      // Remove blur effect from body
+      document.body.classList.remove('answer-focus-mode')
+      toast.success('Focus mode disabled', { duration: 1500, icon: '👁️' })
+    } else {
+      setFocusedAnswer(questionKey)
+      // Add blur effect to body
+      document.body.classList.add('answer-focus-mode')
+      toast.success('Focus mode enabled', { duration: 1500, icon: '🎯' })
+    }
   }
   
   // Function to toggle view mode for a specific group
@@ -442,7 +460,7 @@ const QuestionAnalysis = ({
                           }}
                         />
                         {answers[`unified-${globalGroupIndex}`] && !hiddenAnswers[`unified-${globalGroupIndex}`] && (
-                          <div className="answer-section">
+                          <div className={`answer-section ${focusedAnswer === `unified-${globalGroupIndex}` ? 'focused-answer' : ''}`}>
                             <div className="answer-header">
                               <h5>💡 Answer:</h5>
                               <div className="answer-actions">
@@ -455,6 +473,13 @@ const QuestionAnalysis = ({
                                   title="Copy answer to clipboard"
                                 >
                                   <Copy size={12} />
+                                </button>
+                                <button 
+                                  className={`focus-answer-btn ${focusedAnswer === `unified-${globalGroupIndex}` ? 'active' : ''}`}
+                                  onClick={() => toggleFocusMode(`unified-${globalGroupIndex}`)}
+                                  title={focusedAnswer === `unified-${globalGroupIndex}` ? "Exit focus mode" : "Focus on this answer"}
+                                >
+                                  <Focus size={12} />
                                 </button>
                               </div>
                             </div>
@@ -537,7 +562,7 @@ const QuestionAnalysis = ({
                                     </div>
                                   </div>
                                   {answers[questionKey] && !hiddenAnswers[questionKey] && (
-                                    <div className="individual-answer-section">
+                                    <div className={`individual-answer-section ${focusedAnswer === questionKey ? 'focused-answer' : ''}`}>
                                       <div className="answer-header">
                                         <h6>💡 Answer:</h6>
                                         <div className="answer-actions">
@@ -550,6 +575,13 @@ const QuestionAnalysis = ({
                                             title="Copy answer to clipboard"
                                           >
                                             <Copy size={10} />
+                                          </button>
+                                          <button 
+                                            className={`focus-answer-btn ${focusedAnswer === questionKey ? 'active' : ''}`}
+                                            onClick={() => toggleFocusMode(questionKey)}
+                                            title={focusedAnswer === questionKey ? "Exit focus mode" : "Focus on this answer"}
+                                          >
+                                            <Focus size={10} />
                                           </button>
                                         </div>
                                       </div>

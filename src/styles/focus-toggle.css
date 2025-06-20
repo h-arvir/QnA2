@@ -101,10 +101,150 @@
               height 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+/* Answer Focus Mode Styles */
+.answer-focus-mode {
+  position: relative;
+}
+
+/* No overlay - rely on blur effect for focus */
+
+/* Blur specific major sections */
+.answer-focus-mode .sidebar,
+.answer-focus-mode .floating-navigation,
+.answer-focus-mode .floating-theme-toggle {
+  filter: blur(3px);
+  transition: filter 0.3s ease-in-out;
+}
+
+/* Blur timeline */
+.answer-focus-mode .timeline-container {
+  filter: blur(3px);
+  transition: filter 0.3s ease-in-out;
+}
+
+/* Blur non-focused elements in the content area */
+.answer-focus-mode .question-groups-section > h2,
+.answer-focus-mode .groups-summary,
+.answer-focus-mode .search-section,
+.answer-focus-mode .grouping-loading,
+.answer-focus-mode .no-search-results,
+.answer-focus-mode .groups-controls {
+  filter: blur(3px);
+  transition: filter 0.3s ease-in-out;
+}
+
+/* Blur marks group elements */
+.answer-focus-mode .marks-group-header {
+  filter: blur(3px);
+  transition: filter 0.3s ease-in-out;
+}
+
+/* Blur question group elements */
+.answer-focus-mode .group-header,
+.answer-focus-mode .group-view-mode-controls {
+  filter: blur(3px);
+  transition: filter 0.3s ease-in-out;
+}
+
+/* Blur question content */
+.answer-focus-mode .question-header,
+.answer-focus-mode .question-text,
+.answer-focus-mode .individual-question-content {
+  filter: blur(3px);
+  transition: filter 0.3s ease-in-out;
+}
+
+/* Important: Blur other answer sections but NOT the focused one */
+.answer-focus-mode .answer-section:not(.focused-answer),
+.answer-focus-mode .individual-answer-section:not(.focused-answer) {
+  filter: blur(3px);
+  transition: filter 0.3s ease-in-out;
+}
+
+/* Focused answer styling - keep it crystal clear and prominent */
+.focused-answer {
+  position: relative;
+  z-index: 1000;
+  filter: none !important;
+  pointer-events: all !important;
+  box-sizing: border-box;
+  box-shadow: 
+    0 0 30px rgba(227, 97, 140, 0.5), 
+    0 0 60px rgba(227, 97, 140, 0.3),
+    0 0 100px rgba(227, 97, 140, 0.1);
+  border-radius: var(--radius-lg);
+  background: var(--bg-primary);
+  border: 2px solid var(--primary-400);
+  animation: focusGlow 2s ease-in-out infinite alternate;
+  /* Maintain original dimensions by using box-sizing and no extra padding/margin */
+}
+
+/* Ensure all content within focused answer is completely clear and interactive */
+.focused-answer,
+.focused-answer *,
+.focused-answer .answer-header,
+.focused-answer .answer-text,
+.focused-answer .answer-actions,
+.focused-answer button {
+  filter: none !important;
+  pointer-events: all !important;
+}
+
+@keyframes focusGlow {
+  0% {
+    box-shadow: 
+      0 0 30px rgba(227, 97, 140, 0.5), 
+      0 0 60px rgba(227, 97, 140, 0.3),
+      0 0 100px rgba(227, 97, 140, 0.1);
+    border-color: var(--primary-400);
+  }
+  100% {
+    box-shadow: 
+      0 0 40px rgba(227, 97, 140, 0.7), 
+      0 0 80px rgba(227, 97, 140, 0.4),
+      0 0 120px rgba(227, 97, 140, 0.2);
+    border-color: var(--primary-500);
+  }
+}
+
+/* Focus button styles */
+.focus-answer-btn {
+  background: none;
+  border: none;
+  color: var(--neutral-500);
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-normal);
+  margin-left: var(--spacing-xs);
+}
+
+.focus-answer-btn:hover {
+  background: var(--primary-100);
+  color: var(--primary-600);
+  transform: scale(1.1);
+}
+
+.focus-answer-btn.active {
+  background: var(--primary-500);
+  color: white;
+  box-shadow: 0 0 10px rgba(227, 97, 140, 0.4);
+}
+
+.focus-answer-btn.active:hover {
+  background: var(--primary-600);
+  transform: scale(1.05);
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   [data-focus="true"] .floating-nav-dot {
     width: 48px;
     height: 48px;
+  }
+  
+  .focused-answer {
+    /* Keep original dimensions in mobile view as well */
+    box-sizing: border-box;
   }
 }
