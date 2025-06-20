@@ -92,6 +92,13 @@
   box-shadow: var(--shadow-lg), var(--glow-cyan);
 }
 
+/* Toggle Controls Container */
+.toggle-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
 /* Floating Theme Toggle */
 .floating-theme-toggle {
   position: fixed;

@@ -9,10 +9,54 @@
   z-index: 50;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   backdrop-filter: blur(8px);
-  transition: all 0.3s ease-out;
+  transition: all 0.3s ease-out, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+/* Animation for section change */
+.timeline-section-change {
+  animation: stickyPulse 0.6s ease-in-out;
+}
+
+/* Define keyframes for timeline section change */
+@keyframes timelineSectionChange {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* Animation for timeline item click */
+@keyframes timelineItemClick {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Animation for active step transition */
+@keyframes activeStepTransition {
+  0% {
+    background: rgba(227, 97, 140, 0);
+  }
+  50% {
+    background: rgba(227, 97, 140, 0.1);
+  }
+  100% {
+    background: rgba(227, 97, 140, 0.05);
+  }
 }
 
 .timeline-progress {
@@ -27,6 +71,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  transition: transform 0.3s ease;
+}
+
+/* Animation when timeline item is clicked */
+.timeline-item-clicked {
+  animation: timelineItemClick 0.5s ease;
 }
 
 .timeline-connectors {
@@ -34,7 +84,6 @@
   justify-content: space-between;
   width: 600px;
   margin-top: var(--spacing-md);
-
 }
 
 .timeline-step {
@@ -47,6 +96,13 @@
   padding: var(--spacing-sm);
   border-radius: var(--radius-lg);
   transition: all var(--transition-normal);
+}
+
+/* Active step styling with animation */
+.timeline-step.active-step {
+  background: rgba(227, 97, 140, 0.05);
+  transform: translateY(-2px);
+  animation: activeStepTransition 0.5s ease;
 }
 
 .timeline-step:hover {
@@ -95,10 +151,38 @@
   background: var(--primary-50);
   transform: scale(1.05);
   box-shadow: 0 4px 16px rgba(227, 97, 140, 0.3);
+  animation: dotPulse 0.5s ease;
+}
+
+/* Animation for active dot */
+@keyframes dotPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(227, 97, 140, 0);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(227, 97, 140, 0.4);
+  }
+  100% {
+    transform: scale(1.05);
+    box-shadow: 0 4px 16px rgba(227, 97, 140, 0.3);
+  }
 }
 
 .timeline-dot.active::before {
   opacity: 0.1;
+  animation: dotFill 0.5s ease;
+}
+
+/* Animation for dot fill */
+@keyframes dotFill {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0.1;
+  }
 }
 
 .timeline-dot.completed {
@@ -123,6 +207,20 @@
 .timeline-dot.active .timeline-number {
   color: var(--primary-700);
   font-weight: 800;
+  animation: numberPulse 0.5s ease;
+}
+
+/* Animation for number pulse */
+@keyframes numberPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .timeline-dot.completed .timeline-number {
@@ -153,6 +251,17 @@
 .timeline-step:has(.timeline-dot.active) .timeline-title {
   color: var(--primary-700);
   font-weight: 700;
+  animation: titleFade 0.5s ease;
+}
+
+/* Animation for title fade */
+@keyframes titleFade {
+  0% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 .timeline-connector-container {
@@ -180,10 +289,25 @@
   border-radius: 2px;
   transition: width 0.6s ease;
   width: 0%;
-  animation: progressFill 0.8s ease-out;
 }
 
 /* Progressive connector fill based on completion */
 .timeline-connector.completed::before {
   width: 100%;
+  animation: progressFill 0.8s ease-out;
+}
+
+/* Active connector styling */
+.timeline-connector.active-connector::before {
+  animation: connectorPulse 1.5s infinite;
+}
+
+/* Animation for connector pulse */
+@keyframes connectorPulse {
+  0%, 100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
 }

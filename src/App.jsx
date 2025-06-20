@@ -15,7 +15,7 @@ import Sidebar from './components/Sidebar'
 import InstructionsSection from './components/InstructionsSection'
 import FloatingNavigation from './components/FloatingNavigation'
 import CacheManagement from './components/CacheManagement'
-import ThemeToggle from './components/ThemeToggle'
+import ToggleControls from './components/ToggleControls'
 
 // Import custom hooks
 import { useAppState } from './hooks/useAppState'
@@ -97,9 +97,9 @@ function App() {
 
   return (
     <div className="app">
-      {/* Theme Toggle */}
+      {/* Toggle Controls */}
       <div className="floating-theme-toggle">
-        <ThemeToggle />
+        <ToggleControls />
       </div>
 
       {/* Toast Notifications */}
@@ -190,89 +190,101 @@ function App() {
         {/* Section Content */}
         <div className="section-wrapper">
           {activeSection === SECTION_IDS.UPLOAD && (
-            <FileUpload
-              selectedFiles={selectedFiles}
-              onFileSelect={handleFileSelect}
-              onRemoveFile={handleRemoveFile}
-              uploadStatus={uploadStatus}
-              onUpload={() => handleUpload(selectedFiles)}
-              isDragOver={isDragOver}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              processingProgress={processingProgress}
-              // Processing status props
-              isExtracting={isExtracting}
-              isOCRProcessing={isOCRProcessing}
-              isAutoProcessing={isAutoProcessing}
-              extractionStatus={extractionStatus}
-              ocrProgress={ocrProgress}
-              overallProgress={overallProgress}
-              errorMessage={errorMessage}
-              // API key props
-              geminiApiKey={geminiApiKey}
-              onApiKeyChange={setGeminiApiKey}
-              showApiKeyInput={showApiKeyInput}
-              onToggleApiKeyInput={() => setShowApiKeyInput(!showApiKeyInput)}
-              // Extracted text props
-              extractedText={extractedText}
-              onProcessWithGemini={processTextWithGemini}
-              isProcessingWithGemini={isProcessingWithGemini}
-              cleanedQuestions={cleanedQuestions}
-            />
+            <div className="section-content section-animate-in">
+              <FileUpload
+                selectedFiles={selectedFiles}
+                onFileSelect={handleFileSelect}
+                onRemoveFile={handleRemoveFile}
+                uploadStatus={uploadStatus}
+                onUpload={() => handleUpload(selectedFiles)}
+                isDragOver={isDragOver}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                processingProgress={processingProgress}
+                // Processing status props
+                isExtracting={isExtracting}
+                isOCRProcessing={isOCRProcessing}
+                isAutoProcessing={isAutoProcessing}
+                extractionStatus={extractionStatus}
+                ocrProgress={ocrProgress}
+                overallProgress={overallProgress}
+                errorMessage={errorMessage}
+                // API key props
+                geminiApiKey={geminiApiKey}
+                onApiKeyChange={setGeminiApiKey}
+                showApiKeyInput={showApiKeyInput}
+                onToggleApiKeyInput={() => setShowApiKeyInput(!showApiKeyInput)}
+                // Extracted text props
+                extractedText={extractedText}
+                onProcessWithGemini={processTextWithGemini}
+                isProcessingWithGemini={isProcessingWithGemini}
+                cleanedQuestions={cleanedQuestions}
+              />
+            </div>
           )}
 
           {activeSection === SECTION_IDS.QUESTIONS && (
-            <QuestionsList
-              cleanedQuestions={cleanedQuestions}
-              extractedText={extractedText}
-              onProcessWithGemini={processTextWithGemini}
-              onAnalyzeQuestions={analyzeQuestions}
-              isProcessingWithGemini={isProcessingWithGemini}
-              isGroupingQuestions={isGroupingQuestions}
-              geminiApiKey={geminiApiKey}
-              onNavigateToUpload={() => setActiveSection(SECTION_IDS.UPLOAD)}
-              groupedQuestions={groupedQuestions}
-            />
+            <div className="section-content section-animate-in">
+              <QuestionsList
+                cleanedQuestions={cleanedQuestions}
+                extractedText={extractedText}
+                onProcessWithGemini={processTextWithGemini}
+                onAnalyzeQuestions={analyzeQuestions}
+                isProcessingWithGemini={isProcessingWithGemini}
+                isGroupingQuestions={isGroupingQuestions}
+                geminiApiKey={geminiApiKey}
+                onNavigateToUpload={() => setActiveSection(SECTION_IDS.UPLOAD)}
+                groupedQuestions={groupedQuestions}
+              />
+            </div>
           )}
 
           {activeSection === SECTION_IDS.ANALYSIS && (
-            <QuestionAnalysis
-              groupedQuestions={groupedQuestions}
-              isGroupingQuestions={isGroupingQuestions}
-              onNavigateToQuestions={() => setActiveSection(SECTION_IDS.QUESTIONS)}
-              geminiApiKey={geminiApiKey}
-              extractedText={extractedText}
-              cleanedQuestions={cleanedQuestions}
-              answers={answers}
-              setAnswers={setAnswers}
-              loadingAnswers={loadingAnswers}
-              setLoadingAnswers={setLoadingAnswers}
-              hiddenAnswers={hiddenAnswers}
-              setHiddenAnswers={setHiddenAnswers}
-              groupViewModes={groupViewModes}
-              setGroupViewModes={setGroupViewModes}
-            />
+            <div className="section-content section-animate-in">
+              <QuestionAnalysis
+                groupedQuestions={groupedQuestions}
+                isGroupingQuestions={isGroupingQuestions}
+                onNavigateToQuestions={() => setActiveSection(SECTION_IDS.QUESTIONS)}
+                geminiApiKey={geminiApiKey}
+                extractedText={extractedText}
+                cleanedQuestions={cleanedQuestions}
+                answers={answers}
+                setAnswers={setAnswers}
+                loadingAnswers={loadingAnswers}
+                setLoadingAnswers={setLoadingAnswers}
+                hiddenAnswers={hiddenAnswers}
+                setHiddenAnswers={setHiddenAnswers}
+                groupViewModes={groupViewModes}
+                setGroupViewModes={setGroupViewModes}
+              />
+            </div>
           )}
 
           {activeSection === SECTION_IDS.INSTRUCTIONS && (
-            <InstructionsSection
-              onNavigateToSection={setActiveSection}
-            />
+            <div className="section-content section-animate-in">
+              <InstructionsSection
+                onNavigateToSection={setActiveSection}
+              />
+            </div>
           )}
 
           {activeSection === SECTION_IDS.API_KEY && (
-            <ApiKeySetup
-              geminiApiKey={geminiApiKey}
-              onApiKeyChange={setGeminiApiKey}
-              showApiKeyInput={showApiKeyInput}
-              onToggleApiKeyInput={() => setShowApiKeyInput(!showApiKeyInput)}
-              isInline={false}
-            />
+            <div className="section-content section-animate-in">
+              <ApiKeySetup
+                geminiApiKey={geminiApiKey}
+                onApiKeyChange={setGeminiApiKey}
+                showApiKeyInput={showApiKeyInput}
+                onToggleApiKeyInput={() => setShowApiKeyInput(!showApiKeyInput)}
+                isInline={false}
+              />
+            </div>
           )}
 
           {activeSection === SECTION_IDS.CACHE && (
-            <CacheManagement />
+            <div className="section-content section-animate-in">
+              <CacheManagement />
+            </div>
           )}
         </div>
       </main>

@@ -18,7 +18,7 @@ const Sidebar = ({ activeSection, onSectionChange, navigationItems }) => {
 
   return (
     <nav className="sidebar">
-      <div className="sidebar-header">
+      <div  className="sidebar-header">
         <h1 className="sidebar-title">PDF Q&A</h1>
         <p className="sidebar-subtitle">Extract & Analyze</p>
       </div>

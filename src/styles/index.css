@@ -4,6 +4,7 @@
 @import './base.css';
 @import './dark-theme.css';
 @import './theme-toggle.css';
+@import './focus-toggle.css';
 @import './sidebar.css';
 @import './timeline.css';
 @import './upload.css';
@@ -15,6 +16,7 @@
 @import './animations.css';
 @import './responsive.css';
 @import './utilities.css';
+
 
 /* 
   This file serves as the main entry point for all styles.
@@ -32,3 +34,24 @@
   - responsive.css: Media queries and responsive design
   - utilities.css: Utility classes and helper styles
 */
+
+/* Section content animations */
+.section-content {
+  width: 100%;
+}
+
+.section-animate-in {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+/* Fix for the timeline section change animation */
+.timeline-section-change {
+  animation: stickyPulse 0.6s ease-in-out;
+}
+
+/* Ensure the section wrapper has proper positioning for animations */
+.section-wrapper {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}

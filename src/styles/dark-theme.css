@@ -1,5 +1,69 @@
 /* Futuristic Dark Theme - Advanced Components */
 
+/* Diagonal Theme Transition Animation */
+.theme-transition-overlay {
+  position: fixed;
+  top: -100vh;
+  left: -100vw;
+  width: 300vw;
+  height: 300vh;
+  background: linear-gradient(45deg, 
+    transparent 0%, 
+    transparent 45%, 
+    var(--primary-900, #001a1a) 50%, 
+    var(--bg-primary, #0a0a0a) 55%, 
+    transparent 100%
+  );
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  transition: none;
+}
+
+.theme-transition-overlay.active {
+  animation: diagonalSweep 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes diagonalSweep {
+  0% {
+    opacity: 1;
+    transform: translate(-150%, -150%);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(50%, 50%);
+  }
+}
+
+/* Dark theme specific overlay */
+[data-theme="dark"] .theme-transition-overlay {
+  background: linear-gradient(45deg, 
+    transparent 0%, 
+    transparent 45%, 
+    rgba(0, 26, 26, 0.95) 50%, 
+    rgba(10, 10, 10, 0.98) 55%, 
+    transparent 100%
+  );
+  box-shadow: 0 0 100px rgba(0, 250, 255, 0.3);
+}
+
+/* Light theme specific overlay */
+[data-theme="light"] .theme-transition-overlay {
+  background: linear-gradient(45deg, 
+    transparent 0%, 
+    transparent 45%, 
+    rgba(255, 255, 255, 0.95) 50%, 
+    rgba(248, 248, 248, 0.98) 55%, 
+    transparent 100%
+  );
+  box-shadow: 0 0 100px rgba(0, 0, 0, 0.1);
+}
+
 /* Glass Morphism Effects - Enhanced for Cyberpunk */
 [data-theme="dark"] .glass-effect {
   background: var(--bg-glass);

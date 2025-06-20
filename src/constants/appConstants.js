@@ -13,9 +13,7 @@ export const SECTION_IDS = {
   CACHE: 'cache'
 }
 
-export const FILE_TYPES = {
-  PDF: 'application/pdf'
-}
+
 
 export const PROCESSING_STATUS = {
   WAITING: 'waiting',

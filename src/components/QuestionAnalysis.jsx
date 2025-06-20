@@ -157,12 +157,41 @@ const QuestionAnalysis = ({
     
     // Convert markdown-style formatting to HTML-like formatting for display
     let formatted = text
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold text
-      .replace(/\*(.*?)\*/g, '<em>$1</em>') // Italic text
-      .replace(/`(.*?)`/g, '<code>$1</code>') // Inline code
+      // Headers (must be processed before other elements)
       .replace(/^### (.*$)/gm, '<h3>$1</h3>') // H3 headers
       .replace(/^## (.*$)/gm, '<h2>$1</h2>') // H2 headers
       .replace(/^# (.*$)/gm, '<h1>$1</h1>') // H1 headers
+      
+      // Text formatting
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold text
+      .replace(/\*(.*?)\*/g, '<em>$1</em>') // Italic text
+      
+      // Code blocks and inline code
+      .replace(/```([^`]*?)```/gs, '<pre><code>$1</code></pre>') // Code blocks
+      .replace(/`([^`]*?)`/g, '<code>$1</code>') // Inline code
+      
+      // Lists
+      .replace(/^\s*-\s+(.*$)/gm, '<li>$1</li>') // Unordered list items
+      .replace(/^\s*\d+\.\s+(.*$)/gm, '<li>$1</li>') // Ordered list items
+      
+      // Wrap adjacent list items in ul/ol tags
+      .replace(/(<li>.*?<\/li>)\s*(<li>.*?<\/li>)/gs, '<ul>$1$2</ul>')
+      
+      // Paragraphs (add proper spacing)
+      .replace(/\n\n/g, '</p><p>')
+      
+      // Blockquotes
+      .replace(/^\>\s+(.*$)/gm, '<blockquote>$1</blockquote>')
+    
+    // Wrap the content in a paragraph if it doesn't start with a block element
+    if (!formatted.startsWith('<h1>') && 
+        !formatted.startsWith('<h2>') && 
+        !formatted.startsWith('<h3>') && 
+        !formatted.startsWith('<ul>') && 
+        !formatted.startsWith('<pre>') && 
+        !formatted.startsWith('<blockquote>')) {
+      formatted = '<p>' + formatted + '</p>'
+    }
     
     return formatted
   }
@@ -188,6 +217,7 @@ const QuestionAnalysis = ({
 
   return (
     <div className="section-content">
+      
       {/* <h2 className="section-title">📊 Question Analysis</h2>
       <p className="section-subtitle">AI-powered analysis and grouping of similar questions</p> */}
       
