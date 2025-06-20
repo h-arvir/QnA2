@@ -232,52 +232,7 @@
   color: var(--text-primary);
 }
 
-/* Analysis Prompt */
-.analysis-prompt-section {
-  background: var(--bg-primary);
-  border-radius: var(--radius-xl);
-  padding: var(--spacing-xl);
-  margin-bottom: var(--spacing-xl);
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--border-primary);
-  text-align: center;
-}
 
-.analysis-prompt-section h2 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: var(--spacing-lg);
-}
-
-.analysis-prompt {
-  background: var(--bg-secondary);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-xl);
-  border: 1px solid var(--border-primary);
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.analysis-prompt p {
-  color: var(--text-secondary);
-  margin-bottom: var(--spacing-md);
-  font-size: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-md);
-  font-size: var(--text-lg);
-}
-
-.analysis-prompt p:first-child {
-  color: var(--success-600);
-  font-weight: 600;
-}
-
-.analysis-prompt p:last-of-type {
-  margin-bottom: var(--spacing-lg);
-}
 
 /* Question Groups */
 .groups-summary {

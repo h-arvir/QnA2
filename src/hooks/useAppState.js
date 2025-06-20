@@ -28,7 +28,6 @@ export const useAppState = () => {
   
   // Multiple file processing state
   const [processingProgress, setProcessingProgress] = useState({})
-  const [fileResults, setFileResults] = useState({})
   const [overallProgress, setOverallProgress] = useState(0)
   
   // Caching state
@@ -45,34 +44,11 @@ export const useAppState = () => {
   const [groupViewModes, setGroupViewModes] = useState({})
 
   // Reset functions
-  const resetFileState = () => {
-    setSelectedFiles([])
-    setUploadStatus('')
-    setExtractedText('')
-    setIsOCRProcessing(false)
-    setOcrProgress(0)
-    setErrorMessage('')
-    setExtractionStatus('')
-    setCleanedQuestions('')
-    setIsProcessingWithGemini(false)
-    setIsAutoProcessing(false)
-    setProcessingProgress({})
-    setFileResults({})
-    setOverallProgress(0)
-    setGroupedQuestions([])
-    setIsGroupingQuestions(false)
-    setAnswers({})
-    setLoadingAnswers({})
-    setHiddenAnswers({})
-    setGroupViewModes({})
-  }
-
   const resetProcessingState = () => {
     setExtractedText('')
     setErrorMessage('')
     setExtractionStatus('')
     setCleanedQuestions('')
-    setFileResults({})
     setProcessingProgress({})
     setGroupedQuestions([])
     // Note: We don't reset answers, loadingAnswers, hiddenAnswers, and groupViewModes here
@@ -123,8 +99,6 @@ export const useAppState = () => {
     // Multiple file processing
     processingProgress,
     setProcessingProgress,
-    fileResults,
-    setFileResults,
     overallProgress,
     setOverallProgress,
     
@@ -149,7 +123,6 @@ export const useAppState = () => {
     setGroupViewModes,
     
     // Reset functions
-    resetFileState,
     resetProcessingState
   }
 }

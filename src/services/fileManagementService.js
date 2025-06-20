@@ -31,10 +31,6 @@ export class FileManagementService {
       await new Promise(resolve => setTimeout(resolve, 2000))
       
       // Here you would typically make an API call to your backend
-      // const response = await fetch('/api/upload', {
-      //   method: 'POST',
-      //   body: formData
-      // })
       
       return {
         success: true,

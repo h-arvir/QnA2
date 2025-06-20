@@ -87,30 +87,7 @@ export const useFileProcessing = (state) => {
     }
   }
 
-  const extractTextFromPDF = async (file) => {
-    setIsExtracting(true)
-    setExtractedText('')
-    setIsOCRProcessing(false)
-    setErrorMessage('')
-    
-    try {
-      const extractedText = await PDFProcessingService.extractTextFromPDF(
-        file,
-        (status) => setExtractionStatus(status)
-      )
-      
-      setExtractedText(extractedText)
-      // Automatically process with AI after text extraction
-      await autoProcessWithGemini(extractedText)
-    } catch (error) {
-      setErrorMessage(error.message)
-      setExtractedText('')
-      setExtractionStatus('')
-    } finally {
-      setIsExtracting(false)
-      setIsOCRProcessing(false)
-    }
-  }
+
 
   const autoProcessWithGemini = async (text) => {
     if (!geminiApiKey.trim()) {
@@ -158,8 +135,7 @@ export const useFileProcessing = (state) => {
       toast.dismiss('reprocess')
       toast.dismiss('clean-ai')
       toast.success('Processing completed! Questions have been cleaned and formatted.', {
-        duration: 4000,
-       // icon: '🤖',
+        duration: 4000
       })
       // Navigate to questions section after successful processing
       setTimeout(() => setActiveSection('questions'), 2000)
@@ -170,8 +146,6 @@ export const useFileProcessing = (state) => {
 
   return {
     processMultiplePDFs,
-    extractTextFromPDF,
-    autoProcessWithGemini,
     processTextWithGemini
   }
 }

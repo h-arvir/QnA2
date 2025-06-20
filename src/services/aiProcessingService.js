@@ -151,9 +151,7 @@ ${cleanedText}`
       // Parse the AI response into structured groups by marks
       const groupsByMarks = this.parseAIAnalysisResponseByMarks(analysisResult)
       
-      // Debug logging
-      console.log('AI Analysis Result:', analysisResult)
-      console.log('Parsed Groups by Marks:', groupsByMarks)
+
       
       // Cache the result if fileHash is provided
       if (fileHash) {
@@ -329,10 +327,7 @@ ${cleanedText}`
     return groups
   }
 
-  // Function to parse AI analysis response into structured groups (legacy support)
-  static parseAIAnalysisResponse(analysisText) {
-    return this.parseGroupsFromText(analysisText)
-  }
+
 
   static async generateAnswer(question, context, apiKey, onStatusUpdate = () => {}) {
     if (!question || question.trim().length === 0) {

@@ -6,7 +6,7 @@ import {
   CheckCircle,
   AlertTriangle,
   Info,
-  RefreshCw,
+
   Trash2,
   Cog
 } from 'lucide-react'
@@ -129,16 +129,7 @@ const ApiKeySetup = ({
 
         {geminiApiKey && (
           <div className="api-key-actions">
-            {/* <button
-              onClick={() => {
-                // Test the API key by making a simple request
-                console.log('Testing API key...')
-              }}
-              className="test-api-btn"
-            >
-              <RefreshCw size={16} />
-              Test API Key
-            </button> */}
+
             
             <button
               onClick={() => {

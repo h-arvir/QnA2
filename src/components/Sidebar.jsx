@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { FileText, Key, Database } from 'lucide-react'
 
 const Sidebar = ({ activeSection, onSectionChange, navigationItems }) => {

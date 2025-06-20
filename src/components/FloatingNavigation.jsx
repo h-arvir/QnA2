@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { SECTION_IDS } from '../constants/appConstants'
 
 const FloatingNavigation = ({ activeSection, onSectionChange }) => {

@@ -14,25 +14,3 @@ export const SECTION_IDS = {
 }
 
 
-
-export const PROCESSING_STATUS = {
-  WAITING: 'waiting',
-  PROCESSING: 'processing',
-  READING: 'reading',
-  EXTRACTING: 'extracting',
-  OCR: 'ocr',
-  COMPLETED: 'completed',
-  ERROR: 'error'
-}
-
-export const AI_MODEL = {
-  GEMINI_FLASH: 'gemini-1.5-flash'
-}
-
-export const ERROR_MESSAGES = {
-  NO_API_KEY: 'Please enter your Google Gemini API key',
-  INVALID_FILES: 'Please select valid PDF files',
-  NO_FILES_SELECTED: 'Please select PDF files first',
-  UPLOAD_FAILED: 'Upload failed. Please try again.',
-  PROCESSING_FAILED: 'Failed to process PDF files'
-}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Database, Trash2, RefreshCw, Info, HardDrive, Clock, BarChart3, Sparkles, Brush, Coins } from 'lucide-react'
 import { CacheService } from '../services/cacheService'
 import toast from 'react-hot-toast'

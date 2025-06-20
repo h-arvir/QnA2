@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { Bot, BarChart3, Copy, List, Layers, Lightbulb, Loader2, Eye, EyeOff, Search, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { AIProcessingService } from '../services/aiProcessingService'
