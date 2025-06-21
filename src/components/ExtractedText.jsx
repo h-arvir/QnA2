@@ -1,4 +1,5 @@
-import { Loader2 } from 'lucide-react'
+import React from 'react'
+import { Loader2, AlertTriangle, Copy, FileText } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const ExtractedText = ({ 
@@ -11,7 +12,7 @@ const ExtractedText = ({
 
   return (
     <div className="text-extraction-section">
-      <h2>📄 Raw Extracted Text</h2>
+      <h2>Raw Extracted Text</h2>
       <div className="api-key-warning">
         <p>⚠️ AI processing was not completed. Please set up your Google Gemini API key above to automatically clean and format the extracted text.</p>
       </div>

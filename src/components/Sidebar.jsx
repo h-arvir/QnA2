@@ -1,5 +1,5 @@
 
-import { FileText, Key, Database } from 'lucide-react'
+import { FileText, Key, Database, Bookmark } from 'lucide-react'
 
 const Sidebar = ({ activeSection, onSectionChange, navigationItems }) => {
   // Function to render the appropriate icon based on iconName
@@ -11,6 +11,8 @@ const Sidebar = ({ activeSection, onSectionChange, navigationItems }) => {
         return <Key size={20} />;
       case 'Database':
         return <Database size={20} />;
+      case 'Bookmark':
+        return <Bookmark size={20} />;
       default:
         return null;
     }

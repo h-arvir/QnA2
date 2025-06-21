@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react'
-import { Bot, BarChart3, Copy, List, Layers, Lightbulb, Loader2, Eye, EyeOff, Search, X, Focus } from 'lucide-react'
+import React, { useState, useMemo } from 'react'
+import { Bot, BarChart3, Copy, List, Layers, Lightbulb, Loader2, Eye, EyeOff, Search, X, Focus, Bookmark, BookmarkCheck, RotateCcw, BookmarkX, CheckCircle, Shuffle, AlertTriangle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { AIProcessingService } from '../services/aiProcessingService'
 
@@ -17,7 +17,9 @@ const QuestionAnalysis = ({
   hiddenAnswers,
   setHiddenAnswers,
   groupViewModes,
-  setGroupViewModes
+  setGroupViewModes,
+  bookmarkedQuestions,
+  setBookmarkedQuestions
 }) => {
   // Note: All state is now managed at the app level and passed as props
   // This ensures answers persist when navigating between sections
@@ -65,7 +67,7 @@ const QuestionAnalysis = ({
   // Function to clear search
   const clearSearch = () => {
     setSearchQuery('')
-    toast.success('Search cleared', { duration: 1500, icon: '🔍' })
+    toast.success('Search cleared', { duration: 1500, icon: <RotateCcw size={16} /> })
   }
   
   // Function to toggle focus mode for an answer
@@ -74,12 +76,12 @@ const QuestionAnalysis = ({
       setFocusedAnswer(null)
       // Remove blur effect from body
       document.body.classList.remove('answer-focus-mode')
-      toast.success('Focus mode disabled', { duration: 1500, icon: '👁️' })
+      toast.success('Focus mode disabled', { duration: 1500, icon: <EyeOff size={16} /> })
     } else {
       setFocusedAnswer(questionKey)
       // Add blur effect to body
       document.body.classList.add('answer-focus-mode')
-      toast.success('Focus mode enabled', { duration: 1500, icon: '🎯' })
+      toast.success('Focus mode enabled', { duration: 1500, icon: <Focus size={16} /> })
     }
   }
   
@@ -109,7 +111,7 @@ const QuestionAnalysis = ({
       
       // Show loading toast
       const loadingToast = toast.loading('Generating detailed answer...', { 
-        icon: '🤖',
+        icon: <Bot size={16} />,
         duration: 0 // Don't auto-dismiss
       })
 
@@ -136,7 +138,7 @@ const QuestionAnalysis = ({
       
       // Dismiss loading toast and show success
       toast.dismiss(loadingToast)
-      toast.success('Answer generated successfully!', { icon: '💡' })
+      toast.success('Answer generated successfully!', { icon: <CheckCircle size={16} /> })
       
     } catch (error) {
       console.error('Error generating answer:', error)
@@ -213,6 +215,50 @@ const QuestionAnalysis = ({
     
     return formatted
   }
+  
+  // Function to toggle bookmark for a question
+  const toggleBookmark = (questionKey, questionData, buttonElement) => {
+    setBookmarkedQuestions(prev => {
+      const isBookmarked = prev[questionKey]
+      
+      if (isBookmarked) {
+        // Remove bookmark
+        const updated = { ...prev }
+        delete updated[questionKey]
+        toast.success('Bookmark removed', { duration: 2000, icon: <BookmarkX size={16} /> })
+        return updated
+      } else {
+        // Add bookmark
+        toast.success('Question bookmarked', { duration: 2000, icon: <BookmarkCheck size={16} /> })
+        return {
+          ...prev,
+          [questionKey]: {
+            questionText: questionData.questionText,
+            groupTitle: questionData.groupTitle,
+            marks: questionData.marks,
+            sections: questionData.sections,
+            bookmarkedAt: new Date().toISOString()
+          }
+        }
+      }
+    })
+    
+    // Force blur the button after state update
+    if (buttonElement) {
+      setTimeout(() => {
+        buttonElement.blur()
+        // Also remove any focus styles programmatically
+        buttonElement.style.outline = 'none'
+        buttonElement.style.boxShadow = 'none'
+      }, 0)
+    }
+  }
+  
+  // Function to check if a question is bookmarked
+  const isBookmarked = (questionKey) => {
+    return !!bookmarkedQuestions[questionKey]
+  }
+  
   if ((!groupedQuestions || groupedQuestions.length === 0) && !isGroupingQuestions) {
     return (
       <div className="section-content">
@@ -365,7 +411,7 @@ const QuestionAnalysis = ({
                             className={`view-mode-btn ${currentViewMode === 'unified' ? 'active' : ''}`}
                             onClick={() => {
                               toggleGroupViewMode(globalGroupIndex, 'unified')
-                              toast.success('Switched to unified question view', { duration: 2000, icon: '📋' })
+                              toast.success('Switched to unified question view', { duration: 2000, icon: <Layers size={16} /> })
                             }}
                             title="Show unified question for this group"
                           >
@@ -377,9 +423,9 @@ const QuestionAnalysis = ({
                             onClick={() => {
                               if (group.originalQuestions && group.originalQuestions.length > 0) {
                                 toggleGroupViewMode(globalGroupIndex, 'individual')
-                                toast.success('Switched to individual questions view', { duration: 2000, icon: '📝' })
+                                toast.success('Switched to individual questions view', { duration: 2000, icon: <List size={16} /> })
                               } else {
-                                toast.error('Individual questions not available for this group', { duration: 3000, icon: '⚠️' })
+                                toast.error('Individual questions not available for this group', { duration: 3000, icon: <AlertTriangle size={16} /> })
                               }
                             }}
                             title={
@@ -450,6 +496,32 @@ const QuestionAnalysis = ({
                                   )}
                                 </button>
                               )}
+                              
+                              <button 
+                                className={`bookmark-btn ${isBookmarked(`unified-${globalGroupIndex}`) ? 'bookmarked' : ''}`}
+                                onClick={(e) => {
+                                  const questionKey = `unified-${globalGroupIndex}`
+                                  toggleBookmark(questionKey, {
+                                    questionText: group.unifiedQuestion,
+                                    groupTitle: `Group ${group.groupNumber || groupIndex + 1}`,
+                                    marks: marksGroup.marks,
+                                    sections: marksGroup.sections
+                                  }, e.target)
+                                }}
+                                title={isBookmarked(`unified-${globalGroupIndex}`) ? "Remove bookmark" : "Bookmark this question"}
+                              >
+                                {isBookmarked(`unified-${globalGroupIndex}`) ? (
+                                  <>
+                                    <BookmarkCheck size={14} />
+                                    Saved
+                                  </>
+                                ) : (
+                                  <>
+                                    <Bookmark size={14} />
+                                    Save
+                                  </>
+                                )}
+                              </button>
                             </div>
                           </div>
                         </div>
@@ -468,7 +540,7 @@ const QuestionAnalysis = ({
                                   className="copy-answer-btn"
                                   onClick={() => {
                                     navigator.clipboard.writeText(answers[`unified-${globalGroupIndex}`])
-                                    toast.success('Answer copied to clipboard!', { icon: '📋' })
+                                    toast.success('Answer copied to clipboard!', { icon: <Copy size={16} /> })
                                   }}
                                   title="Copy answer to clipboard"
                                 >
@@ -559,6 +631,31 @@ const QuestionAnalysis = ({
                                           )}
                                         </button>
                                       )}
+                                      
+                                      <button 
+                                        className={`bookmark-btn individual-bookmark-btn ${isBookmarked(questionKey) ? 'bookmarked' : ''}`}
+                                        onClick={(e) => {
+                                          toggleBookmark(questionKey, {
+                                            questionText: question,
+                                            groupTitle: `Group ${group.groupNumber || groupIndex + 1}`,
+                                            marks: marksGroup.marks,
+                                            sections: marksGroup.sections
+                                          }, e.target)
+                                        }}
+                                        title={isBookmarked(questionKey) ? "Remove bookmark" : "Bookmark this question"}
+                                      >
+                                        {isBookmarked(questionKey) ? (
+                                          <>
+                                            <BookmarkCheck size={12} />
+                                            Saved
+                                          </>
+                                        ) : (
+                                          <>
+                                            <Bookmark size={12} />
+                                            Save
+                                          </>
+                                        )}
+                                      </button>
                                     </div>
                                   </div>
                                   {answers[questionKey] && !hiddenAnswers[questionKey] && (
@@ -570,7 +667,7 @@ const QuestionAnalysis = ({
                                             className="copy-answer-btn"
                                             onClick={() => {
                                               navigator.clipboard.writeText(answers[questionKey])
-                                              toast.success('Answer copied to clipboard!', { icon: '📋' })
+                                              toast.success('Answer copied to clipboard!', { icon: <Copy size={16} /> })
                                             }}
                                             title="Copy answer to clipboard"
                                           >

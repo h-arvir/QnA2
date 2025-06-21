@@ -120,24 +120,28 @@
   /* Enhanced Status Colors */
   --success-50: #ecfdf5;
   --success-100: #d1fae5;
+  --success-200: #a7f3d0;
   --success-500: #10b981;
   --success-600: #059669;
   --success-700: #047857;
-  
+
   --warning-50: #fffbeb;
   --warning-100: #fef3c7;
+  --warning-200: #fed7aa;
   --warning-500: #f59e0b;
   --warning-600: #d97706;
   --warning-700: #b45309;
-  
+
   --error-50: #fef2f2;
   --error-100: #fee2e2;
+  --error-200: #fecaca;
   --error-500: #ef4444;
   --error-600: #dc2626;
   --error-700: #b91c1c;
-  
+
   --info-50: #eff6ff;
   --info-100: #dbeafe;
+  --info-200: #bfdbfe;
   --info-500: #3b82f6;
   --info-600: #2563eb;
   --info-700: #1d4ed8;
@@ -237,14 +241,33 @@
   --gradient-holographic: linear-gradient(135deg, rgba(245, 197, 24, 0.3) 0%, rgba(255, 0, 200, 0.3) 50%, rgba(245, 197, 24, 0.3) 100%);
   
   /* Status Colors for Cyberpunk Theme */
+  --success-50: rgba(0, 255, 157, 0.1);
+  --success-100: rgba(0, 255, 157, 0.2);
+  --success-200: rgba(0, 255, 157, 0.3);
   --success-500: #00ff9d;
   --success-600: #00e68c;
+  --success-700: #00d97d;
+  
+  --warning-50: rgba(255, 187, 0, 0.1);
+  --warning-100: rgba(255, 187, 0, 0.2);
+  --warning-200: rgba(255, 187, 0, 0.3);
   --warning-500: #ffbb00;
   --warning-600: #e6a800;
+  --warning-700: #cc9600;
+  
+  --error-50: rgba(255, 51, 102, 0.1);
+  --error-100: rgba(255, 51, 102, 0.2);
+  --error-200: rgba(255, 51, 102, 0.3);
   --error-500: #ff3366;
   --error-600: #e62e5c;
+  --error-700: #cc2952;
+  
+  --info-50: rgba(245, 197, 24, 0.1);
+  --info-100: rgba(245, 197, 24, 0.2);
+  --info-200: rgba(245, 197, 24, 0.3);
   --info-500: #F5C518;
   --info-600: #dbb116;
+  --info-700: #c29c14;
 }
 
 html {

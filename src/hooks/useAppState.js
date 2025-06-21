@@ -42,6 +42,7 @@ export const useAppState = () => {
   const [loadingAnswers, setLoadingAnswers] = useState({})
   const [hiddenAnswers, setHiddenAnswers] = useState({})
   const [groupViewModes, setGroupViewModes] = useState({})
+  const [bookmarkedQuestions, setBookmarkedQuestions] = useState({})
 
   // Reset functions
   const resetProcessingState = () => {
@@ -121,6 +122,8 @@ export const useAppState = () => {
     setHiddenAnswers,
     groupViewModes,
     setGroupViewModes,
+    bookmarkedQuestions,
+    setBookmarkedQuestions,
     
     // Reset functions
     resetProcessingState

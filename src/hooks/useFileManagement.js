@@ -1,3 +1,5 @@
+import React from 'react'
+import { Folder,AlertTriangle  } from 'lucide-react'
 import { FileManagementService } from '../services/fileManagementService'
 import toast from 'react-hot-toast'
 
@@ -47,15 +49,15 @@ export const useFileManagement = (state, fileProcessing) => {
       setUploadStatus(`${validation.invalidFiles.length} non-PDF files were ignored. Processing ${validation.validFiles.length} PDF files.`)
       toast.warning(`${validation.invalidFiles.length} non-PDF files were ignored. Processing ${validation.validFiles.length} PDF files.`, {
         duration: 4000,
-        icon: '⚠️',
+        icon:  React.createElement(AlertTriangle, { size: 16, color: '#facc15' }),
       })
     } else {
       setUploadStatus('')
       toast.success(`${validation.validFiles.length} PDF file${validation.validFiles.length > 1 ? 's' : ''} selected and processing started!`, {
         duration: 3000,
-        icon: '📁',
+        icon: React.createElement(Folder, { size: 16 }),
       })
-    }
+    } 
     
     setSelectedFiles(validation.validFiles)
     resetProcessingState()

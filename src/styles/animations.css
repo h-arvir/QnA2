@@ -227,3 +227,54 @@
     opacity: 0.8;
   }
 }
+
+/* Cyberpunk Pulse Animation for Choose Files Button */
+@keyframes cyberpunk-pulse {
+  0% {
+    box-shadow: var(--shadow-2xl), var(--glow-soft), 0 0 20px rgba(245, 197, 24, 0.15);
+    border-color: rgba(245, 197, 24, 0.3);
+  }
+  50% {
+    box-shadow: var(--shadow-2xl), var(--glow-soft), 0 0 30px rgba(245, 197, 24, 0.25), 0 0 60px rgba(245, 197, 24, 0.1);
+    border-color: rgba(245, 197, 24, 0.5);
+  }
+  100% {
+    box-shadow: var(--shadow-2xl), var(--glow-soft), 0 0 20px rgba(245, 197, 24, 0.15);
+    border-color: rgba(245, 197, 24, 0.3);
+  }
+}
+
+/* Enhanced pulse animation for hover state */
+@keyframes cyberpunk-pulse-hover {
+  0% {
+    box-shadow: var(--shadow-2xl), 0 0 30px rgba(245, 197, 24, 0.25), 0 0 60px rgba(245, 197, 24, 0.1);
+    border-color: rgba(245, 197, 24, 0.5);
+  }
+  50% {
+    box-shadow: var(--shadow-2xl), 0 0 40px rgba(245, 197, 24, 0.35), 0 0 80px rgba(245, 197, 24, 0.15);
+    border-color: rgba(245, 197, 24, 0.7);
+  }
+  100% {
+    box-shadow: var(--shadow-2xl), 0 0 30px rgba(245, 197, 24, 0.25), 0 0 60px rgba(245, 197, 24, 0.1);
+    border-color: rgba(245, 197, 24, 0.5);
+  }
+}
+
+/* Intense pulse animation for hover state */
+@keyframes cyberpunk-pulse-intense {
+  0% {
+    box-shadow: var(--shadow-2xl), 0 0 40px rgba(245, 197, 24, 0.35), 0 0 80px rgba(245, 197, 24, 0.15), 0 0 120px rgba(245, 197, 24, 0.05);
+    border-color: rgba(245, 197, 24, 0.7);
+    text-shadow: 0 0 10px rgba(245, 197, 24, 0.5);
+  }
+  50% {
+    box-shadow: var(--shadow-2xl), 0 0 50px rgba(245, 197, 24, 0.45), 0 0 100px rgba(245, 197, 24, 0.2), 0 0 150px rgba(245, 197, 24, 0.1);
+    border-color: rgba(245, 197, 24, 0.9);
+    text-shadow: 0 0 15px rgba(245, 197, 24, 0.7), 0 0 25px rgba(245, 197, 24, 0.3);
+  }
+  100% {
+    box-shadow: var(--shadow-2xl), 0 0 40px rgba(245, 197, 24, 0.35), 0 0 80px rgba(245, 197, 24, 0.15), 0 0 120px rgba(245, 197, 24, 0.05);
+    border-color: rgba(245, 197, 24, 0.7);
+    text-shadow: 0 0 10px rgba(245, 197, 24, 0.5);
+  }
+}

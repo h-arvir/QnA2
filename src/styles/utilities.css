@@ -191,6 +191,13 @@
 .fixed { position: fixed; }
 .sticky { position: sticky; }
 
+/* Inline icon utility */
+.inline {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 0.5rem;
+}
+
 /* Common z-index utilities */
 .z-0 { z-index: 0; }
 .z-10 { z-index: 10; }
@@ -199,3 +206,86 @@
 .z-40 { z-index: 40; }
 .z-50 { z-index: 50; }
 .z-100 { z-index: 100; }
+
+/* Toast Notifications Styling - Theme Specific */
+/* React Hot Toast uses div[data-sonner-toaster] or specific toast classes */
+
+/* Base toast styling for light theme */
+[data-theme="light"] div[class*="toast"] {
+  background: var(--bg-glass) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid var(--border-primary) !important;
+  box-shadow: var(--shadow-xl), 0 8px 32px rgba(227, 97, 140, 0.1) !important;
+}
+
+/* Dark theme toast enhancements - Cyberpunk style */
+[data-theme="dark"] div[class*="toast"] {
+  background: var(--bg-glass-strong) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid var(--border-secondary) !important;
+  box-shadow: var(--shadow-2xl), var(--glow-soft) !important;
+  position: relative !important;
+}
+
+/* Dark theme toast glow effect */
+[data-theme="dark"] div[class*="toast"]::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--gradient-holographic);
+  opacity: 0.05;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Success toasts - Dark theme enhancement */
+[data-theme="dark"] div[class*="toast"][data-type="success"] {
+  background: rgba(0, 255, 157, 0.1) !important;
+  color: #00ff9d !important;
+  border: 1px solid rgba(0, 255, 157, 0.3) !important;
+  box-shadow: var(--shadow-xl), 0 0 20px rgba(0, 255, 157, 0.15) !important;
+}
+
+/* Error toasts - Dark theme enhancement */
+[data-theme="dark"] div[class*="toast"][data-type="error"] {
+  background: rgba(255, 51, 102, 0.1) !important;
+  color: #ff3366 !important;
+  border: 1px solid rgba(255, 51, 102, 0.3) !important;
+  box-shadow: var(--shadow-xl), 0 0 20px rgba(255, 51, 102, 0.15) !important;
+}
+
+/* Loading toasts - Dark theme enhancement */
+[data-theme="dark"] div[class*="toast"][data-type="loading"] {
+  background: rgba(245, 197, 24, 0.1) !important;
+  color: #F5C518 !important;
+  border: 1px solid rgba(245, 197, 24, 0.3) !important;
+  box-shadow: var(--shadow-xl), 0 0 20px rgba(245, 197, 24, 0.15) !important;
+}
+
+/* Toast animation enhancement for dark theme */
+[data-theme="dark"] div[class*="toast"] {
+  animation: toastSlideInGlow 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes toastSlideInGlow {
+  0% {
+    opacity: 0;
+    transform: translateX(100%) scale(0.9);
+    box-shadow: none;
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateX(10%) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    box-shadow: var(--shadow-2xl), var(--glow-soft);
+  }
+}

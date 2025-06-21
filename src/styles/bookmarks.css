@@ -1,0 +1,362 @@
+/* ============================================
+   BOOKMARKS STYLES
+   ============================================ */
+
+/* Bookmark button styles */
+.bookmark-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  text-decoration: none;
+  white-space: nowrap;
+  outline: none;
+}
+
+.bookmark-btn:hover {
+  background: var(--accent-50);
+  color: var(--accent-600);
+  border-color: var(--accent-200);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.bookmark-btn:active {
+  transform: translateY(0);
+  outline: none;
+}
+
+.bookmark-btn:focus-visible {
+  box-shadow: 0 0 0 2px var(--accent-500);
+}
+
+.bookmark-btn.bookmarked {
+  background: rgba(255, 193, 7, 0.15);
+  color: #b8860b;
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(255, 193, 7, 0.2);
+  outline: none !important;
+}
+
+.bookmark-btn.bookmarked:hover {
+  background: rgba(255, 193, 7, 0.25);
+  color: #996f00;
+  border-color: rgba(255, 193, 7, 0.5);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 6px 20px rgba(255, 193, 7, 0.3);
+  transform: translateY(-1px);
+}
+
+.bookmark-btn.bookmarked:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.bookmark-btn.bookmarked:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.bookmark-btn.bookmarked:active {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Additional rules to ensure no outline in any state */
+.bookmark-btn.bookmarked,
+.bookmark-btn.bookmarked * {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Individual bookmark button (smaller) */
+.individual-bookmark-btn {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--text-xs);
+  outline: none;
+}
+
+.individual-bookmark-btn:active {
+  outline: none;
+  transform: translateY(0);
+}
+
+.individual-bookmark-btn:focus-visible {
+  box-shadow: 0 0 0 2px var(--accent-500);
+}
+
+.individual-bookmark-btn.bookmarked {
+  outline: none !important;
+}
+
+.individual-bookmark-btn.bookmarked:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.individual-bookmark-btn.bookmarked:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.individual-bookmark-btn.bookmarked:active {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Additional rules to ensure no outline in any state for individual buttons */
+.individual-bookmark-btn.bookmarked,
+.individual-bookmark-btn.bookmarked * {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Bookmarks section styles */
+.bookmarks-section {
+  max-width: 100%;
+}
+
+.bookmarks-section h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+}
+
+.bookmarks-summary {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-primary);
+}
+
+.bookmarks-summary p {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-secondary);
+}
+
+.bookmarks-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Bookmark item styles */
+.bookmark-item {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  transition: all 0.2s ease;
+}
+
+.bookmark-item:hover {
+  border-color: var(--accent-200);
+  box-shadow: var(--shadow-md);
+}
+
+.bookmark-header {
+  display: flex;
+  justify-content: between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+
+.bookmark-info {
+  flex: 1;
+}
+
+.bookmark-info h4 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.group-title {
+  color: var(--accent-600);
+  font-weight: 600;
+}
+
+.marks-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  background: var(--info-50);
+  color: var(--info-700);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+.remove-bookmark-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  background: var(--error-50);
+  color: var(--error-600);
+  border: 1px solid var(--error-200);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  outline: none;
+}
+
+.remove-bookmark-btn:hover {
+  background: var(--error-100);
+  color: var(--error-700);
+  border-color: var(--error-300);
+  transform: translateY(-1px);
+}
+
+.remove-bookmark-btn:active {
+  transform: translateY(0);
+  outline: none;
+}
+
+.remove-bookmark-btn:focus-visible {
+  box-shadow: 0 0 0 2px var(--error-500);
+}
+
+.bookmark-question {
+  border-top: 1px solid var(--border-primary);
+  padding-top: 1rem;
+}
+
+.bookmark-question .question-header {
+  display: flex;
+  justify-content: between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+  gap: 1rem;
+}
+
+.bookmark-question .question-header h5 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: var(--text-base);
+  font-weight: 600;
+  flex: 1;
+}
+
+.bookmark-question .question-text {
+  background: var(--bg-secondary);
+  padding: 1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .bookmark-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .remove-bookmark-btn {
+    align-self: flex-end;
+  }
+  
+  .bookmark-question .question-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  
+  .question-action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  
+  .bookmark-btn,
+  .individual-bookmark-btn {
+    flex: 1;
+    min-width: fit-content;
+  }
+}
+
+/* Dark theme adjustments */
+@media (prefers-color-scheme: dark) {
+  .bookmark-btn.bookmarked {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffd700;
+    border: 1px solid rgba(255, 193, 7, 0.4);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 16px rgba(255, 193, 7, 0.15);
+  }
+  
+  .bookmark-btn.bookmarked:hover {
+    background: rgba(255, 193, 7, 0.3);
+    color: #ffed4a;
+    border-color: rgba(255, 193, 7, 0.6);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 6px 20px rgba(255, 193, 7, 0.25);
+    transform: translateY(-1px);
+  }
+}
+
+/* Focus states for accessibility - only for non-bookmarked state */
+.bookmark-btn:not(.bookmarked):focus,
+.remove-bookmark-btn:focus {
+  box-shadow: 0 0 0 2px var(--accent-500);
+}
+
+/* Global rules to completely remove any focus/outline for bookmarked buttons */
+button.bookmark-btn.bookmarked,
+button.bookmark-btn.bookmarked:focus,
+button.bookmark-btn.bookmarked:focus-visible,
+button.bookmark-btn.bookmarked:active,
+button.individual-bookmark-btn.bookmarked,
+button.individual-bookmark-btn.bookmarked:focus,
+button.individual-bookmark-btn.bookmarked:focus-visible,
+button.individual-bookmark-btn.bookmarked:active {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: var(--warning-200) !important;
+}
+
+/* Remove any webkit focus styles */
+button.bookmark-btn.bookmarked::-moz-focus-inner,
+button.individual-bookmark-btn.bookmarked::-moz-focus-inner {
+  border: 0 !important;
+  outline: none !important;
+}
+
+/* Animation for bookmark state changes */
+.bookmark-btn.bookmarked {
+  animation: bookmarkAdded 0.3s ease-out;
+}
+
+@keyframes bookmarkAdded {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

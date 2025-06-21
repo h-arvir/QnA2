@@ -1,8 +1,10 @@
+import React from 'react' 
 import { PDFProcessingService } from '../services/pdfProcessingService'
 import { AIProcessingService } from '../services/aiProcessingService'
 import { FileManagementService } from '../services/fileManagementService'
 import { CacheService } from '../services/cacheService'
 import toast from 'react-hot-toast'
+import { FileText, X, CheckCircle, Sparkles } from 'lucide-react'
 
 export const useFileProcessing = (state) => {
   const {
@@ -62,8 +64,8 @@ export const useFileProcessing = (state) => {
         
         // Show success notification for file processing
         toast.success(`Successfully processed ${combinedResult.successCount} of ${files.length} PDF files!`, {
-          duration: 3000,
-          icon: '📄',
+        duration: 3000,
+        icon: React.createElement(FileText, { size: 16 }),
         })
         
         // Automatically process combined text with AI
@@ -71,8 +73,8 @@ export const useFileProcessing = (state) => {
       } else {
         setErrorMessage(`Failed to extract text from all ${files.length} PDF files.`)
         toast.error(`Failed to extract text from all ${files.length} PDF files.`, {
-          duration: 5000,
-          icon: '❌',
+        duration: 5000,
+        icon: React.createElement(X, { size: 16 }),
         })
       }
       
