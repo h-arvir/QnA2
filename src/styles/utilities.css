@@ -40,6 +40,192 @@
   font-size: var(--text-lg);
 }
 
+/* Navigation Button Styles */
+.nav-btn {
+  background: var(--primary-500);
+  color: white;
+  border: none;
+  margin: 0 auto;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-xl);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--text-base);
+}
+
+.nav-btn:hover {
+  background: var(--primary-600);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(227, 97, 140, 0.3);
+}
+
+/* Dark Theme Cyberpunk Styling for Analyze Button */
+[data-theme="dark"] .analyze-btn,
+[data-theme="dark"] .analyze-main-btn {
+  background: rgba(245, 197, 24, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(245, 197, 24, 0.5);
+  box-shadow: var(--shadow-2xl), var(--glow-soft), 0 0 30px rgba(245, 197, 24, 0.25), 0 0 60px rgba(245, 197, 24, 0.1);
+  color: #F5C518;
+  text-shadow: 0 0 8px rgba(245, 197, 24, 0.4);
+  animation: cyberpunk-pulse-hover 1.5s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Dark theme holographic overlay for analyze buttons */
+[data-theme="dark"] .analyze-btn::after,
+[data-theme="dark"] .analyze-main-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--gradient-holographic);
+  opacity: 0.05;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Enhanced hover effect for analyze buttons */
+[data-theme="dark"] .analyze-btn:hover,
+[data-theme="dark"] .analyze-main-btn:hover {
+  background: rgba(245, 197, 24, 0.15);
+  border-color: rgba(245, 197, 24, 0.7);
+  box-shadow: var(--shadow-2xl), 0 0 40px rgba(245, 197, 24, 0.35), 0 0 80px rgba(245, 197, 24, 0.15), 0 0 120px rgba(245, 197, 24, 0.05);
+  transform: translateY(-3px) scale(1.05);
+  animation: cyberpunk-pulse-intense 1s ease-in-out infinite;
+}
+
+/* Active state for analyze buttons */
+[data-theme="dark"] .analyze-btn:active,
+[data-theme="dark"] .analyze-main-btn:active {
+  background: rgba(245, 197, 24, 0.2);
+  border-color: rgba(245, 197, 24, 0.8);
+  box-shadow: var(--shadow-2xl), 0 0 20px rgba(245, 197, 24, 0.4), inset 0 0 20px rgba(245, 197, 24, 0.1);
+  transform: translateY(-1px) scale(1.02);
+  text-shadow: 0 0 12px rgba(245, 197, 24, 0.8);
+  animation: none;
+}
+
+/* Dark theme shimmer effect for analyze buttons */
+[data-theme="dark"] .analyze-btn::before,
+[data-theme="dark"] .analyze-main-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(245, 197, 24, 0.3), transparent);
+  transition: left var(--transition-slow);
+  z-index: 1;
+}
+
+[data-theme="dark"] .analyze-btn:hover::before,
+[data-theme="dark"] .analyze-main-btn:hover::before {
+  left: 100%;
+}
+
+/* Dark Theme Cyberpunk Styling for Navigation Buttons */
+[data-theme="dark"] .nav-btn {
+  background: rgba(245, 197, 24, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(245, 197, 24, 0.5);
+  box-shadow: var(--shadow-2xl), var(--glow-soft), 0 0 30px rgba(245, 197, 24, 0.25), 0 0 60px rgba(245, 197, 24, 0.1);
+  color: #F5C518;
+  text-shadow: 0 0 8px rgba(245, 197, 24, 0.4);
+  animation: cyberpunk-pulse-hover 1.5s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Dark theme holographic overlay for nav buttons */
+[data-theme="dark"] .nav-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--gradient-holographic);
+  opacity: 0.05;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Enhanced hover effect for nav buttons */
+[data-theme="dark"] .nav-btn:hover {
+  background: rgba(245, 197, 24, 0.15);
+  border-color: rgba(245, 197, 24, 0.7);
+  box-shadow: var(--shadow-2xl), 0 0 40px rgba(245, 197, 24, 0.35), 0 0 80px rgba(245, 197, 24, 0.15), 0 0 120px rgba(245, 197, 24, 0.05);
+  transform: translateY(-3px) scale(1.05);
+  animation: cyberpunk-pulse-intense 1s ease-in-out infinite;
+}
+
+/* Active state for nav buttons */
+[data-theme="dark"] .nav-btn:active {
+  background: rgba(245, 197, 24, 0.2);
+  border-color: rgba(245, 197, 24, 0.8);
+  box-shadow: var(--shadow-2xl), 0 0 20px rgba(245, 197, 24, 0.4), inset 0 0 20px rgba(245, 197, 24, 0.1);
+  transform: translateY(-1px) scale(1.02);
+  text-shadow: 0 0 12px rgba(245, 197, 24, 0.8);
+  animation: none;
+}
+
+/* Dark theme shimmer effect for nav buttons */
+[data-theme="dark"] .nav-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(245, 197, 24, 0.3), transparent);
+  transition: left var(--transition-slow);
+  z-index: 1;
+}
+
+[data-theme="dark"] .nav-btn:hover::before {
+  left: 100%;
+}
+
+/* Disabled state for dark theme buttons */
+[data-theme="dark"] .analyze-btn:disabled,
+[data-theme="dark"] .analyze-main-btn:disabled,
+[data-theme="dark"] .nav-btn:disabled {
+  background: rgba(245, 197, 24, 0.05);
+  border-color: rgba(245, 197, 24, 0.2);
+  color: rgba(245, 197, 24, 0.4);
+  text-shadow: none;
+  animation: none;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: var(--shadow-lg);
+  opacity: 0.5;
+}
+
+[data-theme="dark"] .analyze-btn:disabled::before,
+[data-theme="dark"] .analyze-main-btn:disabled::before,
+[data-theme="dark"] .nav-btn:disabled::before {
+  display: none;
+}
+
+[data-theme="dark"] .analyze-btn:disabled::after,
+[data-theme="dark"] .analyze-main-btn:disabled::after,
+[data-theme="dark"] .nav-btn:disabled::after {
+  opacity: 0.02;
+}
+
 /* Duplicate styles that appear multiple times in original - consolidated here */
 .analysis-prompt-section {
   background: var(--bg-primary);

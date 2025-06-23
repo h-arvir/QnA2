@@ -75,8 +75,13 @@
   opacity: 1;
 }
 
-.nav-items[data-active="cache"]::before {
+.nav-items[data-active="bookmarks"]::before {
   transform: translateY(116px);
+  opacity: 1;
+}
+
+.nav-items[data-active="cache"]::before {
+  transform: translateY(172px);
   opacity: 1;
 }
 
