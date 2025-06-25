@@ -30,6 +30,12 @@ export const useQuestionAnalysis = (state) => {
       setIsGroupingQuestions(true)
       setErrorMessage('')
       
+      // Show analyzing questions toast
+      toast.loading('Analyzing questions...', {
+        id: 'analyze',
+        duration: Infinity,
+      })
+      
       // Clear previous answers when analyzing new questions
       setAnswers({})
       setLoadingAnswers({})
@@ -53,6 +59,8 @@ export const useQuestionAnalysis = (state) => {
       
     } catch (error) {
       setErrorMessage(error.message)
+      // Dismiss analyzing toast on error
+      toast.dismiss('analyze')
     } finally {
       setIsGroupingQuestions(false)
     }

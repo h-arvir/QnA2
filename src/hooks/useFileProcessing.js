@@ -64,9 +64,17 @@ export const useFileProcessing = (state) => {
         
         // Show success notification for file processing
         toast.success(`Successfully processed ${combinedResult.successCount} of ${files.length} PDF files!`, {
-        duration: 3000,
-        icon: React.createElement(FileText, { size: 16 }),
+          duration: 3000,
+          icon: React.createElement(FileText, { size: 16 }),
         })
+        
+        // Show AI cleaning toast after success toast
+        setTimeout(() => {
+          toast.loading('Cleaning text with AI...', {
+            id: 'ai-cleaning',
+            icon: React.createElement(Sparkles, { size: 16 }),
+          })
+        }, 3000)
         
         // Automatically process combined text with AI
         await autoProcessWithGemini(combinedResult.combinedText)
@@ -99,6 +107,9 @@ export const useFileProcessing = (state) => {
 
     setIsAutoProcessing(true)
     setErrorMessage('')
+    
+    // Dismiss OCR processing toast when AI processing starts
+    toast.dismiss('ocr-processing')
 
     try {
       const cleanedText = await AIProcessingService.processTextWithGemini(
@@ -108,10 +119,14 @@ export const useFileProcessing = (state) => {
       )
 
       setCleanedQuestions(cleanedText)
+      // Dismiss AI cleaning toast when processing is complete
+      toast.dismiss('ai-cleaning')
       // Navigate to questions section after successful processing
       setTimeout(() => setActiveSection('questions'), 2000)
     } catch (error) {
       setErrorMessage(error.message)
+      // Dismiss AI cleaning toast on error
+      toast.dismiss('ai-cleaning')
     } finally {
       setIsAutoProcessing(false)
     }

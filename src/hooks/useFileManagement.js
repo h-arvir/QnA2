@@ -1,5 +1,5 @@
 import React from 'react'
-import { Folder,AlertTriangle  } from 'lucide-react'
+import { Folder, AlertTriangle, Sparkles } from 'lucide-react'
 import { FileManagementService } from '../services/fileManagementService'
 import toast from 'react-hot-toast'
 
@@ -57,6 +57,15 @@ export const useFileManagement = (state, fileProcessing) => {
         duration: 3000,
         icon: React.createElement(Folder, { size: 16 }),
       })
+      
+      // Show OCR processing toast after a short delay
+      setTimeout(() => {
+        toast.loading('Starting OCR processing for text extraction...', {
+          id: 'ocr-processing',
+          duration: 4000,
+          icon: React.createElement(Sparkles, { size: 16 }),
+        })
+      }, 1000)
     } 
     
     setSelectedFiles(validation.validFiles)
