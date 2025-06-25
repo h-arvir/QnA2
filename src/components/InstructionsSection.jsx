@@ -199,14 +199,14 @@ const InstructionsSection = ({ onNavigateToSection }) => {
               <BarChart3 size={20} />
               <span>Intelligent question grouping</span>
             </div>
-            <div className="feature-item">
+            {/* <div className="feature-item">
               <Download size={20} />
               <span>Export & copy functionality</span>
             </div>
             <div className="feature-item">
               <RefreshCw size={20} />
               <span>Real-time progress tracking</span>
-            </div>
+            </div> */}
             <div className="feature-item">
               <Settings size={20} />
               <span>Answer generation & persistence</span>
@@ -230,7 +230,7 @@ const InstructionsSection = ({ onNavigateToSection }) => {
           </button>
           <button
             onClick={() => onNavigateToSection('upload')}
-            className="nav-btn primary"
+            className="nav-btn secondary"
           >
             <Upload size={16} />
             Start with Upload

@@ -10,6 +10,7 @@ const Timeline = ({
   const [scrollY, setScrollY] = useState(0)
   const [prevSection, setPrevSection] = useState(activeSection)
   const [isFocusMode, setIsFocusMode] = useState(false)
+  const [isMainFocusMode, setIsMainFocusMode] = useState(false)
   const timelineRef = useRef(null)
 
   useEffect(() => {
@@ -34,6 +35,23 @@ const Timeline = ({
     // Set up observer for class changes on body
     const observer = new MutationObserver(checkFocusMode)
     observer.observe(document.body, { attributes: true, attributeFilter: ['class'] })
+    
+    return () => observer.disconnect()
+  }, [])
+
+  // Check for main focus mode
+  useEffect(() => {
+    const checkMainFocusMode = () => {
+      const mainFocusMode = document.documentElement.getAttribute('data-focus') === 'true'
+      setIsMainFocusMode(mainFocusMode)
+    }
+    
+    // Initial check
+    checkMainFocusMode()
+    
+    // Set up observer for attribute changes on documentElement
+    const observer = new MutationObserver(checkMainFocusMode)
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-focus'] })
     
     return () => observer.disconnect()
   }, [])
@@ -102,19 +120,20 @@ const Timeline = ({
 
   // In focus mode, render but with CSS that hides it
   // This allows for smoother transitions when toggling focus mode
+  const shouldHideTimeline = isFocusMode || isMainFocusMode
   
   return (
     <div 
       ref={timelineRef}
-      className={`timeline-container ${isFocusMode ? 'focus-mode-hidden' : ''}`}
+      className={`timeline-container ${shouldHideTimeline ? 'focus-mode-hidden' : ''}`}
       style={{ 
-        opacity: isFocusMode ? 0 : opacity,
-        transform: isFocusMode ? 'translateY(-100%)' : `scale(${scale})`,
+        opacity: shouldHideTimeline ? 0 : opacity,
+        transform: shouldHideTimeline ? 'translateY(-100%)' : `scale(${scale})`,
         filter: scrollY > 50 ? 'blur(0.5px)' : 'none',
-        position: isFocusMode ? 'absolute' : 'sticky',
-        height: isFocusMode ? 0 : 'auto',
-        overflow: isFocusMode ? 'hidden' : 'visible',
-        pointerEvents: isFocusMode ? 'none' : 'auto'
+        position: shouldHideTimeline ? 'absolute' : 'sticky',
+        height: shouldHideTimeline ? 0 : 'auto',
+        overflow: shouldHideTimeline ? 'hidden' : 'visible',
+        pointerEvents: shouldHideTimeline ? 'none' : 'auto'
       }}
     >
       <div className="timeline-progress">

@@ -20,6 +20,16 @@
   padding-top: 0; /* Remove top padding */
 }
 
+/* Hide timeline in main focus mode */
+[data-focus="true"] .timeline-container {
+  opacity: 0 !important;
+  transform: translateY(-100%) !important;
+  position: absolute !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
 /* Timeline transitions for focus mode */
 .timeline-container {
   transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),

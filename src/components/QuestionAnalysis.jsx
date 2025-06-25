@@ -218,6 +218,9 @@ const QuestionAnalysis = ({
   
   // Function to toggle bookmark for a question
   const toggleBookmark = (questionKey, questionData, buttonElement) => {
+    // Check current bookmark status before updating
+    const wasBookmarked = !!bookmarkedQuestions[questionKey]
+    
     setBookmarkedQuestions(prev => {
       const isBookmarked = prev[questionKey]
       
@@ -225,11 +228,9 @@ const QuestionAnalysis = ({
         // Remove bookmark
         const updated = { ...prev }
         delete updated[questionKey]
-        toast.success('Bookmark removed', { duration: 2000, icon: <BookmarkX size={16} /> })
         return updated
       } else {
         // Add bookmark
-        toast.success('Question bookmarked', { duration: 2000, icon: <BookmarkCheck size={16} /> })
         return {
           ...prev,
           [questionKey]: {
@@ -242,6 +243,13 @@ const QuestionAnalysis = ({
         }
       }
     })
+    
+    // Show toast notification based on the action taken
+    if (wasBookmarked) {
+      toast.success('Bookmark removed', { duration: 2000, icon: <BookmarkX size={16} /> })
+    } else {
+      toast.success('Question bookmarked', { duration: 2000, icon: <BookmarkCheck size={16} /> })
+    }
     
     // Force blur the button after state update
     if (buttonElement) {
