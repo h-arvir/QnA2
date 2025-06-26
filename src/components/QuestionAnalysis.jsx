@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react'
 import { Bot, BarChart3, Copy, List, Layers, Lightbulb, Loader2, Eye, EyeOff, Search, X, Focus, Bookmark, BookmarkCheck, RotateCcw, BookmarkX, CheckCircle, Shuffle, AlertTriangle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { AIProcessingService } from '../services/aiProcessingService'
+import AnsBlur from './AnsBlur'
 
 const QuestionAnalysis = ({ 
   groupedQuestions, 
@@ -70,20 +71,7 @@ const QuestionAnalysis = ({
     toast.success('Search cleared', { duration: 1500, icon: <RotateCcw size={16} /> })
   }
   
-  // Function to toggle focus mode for an answer
-  const toggleFocusMode = (questionKey) => {
-    if (focusedAnswer === questionKey) {
-      setFocusedAnswer(null)
-      // Remove blur effect from body
-      document.body.classList.remove('answer-focus-mode')
-      toast.success('Focus mode disabled', { duration: 1500, icon: <EyeOff size={16} /> })
-    } else {
-      setFocusedAnswer(questionKey)
-      // Add blur effect to body
-      document.body.classList.add('answer-focus-mode')
-      toast.success('Focus mode enabled', { duration: 1500, icon: <Focus size={16} /> })
-    }
-  }
+
   
   // Function to toggle view mode for a specific group
   const toggleGroupViewMode = (groupIndex, mode) => {
@@ -554,13 +542,12 @@ const QuestionAnalysis = ({
                                 >
                                   <Copy size={12} />
                                 </button>
-                                <button 
-                                  className={`focus-answer-btn ${focusedAnswer === `unified-${globalGroupIndex}` ? 'active' : ''}`}
-                                  onClick={() => toggleFocusMode(`unified-${globalGroupIndex}`)}
-                                  title={focusedAnswer === `unified-${globalGroupIndex}` ? "Exit focus mode" : "Focus on this answer"}
-                                >
-                                  <Focus size={12} />
-                                </button>
+                                <AnsBlur 
+                                  questionKey={`unified-${globalGroupIndex}`}
+                                  focusedAnswer={focusedAnswer}
+                                  setFocusedAnswer={setFocusedAnswer}
+                                  size={12}
+                                />
                               </div>
                             </div>
                             <div 
@@ -681,13 +668,12 @@ const QuestionAnalysis = ({
                                           >
                                             <Copy size={10} />
                                           </button>
-                                          <button 
-                                            className={`focus-answer-btn ${focusedAnswer === questionKey ? 'active' : ''}`}
-                                            onClick={() => toggleFocusMode(questionKey)}
-                                            title={focusedAnswer === questionKey ? "Exit focus mode" : "Focus on this answer"}
-                                          >
-                                            <Focus size={10} />
-                                          </button>
+                                          <AnsBlur 
+                                            questionKey={questionKey}
+                                            focusedAnswer={focusedAnswer}
+                                            setFocusedAnswer={setFocusedAnswer}
+                                            size={10}
+                                          />
                                         </div>
                                       </div>
                                       <div 

@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react'
 import { Bookmark, BookmarkX, Search, X, Copy, Lightbulb, Eye, EyeOff, Focus, Loader2, Bot, RotateCcw, CheckCircle, Sparkles } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { AIProcessingService } from '../services/aiProcessingService'
+import AnsBlur from './AnsBlur'
 
 const BookmarksSection = ({ 
   bookmarkedQuestions,
@@ -70,20 +71,7 @@ const BookmarksSection = ({
     toast.success('Bookmark removed', { duration: 2000, icon: <BookmarkX size={16} /> })
   }
   
-  // Function to toggle focus mode for an answer
-  const toggleFocusMode = (questionKey) => {
-    if (focusedAnswer === questionKey) {
-      setFocusedAnswer(null)
-      // Remove blur effect from body
-      document.body.classList.remove('answer-focus-mode')
-      toast.success('Focus mode disabled', { duration: 1500, icon: <EyeOff size={16} /> })
-    } else {
-      setFocusedAnswer(questionKey)
-      // Add blur effect to body
-      document.body.classList.add('answer-focus-mode')
-      toast.success('Focus mode enabled', { duration: 1500, icon: <Focus size={16} /> })
-    }
-  }
+
   
   // Function to toggle answer visibility
   const toggleAnswerVisibility = (questionKey) => {
@@ -380,13 +368,12 @@ const BookmarksSection = ({
                         >
                           <Copy size={12} />
                         </button>
-                        <button 
-                          className={`focus-answer-btn ${focusedAnswer === bookmark.questionKey ? 'active' : ''}`}
-                          onClick={() => toggleFocusMode(bookmark.questionKey)}
-                          title={focusedAnswer === bookmark.questionKey ? "Exit focus mode" : "Focus on this answer"}
-                        >
-                          <Focus size={12} />
-                        </button>
+                        <AnsBlur 
+                          questionKey={bookmark.questionKey}
+                          focusedAnswer={focusedAnswer}
+                          setFocusedAnswer={setFocusedAnswer}
+                          size={12}
+                        />
                       </div>
                     </div>
                     <div 

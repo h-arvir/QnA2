@@ -9,7 +9,6 @@ const Timeline = ({
 }) => {
   const [scrollY, setScrollY] = useState(0)
   const [prevSection, setPrevSection] = useState(activeSection)
-  const [isFocusMode, setIsFocusMode] = useState(false)
   const [isMainFocusMode, setIsMainFocusMode] = useState(false)
   const timelineRef = useRef(null)
 
@@ -22,22 +21,8 @@ const Timeline = ({
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
   
-  // Check for answer focus mode
-  useEffect(() => {
-    const checkFocusMode = () => {
-      const answerFocusMode = document.body.classList.contains('answer-focus-mode')
-      setIsFocusMode(answerFocusMode)
-    }
-    
-    // Initial check
-    checkFocusMode()
-    
-    // Set up observer for class changes on body
-    const observer = new MutationObserver(checkFocusMode)
-    observer.observe(document.body, { attributes: true, attributeFilter: ['class'] })
-    
-    return () => observer.disconnect()
-  }, [])
+  // Note: Answer focus mode is now handled purely by CSS blur effects
+  // Timeline should remain visible but blurred when answer focus is active
 
   // Check for main focus mode
   useEffect(() => {
@@ -118,9 +103,9 @@ const Timeline = ({
     }
   }
 
-  // In focus mode, render but with CSS that hides it
-  // This allows for smoother transitions when toggling focus mode
-  const shouldHideTimeline = isFocusMode || isMainFocusMode
+  // Only hide timeline for main focus mode, not answer focus mode
+  // Answer focus mode will be handled by CSS blur effects
+  const shouldHideTimeline = isMainFocusMode
   
   return (
     <div 
