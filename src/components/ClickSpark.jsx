@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback, useState } from "react";
+import { useRef, useEffect, useCallback } from "react";
 
 const ClickSpark = ({
   sparkColor = "#fff",
@@ -10,40 +10,9 @@ const ClickSpark = ({
   extraScale = 1.0,
   children
 }) => {
-  // Detect dark theme reactively - using lazy initializer to prevent DOM query on every render
-  const [isDarkTheme, setIsDarkTheme] = useState(() => {
-    console.log('🔍 DOM query for theme - only runs ONCE on mount');
-    
-    // First check the DOM attribute
-    const domTheme = document.documentElement.getAttribute('data-theme');
-    if (domTheme) {
-      return domTheme === 'dark';
-    }
-    
-    // Fallback: check localStorage directly (same logic as ToggleControls)
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    return savedTheme === 'dark' || (!savedTheme && prefersDark);
-  });
-  const currentSparkColor = isDarkTheme ? "#F5C518" : sparkColor;
   const canvasRef = useRef(null);
   const sparksRef = useRef([]);     
   const startTimeRef = useRef(null); 
-
-  // Watch for theme changes
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      const newIsDarkTheme = document.documentElement.getAttribute('data-theme') === 'dark';
-      setIsDarkTheme(newIsDarkTheme);
-    });
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['data-theme']
-    });
-
-    return () => observer.disconnect();
-  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -124,7 +93,7 @@ const ClickSpark = ({
         const x2 = spark.x + (distance + lineLength) * Math.cos(spark.angle);
         const y2 = spark.y + (distance + lineLength) * Math.sin(spark.angle);
 
-        ctx.strokeStyle = currentSparkColor;
+        ctx.strokeStyle = sparkColor;
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.moveTo(x1, y1);
@@ -143,7 +112,7 @@ const ClickSpark = ({
       cancelAnimationFrame(animationId);
     };
   }, [
-    currentSparkColor,
+    sparkColor,
     sparkSize,
     sparkRadius,
     sparkCount,
@@ -198,4 +167,4 @@ const ClickSpark = ({
   );
 };
 
-export default ClickSpark;  
+export default ClickSpark;
