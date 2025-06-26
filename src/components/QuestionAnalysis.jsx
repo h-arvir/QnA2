@@ -112,7 +112,7 @@ const QuestionAnalysis = ({
       // Show loading toast
       const loadingToast = toast.loading('Generating detailed answer...', { 
         icon: <Bot size={16} />,
-        duration: 0 // Don't auto-dismiss
+        duration: Infinity // Persist until dismissed
       })
 
       // Prepare context from the document

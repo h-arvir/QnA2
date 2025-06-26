@@ -50,8 +50,7 @@ const BookmarksSection = ({
     if (!searchQuery.trim()) return bookmarkedQuestionsArray
     
     return bookmarkedQuestionsArray.filter(bookmark => 
-      matchesSearch(bookmark.questionText || '', searchQuery) ||
-      matchesSearch(bookmark.groupTitle || '', searchQuery)
+      matchesSearch(bookmark.questionText || '', searchQuery)
     )
   }, [bookmarkedQuestionsArray, searchQuery])
   
@@ -108,7 +107,7 @@ const BookmarksSection = ({
       // Show loading toast
       const loadingToast = toast.loading('Generating detailed answer...', { 
         icon: <Bot size={16} />,
-        duration: 0 // Don't auto-dismiss
+        duration: Infinity // Persist until dismissed
       })
 
       // Prepare context from the document
@@ -287,21 +286,10 @@ const BookmarksSection = ({
             <div key={bookmark.questionKey} className="bookmark-item">
               <div className="bookmark-header">
                 <div className="bookmark-info">
-                  <h4>
-                    {bookmark.groupTitle && (
-                      <span className="group-title">{bookmark.groupTitle} - </span>
-                    )}
-                    Question {index + 1}
-                  </h4>
-                  {bookmark.marks && (
+                  <h4>Question {index + 1}</h4>
+                  {/* {bookmark.marks && (
                     <span className="marks-badge">{bookmark.marks} Marks</span>
-                  )}
-                  {bookmark.sections && bookmark.sections.length > 0 && (
-                    <div className="sections-info">
-                      <span className="sections-label">Sections:</span>
-                      <span className="sections-list">{bookmark.sections.join(', ')}</span>
-                    </div>
-                  )}
+                  )} */}
                 </div>
                 <button
                   className="remove-bookmark-btn"
