@@ -1,7 +1,9 @@
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useCallback, useState } from "react";
 
 const ClickSpark = ({
   sparkColor = "#fff",
+  lightThemeColor = "#E3618C", // Rose-pink for light theme
+  darkThemeColor = "#F5C518",  // Gold-yellow for dark theme
   sparkSize = 10,
   sparkRadius = 15,
   sparkCount = 8,
@@ -12,7 +14,102 @@ const ClickSpark = ({
 }) => {
   const canvasRef = useRef(null);
   const sparksRef = useRef([]);     
-  const startTimeRef = useRef(null); 
+  const startTimeRef = useRef(null);
+  const [currentSparkColor, setCurrentSparkColor] = useState(sparkColor);
+
+  // Theme detection and color management
+  useEffect(() => {
+    const updateSparkColor = () => {
+      const savedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+      
+      // Use theme-specific colors if provided, otherwise fall back to sparkColor
+      if (lightThemeColor && darkThemeColor) {
+        setCurrentSparkColor(isDark ? darkThemeColor : lightThemeColor);
+      } else {
+        setCurrentSparkColor(sparkColor);
+      }
+    };
+
+    // Initial color setup
+    updateSparkColor();
+
+    // Listen for theme changes via storage events (when changed in other tabs)
+    const handleStorageChange = (e) => {
+      if (e.key === 'theme') {
+        updateSparkColor();
+      }
+    };
+
+    // Listen for theme changes via custom event (when changed in same tab)
+    const handleThemeChange = () => {
+      updateSparkColor();
+    };
+
+    // Listen for system theme changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleMediaChange = () => {
+      updateSparkColor();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('themechange', handleThemeChange);
+    mediaQuery.addEventListener('change', handleMediaChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('themechange', handleThemeChange);
+      mediaQuery.removeEventListener('change', handleMediaChange);
+    };
+  }, [sparkColor, lightThemeColor, darkThemeColor]);
+
+  // Theme detection and color management
+  useEffect(() => {
+    const updateSparkColor = () => {
+      const savedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
+      
+      // Use theme-specific colors if provided, otherwise fall back to sparkColor
+      if (lightThemeColor && darkThemeColor) {
+        setCurrentSparkColor(isDark ? darkThemeColor : lightThemeColor);
+      } else {
+        setCurrentSparkColor(sparkColor);
+      }
+    };
+
+    // Initial color setup
+    updateSparkColor();
+
+    // Listen for theme changes via storage events (when changed in other tabs)
+    const handleStorageChange = (e) => {
+      if (e.key === 'theme') {
+        updateSparkColor();
+      }
+    };
+
+    // Listen for theme changes via custom event (when changed in same tab)
+    const handleThemeChange = () => {
+      updateSparkColor();
+    };
+
+    // Listen for system theme changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleMediaChange = () => {
+      updateSparkColor();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('themechange', handleThemeChange);
+    mediaQuery.addEventListener('change', handleMediaChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('themechange', handleThemeChange);
+      mediaQuery.removeEventListener('change', handleMediaChange);
+    };
+  }, [sparkColor, lightThemeColor, darkThemeColor]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -93,7 +190,7 @@ const ClickSpark = ({
         const x2 = spark.x + (distance + lineLength) * Math.cos(spark.angle);
         const y2 = spark.y + (distance + lineLength) * Math.sin(spark.angle);
 
-        ctx.strokeStyle = sparkColor;
+        ctx.strokeStyle = currentSparkColor;
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.moveTo(x1, y1);
@@ -112,7 +209,7 @@ const ClickSpark = ({
       cancelAnimationFrame(animationId);
     };
   }, [
-    sparkColor,
+    currentSparkColor,
     sparkSize,
     sparkRadius,
     sparkCount,

@@ -63,6 +63,11 @@ const ToggleControls = () => {
       
       // Apply to document
       document.documentElement.setAttribute('data-theme', newTheme ? 'dark' : 'light')
+      
+      // Dispatch custom event for other components to listen to theme changes
+      window.dispatchEvent(new CustomEvent('themechange', { 
+        detail: { theme: newTheme ? 'dark' : 'light' } 
+      }))
     }, 200)
     
     // Remove overlay after animation completes

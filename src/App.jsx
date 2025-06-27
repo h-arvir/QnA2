@@ -102,7 +102,8 @@ function App() {
 
   return (
     <ClickSpark
-      sparkColor='#E3618C'
+      lightThemeColor='#E3618C'
+      darkThemeColor='#F5C518'
       sparkSize={10}
       sparkRadius={15}
       sparkCount={8}
