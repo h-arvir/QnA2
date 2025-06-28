@@ -20,6 +20,7 @@ import ToggleControls from './components/ToggleControls'
 import ClickSpark from './components/ClickSpark'
 
 
+
 // Import custom hooks
 import { useAppState } from './hooks/useAppState'
 import { useFileProcessing } from './hooks/useFileProcessing'

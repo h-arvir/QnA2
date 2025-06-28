@@ -68,13 +68,14 @@ const ClickSpark = ({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const parent = canvas.parentElement;
-    if (!parent) return;
-
     let resizeTimeout;
 
     const resizeCanvas = () => {
-      const { width, height } = parent.getBoundingClientRect();
+      // Use viewport dimensions for fixed positioning
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      
+      // Set canvas size to match viewport exactly
       if (canvas.width !== width || canvas.height !== height) {
         canvas.width = width;
         canvas.height = height;
@@ -86,13 +87,11 @@ const ClickSpark = ({
       resizeTimeout = setTimeout(resizeCanvas, 100);
     };
 
-    const ro = new ResizeObserver(handleResize);
-    ro.observe(parent);
-
+    window.addEventListener('resize', handleResize);
     resizeCanvas();
 
     return () => {
-      ro.disconnect();
+      window.removeEventListener('resize', handleResize);
       clearTimeout(resizeTimeout);
     };
   }, []);
@@ -174,9 +173,16 @@ const ClickSpark = ({
   const handleClick = (e) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    
+    // Use viewport coordinates directly since canvas is fixed positioned
+    // No need to scale by device pixel ratio for coordinates since we're using CSS pixels
+    const x = e.clientX;
+    const y = e.clientY;
+
+    // Ensure coordinates are within viewport bounds
+    if (x < 0 || x > window.innerWidth || y < 0 || y > window.innerHeight) {
+      return;
+    }
 
     const now = performance.now();
     const newSparks = Array.from({ length: sparkCount }, (_, i) => ({
@@ -201,15 +207,17 @@ const ClickSpark = ({
       <canvas
         ref={canvasRef}
         style={{
-          width: "100%",
-          height: "100%",
+          width: "100vw",
+          height: "100vh",
           display: "block",
           userSelect: "none",
-          position: "absolute",
+          position: "fixed",
           top: 0,
           left: 0,
           pointerEvents: "none",
-          zIndex: 9999
+          zIndex: 9999,
+          margin: 0,
+          padding: 0
         }}
       />
       {children}

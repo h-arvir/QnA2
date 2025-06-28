@@ -64,11 +64,24 @@ export class FileManagementService {
     let combinedText = ''
     let successCount = 0
     let errorCount = 0
+    let fileHashes = []
+    let fromCache = 0
     
     results.forEach((result, index) => {
       const fileName = files[index].name
       if (result.status === 'fulfilled' && result.value) {
-        combinedText += `\n\n=== ${fileName} ===\n${result.value}\n`
+        // Handle both old string format and new object format
+        if (typeof result.value === 'string') {
+          combinedText += `\n\n=== ${fileName} ===\n${result.value}\n`
+        } else if (result.value && result.value.text) {
+          combinedText += `\n\n=== ${fileName} ===\n${result.value.text}\n`
+          if (result.value.fileHash) {
+            fileHashes.push(result.value.fileHash)
+          }
+          if (result.value.fromCache) {
+            fromCache++
+          }
+        }
         successCount++
       } else {
         errorCount++
@@ -80,7 +93,9 @@ export class FileManagementService {
       combinedText: combinedText.trim(),
       successCount,
       errorCount,
-      hasContent: combinedText.trim().length > 0
+      hasContent: combinedText.trim().length > 0,
+      fileHashes,
+      fromCache
     }
   }
 }

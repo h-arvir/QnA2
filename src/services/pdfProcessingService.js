@@ -219,10 +219,26 @@ export class PDFProcessingService {
     }
     
     try {
-      updateFileProgress('processing', 0)
+      // Generate file hash for caching
+      const fileHash = await CacheService.generateFileHash(file)
+      
+      // Check cache first
+      updateFileProgress('processing', 10)
+      const cachedResult = await CacheService.getCacheData(fileHash, CacheService.STAGES.EXTRACTED_TEXT)
+      if (cachedResult) {
+        updateFileProgress('completed', 100)
+        console.log(`✅ Found cached text for ${fileName}! Skipping processing.`)
+        return {
+          text: cachedResult.text,
+          fileHash,
+          fromCache: true
+        }
+      }
+      
+      updateFileProgress('processing', 20)
       
       const arrayBuffer = await file.arrayBuffer()
-      updateFileProgress('reading', 20)
+      updateFileProgress('reading', 30)
       
       const pdf = await pdfjsLib.getDocument(arrayBuffer).promise
       let fullText = ''
@@ -242,7 +258,7 @@ export class PDFProcessingService {
         }
         
         // Update progress during text extraction
-        const extractProgress = 40 + (pageNum / pdf.numPages) * 40
+        const extractProgress = 40 + (pageNum / pdf.numPages) * 30
         updateFileProgress('extracting', Math.round(extractProgress))
       }
       
@@ -256,12 +272,42 @@ export class PDFProcessingService {
           updateFileProgress('error', 100, ocrText)
           throw new Error(ocrText)
         } else {
+          // Cache OCR result
+          await CacheService.setCacheData(fileHash, CacheService.STAGES.EXTRACTED_TEXT, {
+            text: ocrText,
+            extractionMethod: 'OCR',
+            processedAt: new Date().toISOString()
+          }, {
+            fileName: file.name,
+            fileSize: file.size,
+            stage: 'text_extraction'
+          })
+          
           updateFileProgress('completed', 100)
-          return ocrText
+          return {
+            text: ocrText,
+            fileHash,
+            fromCache: false
+          }
         }
       } else {
+        // Cache normal text extraction result
+        await CacheService.setCacheData(fileHash, CacheService.STAGES.EXTRACTED_TEXT, {
+          text: fullText.trim(),
+          extractionMethod: 'PDF.js',
+          processedAt: new Date().toISOString()
+        }, {
+          fileName: file.name,
+          fileSize: file.size,
+          stage: 'text_extraction'
+        })
+        
         updateFileProgress('completed', 100)
-        return fullText.trim()
+        return {
+          text: fullText.trim(),
+          fileHash,
+          fromCache: false
+        }
       }
     } catch (error) {
       console.error(`Error extracting text from ${fileName}:`, error)

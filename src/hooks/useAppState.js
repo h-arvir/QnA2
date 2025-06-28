@@ -56,6 +56,20 @@ export const useAppState = () => {
     // as they should persist when just resetting processing state
   }
 
+  const resetFileState = () => {
+    setSelectedFiles([])
+    setUploadStatus('')
+    setIsDragOver(false)
+    resetProcessingState()
+    setFileHashes({})
+    // Reset answer-related state when clearing all files
+    setAnswers({})
+    setLoadingAnswers({})
+    setHiddenAnswers({})
+    setGroupViewModes({})
+    setBookmarkedQuestions({})
+  }
+
   return {
     // Navigation
     activeSection,
@@ -126,6 +140,7 @@ export const useAppState = () => {
     setBookmarkedQuestions,
     
     // Reset functions
-    resetProcessingState
+    resetProcessingState,
+    resetFileState
   }
 }

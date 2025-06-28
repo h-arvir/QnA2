@@ -21,19 +21,18 @@ export class CacheService {
       const hashArray = Array.from(new Uint8Array(hashBuffer))
       const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
       
-      // Include file metadata for additional uniqueness
+      // Include stable file metadata for additional uniqueness (excluding lastModified)
       const metadata = {
         name: file.name,
         size: file.size,
-        lastModified: file.lastModified,
         type: file.type
       }
       
       return `${hashHex}_${btoa(JSON.stringify(metadata)).replace(/[/+=]/g, '')}`
     } catch (error) {
       console.error('Error generating file hash:', error)
-      // Fallback to simple hash based on file properties
-      return `fallback_${file.name}_${file.size}_${file.lastModified}`.replace(/[^a-zA-Z0-9_]/g, '')
+      // Fallback to simple hash based on stable file properties (excluding lastModified)
+      return `fallback_${file.name}_${file.size}_${file.type}`.replace(/[^a-zA-Z0-9_]/g, '')
     }
   }
 
@@ -85,20 +84,10 @@ export class CacheService {
   static getCacheMetadata() {
     try {
       const metadata = localStorage.getItem(this.CACHE_METADATA_KEY)
-      return metadata ? JSON.parse(metadata) : {
-        version: this.CACHE_VERSION,
-        entries: {},
-        totalSize: 0,
-        lastCleanup: Date.now()
-      }
+      return metadata ? JSON.parse(metadata) : this.getDefaultMetadata()
     } catch (error) {
       console.error('Error reading cache metadata:', error)
-      return {
-        version: this.CACHE_VERSION,
-        entries: {},
-        totalSize: 0,
-        lastCleanup: Date.now()
-      }
+      return this.getDefaultMetadata()
     }
   }
 
@@ -117,15 +106,7 @@ export class CacheService {
    * Compress data before storing
    */
   static compressData(data) {
-    try {
-      // Simple compression using JSON stringify with reduced whitespace
-      const jsonString = JSON.stringify(data)
-      // For better compression, you could implement LZ-string or similar
-      return jsonString
-    } catch (error) {
-      console.error('Error compressing data:', error)
-      return JSON.stringify(data)
-    }
+    return JSON.stringify(data)
   }
 
   /**
@@ -141,18 +122,41 @@ export class CacheService {
   }
 
   /**
-   * Calculate size of data in bytes
-   */
-  static calculateDataSize(data) {
-    return new Blob([JSON.stringify(data)]).size
-  }
-
-  /**
    * Check if cache entry is expired
    */
   static isCacheExpired(timestamp) {
     const expiryTime = this.CACHE_EXPIRY_DAYS * 24 * 60 * 60 * 1000
     return (Date.now() - timestamp) > expiryTime
+  }
+
+  /**
+   * Remove cache entry from both storage and metadata
+   */
+  static removeCacheEntry(cacheKey, entry, metadata) {
+    localStorage.removeItem(cacheKey)
+    delete metadata.entries[cacheKey]
+    metadata.totalSize -= entry.size
+    this.updateCacheMetadata(metadata)
+  }
+
+  /**
+   * Check if cache is over size or entry limits
+   */
+  static isOverCacheLimits(metadata, removedSize, removedCount, maxSizeBytes) {
+    return (metadata.totalSize - removedSize > maxSizeBytes || 
+            Object.keys(metadata.entries).length - removedCount > this.MAX_CACHE_ENTRIES)
+  }
+
+  /**
+   * Get default cache metadata structure
+   */
+  static getDefaultMetadata() {
+    return {
+      version: this.CACHE_VERSION,
+      entries: {},
+      totalSize: 0,
+      lastCleanup: Date.now()
+    }
   }
 
   /**
@@ -178,10 +182,6 @@ export class CacheService {
       metadata.totalSize -= cleanedSize
       metadata.lastCleanup = Date.now()
       this.updateCacheMetadata(metadata)
-
-      if (cleanedCount > 0) {
-        console.log(`Cache cleanup: Removed ${cleanedCount} expired entries, freed ${(cleanedSize / 1024 / 1024).toFixed(2)} MB`)
-      }
 
       return { cleanedCount, cleanedSize }
     } catch (error) {
@@ -210,8 +210,7 @@ export class CacheService {
       let removedCount = 0
 
       // Remove oldest entries until we're under limits
-      while ((metadata.totalSize - removedSize > maxSizeBytes || 
-              Object.keys(metadata.entries).length - removedCount > this.MAX_CACHE_ENTRIES) &&
+      while (this.isOverCacheLimits(metadata, removedSize, removedCount, maxSizeBytes) &&
              sortedEntries.length > removedCount) {
         
         const [key, entry] = sortedEntries[removedCount]
@@ -223,10 +222,6 @@ export class CacheService {
 
       metadata.totalSize -= removedSize
       this.updateCacheMetadata(metadata)
-
-      if (removedCount > 0) {
-        console.log(`Cache size management: Removed ${removedCount} old entries, freed ${(removedSize / 1024 / 1024).toFixed(2)} MB`)
-      }
     } catch (error) {
       console.error('Error managing cache size:', error)
     }
@@ -239,7 +234,7 @@ export class CacheService {
     try {
       const cacheKey = this.getCacheKey(fileHash, stage)
       const compressedData = this.compressData(data)
-      const dataSize = this.calculateDataSize(data)
+      const dataSize = new Blob([compressedData]).size
 
       // Store the actual data
       localStorage.setItem(cacheKey, compressedData)
@@ -260,7 +255,6 @@ export class CacheService {
       // Manage cache size
       this.manageCacheSize()
 
-      console.log(`Cached ${stage} data for file hash: ${fileHash.substring(0, 8)}...`)
       return true
     } catch (error) {
       console.error('Error storing cache data:', error)
@@ -281,10 +275,7 @@ export class CacheService {
       if (!entry || this.isCacheExpired(entry.timestamp)) {
         if (entry) {
           // Remove expired entry
-          localStorage.removeItem(cacheKey)
-          delete metadata.entries[cacheKey]
-          metadata.totalSize -= entry.size
-          this.updateCacheMetadata(metadata)
+          this.removeCacheEntry(cacheKey, entry, metadata)
         }
         return null
       }
@@ -292,16 +283,12 @@ export class CacheService {
       const compressedData = localStorage.getItem(cacheKey)
       if (!compressedData) {
         // Entry exists in metadata but not in storage, clean up
-        delete metadata.entries[cacheKey]
-        metadata.totalSize -= entry.size
-        this.updateCacheMetadata(metadata)
+        this.removeCacheEntry(cacheKey, entry, metadata)
         return null
       }
 
       const data = this.decompressData(compressedData)
       if (data) {
-        console.log(`Cache hit for ${stage} data: ${fileHash.substring(0, 8)}...`)
-        
         // Update timestamp to mark as recently used
         entry.timestamp = Date.now()
         this.updateCacheMetadata(metadata)
@@ -311,46 +298,6 @@ export class CacheService {
     } catch (error) {
       console.error('Error retrieving cache data:', error)
       return null
-    }
-  }
-
-  /**
-   * Check if data exists in cache
-   */
-  static async hasCacheData(fileHash, stage) {
-    try {
-      const cacheKey = this.getCacheKey(fileHash, stage)
-      const metadata = this.getCacheMetadata()
-      const entry = metadata.entries[cacheKey]
-      
-      return entry && !this.isCacheExpired(entry.timestamp) && localStorage.getItem(cacheKey) !== null
-    } catch (error) {
-      console.error('Error checking cache data:', error)
-      return false
-    }
-  }
-
-  /**
-   * Remove specific cache entry
-   */
-  static async removeCacheData(fileHash, stage) {
-    try {
-      const cacheKey = this.getCacheKey(fileHash, stage)
-      const metadata = this.getCacheMetadata()
-      const entry = metadata.entries[cacheKey]
-
-      if (entry) {
-        localStorage.removeItem(cacheKey)
-        metadata.totalSize -= entry.size
-        delete metadata.entries[cacheKey]
-        this.updateCacheMetadata(metadata)
-        console.log(`Removed cache entry for ${stage}: ${fileHash.substring(0, 8)}...`)
-        return true
-      }
-      return false
-    } catch (error) {
-      console.error('Error removing cache data:', error)
-      return false
     }
   }
 
@@ -371,15 +318,9 @@ export class CacheService {
       })
 
       // Reset metadata
-      const newMetadata = {
-        version: this.CACHE_VERSION,
-        entries: {},
-        totalSize: 0,
-        lastCleanup: Date.now()
-      }
+      const newMetadata = this.getDefaultMetadata()
       this.updateCacheMetadata(newMetadata)
 
-      console.log(`Cleared all cache: Removed ${removedCount} entries, freed ${(removedSize / 1024 / 1024).toFixed(2)} MB`)
       return { removedCount, removedSize }
     } catch (error) {
       console.error('Error clearing cache:', error)
@@ -424,31 +365,6 @@ export class CacheService {
         lastCleanup: 'Unknown',
         version: this.CACHE_VERSION
       }
-    }
-  }
-
-  /**
-   * Initialize cache service (run cleanup on startup)
-   */
-  static initialize() {
-    try {
-      console.log('Initializing Cache Service...')
-      
-      // Check if we need to run cleanup
-      const metadata = this.getCacheMetadata()
-      const daysSinceCleanup = (Date.now() - metadata.lastCleanup) / (24 * 60 * 60 * 1000)
-      
-      if (daysSinceCleanup > 1) { // Run cleanup daily
-        this.cleanupExpiredEntries()
-      }
-
-      const stats = this.getCacheStats()
-      console.log(`Cache initialized: ${stats.totalEntries} entries, ${stats.totalSizeMB} MB used (${stats.usagePercent}%)`)
-      
-      return stats
-    } catch (error) {
-      console.error('Error initializing cache service:', error)
-      return this.getCacheStats()
     }
   }
 

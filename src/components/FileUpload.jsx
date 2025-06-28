@@ -185,9 +185,6 @@ const FileUpload = ({
       {/* Error Message */}
       <StatusMessage message={errorMessage} type="error" />
 
-      {/* Extraction Status */}
-      <StatusMessage message={extractionStatus} type="info" />
-
       {/* Processing Status Section */}
       <ProcessingStatus
         isExtracting={isExtracting}

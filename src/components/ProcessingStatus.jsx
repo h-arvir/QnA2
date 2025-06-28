@@ -26,7 +26,7 @@ const ProcessingStatus = ({
           <p>{extractionStatus || 'Extracting text from PDFs...'}</p>
           {selectedFilesCount > 1 && (
             <div className="overall-progress">
-              <p>Overall Progress: {overallProgress}%</p>
+              <p>OCR Progress: {overallProgress}%</p>
               <div className="progress-bar">
                 <div 
                   className="progress-fill" 
@@ -51,12 +51,11 @@ const ProcessingStatus = ({
         </div>
       )}
       
-      {isAutoProcessing && (
+      {/* {isAutoProcessing && (
         <div className="extraction-loading">
           <div className="loading-spinner"></div>
-          <p>{extractionStatus || 'Processing text with AI...'}</p>
         </div>
-      )}
+      )} */}
     </div>
   )
 }
