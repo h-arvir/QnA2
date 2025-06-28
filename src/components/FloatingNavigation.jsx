@@ -25,13 +25,16 @@ const FloatingNavigation = ({ activeSection, onSectionChange }) => {
   }, [])
 
   return (
-    <div className={`floating-navigation ${!isTimelineVisible ? 'timeline-hidden' : ''}`}>
+    <div   className={`floating-navigation ${!isTimelineVisible ? 'timeline-hidden' : ''}`}>
       <div className="floating-nav-line">
         {mainSections.map((section, index) => (
           <button
             key={section.id}
             className={`floating-nav-dot ${activeSection === section.id ? 'active' : ''}`}
-            onClick={() => onSectionChange(section.id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onSectionChange(section.id);
+            }}
             title={section.label}
             aria-label={`Navigate to ${section.label}`}
           >

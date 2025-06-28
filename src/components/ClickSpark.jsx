@@ -64,53 +64,6 @@ const ClickSpark = ({
     };
   }, [sparkColor, lightThemeColor, darkThemeColor]);
 
-  // Theme detection and color management
-  useEffect(() => {
-    const updateSparkColor = () => {
-      const savedTheme = localStorage.getItem('theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const isDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
-      
-      // Use theme-specific colors if provided, otherwise fall back to sparkColor
-      if (lightThemeColor && darkThemeColor) {
-        setCurrentSparkColor(isDark ? darkThemeColor : lightThemeColor);
-      } else {
-        setCurrentSparkColor(sparkColor);
-      }
-    };
-
-    // Initial color setup
-    updateSparkColor();
-
-    // Listen for theme changes via storage events (when changed in other tabs)
-    const handleStorageChange = (e) => {
-      if (e.key === 'theme') {
-        updateSparkColor();
-      }
-    };
-
-    // Listen for theme changes via custom event (when changed in same tab)
-    const handleThemeChange = () => {
-      updateSparkColor();
-    };
-
-    // Listen for system theme changes
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleMediaChange = () => {
-      updateSparkColor();
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('themechange', handleThemeChange);
-    mediaQuery.addEventListener('change', handleMediaChange);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('themechange', handleThemeChange);
-      mediaQuery.removeEventListener('change', handleMediaChange);
-    };
-  }, [sparkColor, lightThemeColor, darkThemeColor]);
-
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;

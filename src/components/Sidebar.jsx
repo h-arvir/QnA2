@@ -30,7 +30,10 @@ const Sidebar = ({ activeSection, onSectionChange, navigationItems }) => {
           <button
             key={item.id}
             className={`nav-item ${activeSection === item.id ? 'active' : ''}`}
-            onClick={() => onSectionChange(item.id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onSectionChange(item.id);
+            }}
           >
             <span className="nav-icon">{renderIcon(item.iconName)}</span>
             <span className="nav-label">{item.label}</span>

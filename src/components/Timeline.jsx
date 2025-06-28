@@ -88,7 +88,12 @@ const Timeline = ({
   const scale = Math.max(0.95, 1 - (scrollY / 1000))
 
   // Handle section change with animation
-  const handleSectionChange = (sectionId) => {
+  const handleSectionChange = (sectionId, event) => {
+    // Prevent event bubbling to avoid triggering parent click handlers
+    if (event) {
+      event.stopPropagation();
+    }
+    
     if (sectionId !== activeSection) {
       // Add animation class to the timeline item being clicked
       const timelineItem = document.querySelector(`.timeline-item[data-id="${sectionId}"]`)
@@ -126,7 +131,7 @@ const Timeline = ({
           <div key={step.id} className="timeline-item" data-id={step.id}>
             <div 
               className={`timeline-step ${activeSection === step.id ? 'active-step' : ''}`} 
-              onClick={() => handleSectionChange(step.id)}
+              onClick={(e) => handleSectionChange(step.id, e)}
             >
               <div 
                 className={`timeline-dot ${step.completed ? 'completed' : ''} ${activeSection === step.id ? 'active' : ''}`}
