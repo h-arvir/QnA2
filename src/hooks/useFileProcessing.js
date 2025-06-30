@@ -57,26 +57,15 @@ export const useFileProcessing = (state) => {
       
       const results = await Promise.allSettled(processingPromises)
       
-      // Combine all successful results and collect file hashes
+      // Combine all successful results
       const combinedResult = FileManagementService.combineFileResults(results, files)
       
       if (combinedResult.hasContent) {
         setExtractedText(combinedResult.combinedText)
-        
-        // Create status message with cache information
-        let statusMessage = `Successfully processed ${combinedResult.successCount} of ${files.length} PDF files!`
-        if (combinedResult.fromCache > 0) {
-          statusMessage += ` (${combinedResult.fromCache} loaded from cache)`
-        }
-        setExtractionStatus(statusMessage)
-        
-        // Store file hashes for caching
-        if (combinedResult.fileHashes && combinedResult.fileHashes.length > 0) {
-          setFileHashes(combinedResult.fileHashes)
-        }
+        setExtractionStatus(`Successfully processed ${combinedResult.successCount} of ${files.length} PDF files!`)
         
         // Show success notification for file processing
-        toast.success(statusMessage, {
+        toast.success(`Successfully processed ${combinedResult.successCount} of ${files.length} PDF files!`, {
           duration: 3000,
           icon: React.createElement(FileText, { size: 16 }),
         })
@@ -89,8 +78,8 @@ export const useFileProcessing = (state) => {
           })
         }, 3000)
         
-        // Automatically process combined text with AI, passing file hashes for caching
-        await autoProcessWithGemini(combinedResult.combinedText, combinedResult.fileHashes)
+        // Automatically process combined text with AI
+        await autoProcessWithGemini(combinedResult.combinedText)
       } else {
         setErrorMessage(`Failed to extract text from all ${files.length} PDF files.`)
         toast.error(`Failed to extract text from all ${files.length} PDF files.`, {
@@ -112,7 +101,7 @@ export const useFileProcessing = (state) => {
 
 
 
-  const autoProcessWithGemini = async (text, fileHashes = []) => {
+  const autoProcessWithGemini = async (text) => {
     if (!geminiApiKey.trim()) {
       setErrorMessage('Please enter your Google Gemini API key to automatically process the extracted text.')
       return
@@ -132,23 +121,10 @@ export const useFileProcessing = (state) => {
     toast.dismiss('ocr-processing')
 
     try {
-      // For multiple files, create a combined hash for caching
-      let combinedFileHash = null
-      if (fileHashes && fileHashes.length > 0) {
-        // Create a hash from all file hashes for combined content caching
-        const hashString = fileHashes.sort().join('_')
-        const encoder = new TextEncoder()
-        const data = encoder.encode(hashString)
-        const hashBuffer = await crypto.subtle.digest('SHA-256', data)
-        const hashArray = Array.from(new Uint8Array(hashBuffer))
-        combinedFileHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 16)
-      }
-
       const cleanedText = await AIProcessingService.processTextWithGemini(
         text,
         geminiApiKey,
-        (status) => setExtractionStatus(status),
-        combinedFileHash
+        (status) => setExtractionStatus(status)
       )
 
       setCleanedQuestions(cleanedText)

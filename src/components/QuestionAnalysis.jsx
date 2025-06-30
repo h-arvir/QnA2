@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react'
-import { Bot, BarChart3, Copy, List, Layers, Lightbulb, Loader2, Eye, EyeOff, Search, X, Focus, Bookmark, BookmarkCheck, RotateCcw, BookmarkX, CheckCircle, Shuffle, AlertTriangle } from 'lucide-react'
+import { Bot, BarChart3, Copy, Lightbulb, Loader2, Eye, EyeOff, Search, X, Focus, Bookmark, BookmarkCheck, RotateCcw, BookmarkX, CheckCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { AIProcessingService } from '../services/aiProcessingService'
 import AnsBlur from './AnsBlur'
@@ -17,8 +17,6 @@ const QuestionAnalysis = ({
   setLoadingAnswers,
   hiddenAnswers,
   setHiddenAnswers,
-  groupViewModes,
-  setGroupViewModes,
   bookmarkedQuestions,
   setBookmarkedQuestions
 }) => {
@@ -45,25 +43,60 @@ const QuestionAnalysis = ({
     return question.toLowerCase().includes(searchTerm.toLowerCase())
   }
   
-  // Filtered grouped questions based on search query
-  const filteredGroupedQuestions = useMemo(() => {
-    if (!searchQuery.trim() || !groupedQuestions) return groupedQuestions
+  // Convert grouped questions to flat list of individual questions
+  const flatQuestions = useMemo(() => {
+    if (!groupedQuestions) return []
     
-    return groupedQuestions.map(marksGroup => ({
-      ...marksGroup,
-      groups: marksGroup.groups?.filter(group => {
-        // Check if unified question matches
-        const unifiedMatches = matchesSearch(group.unifiedQuestion || '', searchQuery)
-        
-        // Check if any individual question matches
-        const individualMatches = group.originalQuestions?.some(q => 
-          matchesSearch(q.question || q, searchQuery)
-        ) || false
-        
-        return unifiedMatches || individualMatches
-      }) || []
-    })).filter(marksGroup => marksGroup.groups.length > 0)
-  }, [groupedQuestions, searchQuery])
+    // Sort marks groups to ensure 5 marks (Section A, B) come before 2 marks (Section C)
+    const sortedMarksGroups = [...groupedQuestions].sort((a, b) => {
+      // 5 marks should come first, then 2 marks
+      if (a.marks === 5 && b.marks === 2) return -1
+      if (a.marks === 2 && b.marks === 5) return 1
+      return 0
+    })
+    
+    const questions = []
+    let questionNumber = 1
+    
+    sortedMarksGroups.forEach(marksGroup => {
+      if (marksGroup.groups) {
+        marksGroup.groups.forEach(group => {
+          if (group.originalQuestions && group.originalQuestions.length > 0) {
+            // Use individual questions if available
+            group.originalQuestions.forEach(question => {
+              questions.push({
+                questionNumber: questionNumber++,
+                questionText: question,
+                marks: marksGroup.marks,
+                sections: marksGroup.sections,
+                questionKey: `question-${questionNumber - 1}`
+              })
+            })
+          } else {
+            // Use unified question if individual questions not available
+            questions.push({
+              questionNumber: questionNumber++,
+              questionText: group.unifiedQuestion,
+              marks: marksGroup.marks,
+              sections: marksGroup.sections,
+              questionKey: `question-${questionNumber - 1}`
+            })
+          }
+        })
+      }
+    })
+    
+    return questions
+  }, [groupedQuestions])
+
+  // Filtered questions based on search query
+  const filteredQuestions = useMemo(() => {
+    if (!searchQuery.trim()) return flatQuestions
+    
+    return flatQuestions.filter(question => 
+      matchesSearch(question.questionText || '', searchQuery)
+    )
+  }, [flatQuestions, searchQuery])
   
   // Function to clear search
   const clearSearch = () => {
@@ -72,19 +105,7 @@ const QuestionAnalysis = ({
   }
   
 
-  
-  // Function to toggle view mode for a specific group
-  const toggleGroupViewMode = (groupIndex, mode) => {
-    setGroupViewModes(prev => ({
-      ...prev,
-      [groupIndex]: mode
-    }))
-  }
-  
-  // Function to get view mode for a specific group (default to 'unified')
-  const getGroupViewMode = (groupIndex) => {
-    return groupViewModes[groupIndex] || 'unified'
-  }
+
   
   // Function to handle answer generation
   const handleGenerateAnswer = async (questionKey, questionText) => {
@@ -223,7 +244,7 @@ const QuestionAnalysis = ({
           ...prev,
           [questionKey]: {
             questionText: questionData.questionText,
-            groupTitle: questionData.groupTitle,
+            questionNumber: questionData.questionNumber,
             marks: questionData.marks,
             sections: questionData.sections,
             bookmarkedAt: new Date().toISOString()
@@ -281,20 +302,14 @@ const QuestionAnalysis = ({
       {/* <h2 className="section-title">📊 Question Analysis</h2>
       <p className="section-subtitle">AI-powered analysis and grouping of similar questions</p> */}
       
-      {groupedQuestions && groupedQuestions.length > 0 && (
+      {flatQuestions && flatQuestions.length > 0 && (
         <div className="question-groups-section">
           <h2>
             <Bot size={24} />
-            AI Question Analysis & Grouping by Marks
+            AI Question Analysis by Marks
           </h2>
           <div className="groups-summary">
-            {/* Calculate total groups across all marks */}
-            {(() => {
-              const totalGroups = groupedQuestions.reduce((sum, marksGroup) => {
-                return sum + (marksGroup.groups ? marksGroup.groups.length : 0)
-              }, 0)
-              return <p>Found <strong>{totalGroups}</strong> unified question groups organized by marks (5 Marks and 2 Marks).</p>
-            })()}
+            <p>Found <strong>{flatQuestions.length}</strong> questions organized by marks (5 Marks and 2 Marks).</p>
             {(!geminiApiKey || !geminiApiKey.trim()) && (
               <div className="api-key-warning">
                 <p>⚠️ Set your Gemini API key to generate detailed answers for questions.</p>
@@ -326,20 +341,10 @@ const QuestionAnalysis = ({
               </div>
               {searchQuery && (
                 <div className="search-results-info">
-                  {(() => {
-                    const totalFilteredGroups = filteredGroupedQuestions.reduce((sum, marksGroup) => {
-                      return sum + (marksGroup.groups ? marksGroup.groups.length : 0)
-                    }, 0)
-                    const totalGroups = groupedQuestions.reduce((sum, marksGroup) => {
-                      return sum + (marksGroup.groups ? marksGroup.groups.length : 0)
-                    }, 0)
-                    return (
-                      <span>
-                        Showing <strong>{totalFilteredGroups}</strong> of <strong>{totalGroups}</strong> groups
-                        {totalFilteredGroups === 0 && ' - No matches found'}
-                      </span>
-                    )
-                  })()}
+                  <span>
+                    Showing <strong>{filteredQuestions.length}</strong> of <strong>{flatQuestions.length}</strong> questions
+                    {filteredQuestions.length === 0 && ' - No matches found'}
+                  </span>
                 </div>
               )}
             </div>
@@ -353,7 +358,7 @@ const QuestionAnalysis = ({
           )}
           
           {/* No Results Message */}
-          {searchQuery && filteredGroupedQuestions.length === 0 && (
+          {searchQuery && filteredQuestions.length === 0 && (
             <div className="no-search-results">
               <div className="no-results-icon">
                 <Search size={48} />
@@ -369,98 +374,62 @@ const QuestionAnalysis = ({
             </div>
           )}
           
-          <div className="marks-groups-container">
-            {filteredGroupedQuestions.map((marksGroup, marksIndex) => (
-              <div key={marksIndex} className="marks-group">
-                <div className="marks-group-header">
-                  <h2 className="marks-title">
-                    {marksGroup.marks ? `${marksGroup.marks} Marks` : 'Questions'}
-                  </h2>
-                  {marksGroup.sections && marksGroup.sections.length > 0 && (
-                    <div className="sections-info">
-                      <span className="sections-label">Sections:</span>
-                      <span className="sections-list">{marksGroup.sections.join(', ')}</span>
+          {/* Group questions by marks for display */}
+          {(() => {
+            const questionsByMarks = {}
+            filteredQuestions.forEach(question => {
+              const marksKey = question.marks || 'Other'
+              if (!questionsByMarks[marksKey]) {
+                questionsByMarks[marksKey] = []
+              }
+              questionsByMarks[marksKey].push(question)
+            })
+            
+            // Sort marks to ensure 5 marks appear before 2 marks
+            const sortedMarksEntries = Object.entries(questionsByMarks).sort(([marksA], [marksB]) => {
+              if (marksA === '5' && marksB === '2') return -1
+              if (marksA === '2' && marksB === '5') return 1
+              return 0
+            })
+            
+            return (
+              <div className="marks-groups-container">
+                {sortedMarksEntries.map(([marks, questions]) => (
+                  <div key={marks} className="marks-group">
+                    <div className="marks-group-header">
+                      <h2 className="marks-title">
+                        {marks !== 'Other' ? `${marks} Marks` : 'Questions'}
+                      </h2>
+                      {questions.length > 0 && questions[0].sections && questions[0].sections.length > 0 && (
+                        <div className="sections-info">
+                          <span className="sections-label">Sections:</span>
+                          <span className="sections-list">{questions[0].sections.join(', ')}</span>
+                        </div>
+                      )}
+                      <span className="marks-group-count">
+                        {questions.length} questions
+                      </span>
                     </div>
-                  )}
-                  <span className="marks-group-count">
-                    {marksGroup.groups ? marksGroup.groups.length : 0} question groups
-                  </span>
-                </div>
-                
-                <div className="question-groups-container">
-                  {marksGroup.groups && marksGroup.groups.map((group, groupIndex) => {
-                    const globalGroupIndex = `${marksIndex}-${groupIndex}`
-                    const currentViewMode = getGroupViewMode(globalGroupIndex)
                     
-                    return (
-                      <div key={groupIndex} className="question-group">
-                        <div className="group-header">
-                          <h3>Group {group.groupNumber || groupIndex + 1}</h3>
-                          <span className="group-count">
-                            {group.count === 1 ? '1 question' : `${group.count} similar questions`}
-                          </span>
-                        </div>
-                        
-                        {/* View Mode Toggle Buttons for this group */}
-                        <div className="group-view-mode-controls">
-                          <button 
-                            className={`view-mode-btn ${currentViewMode === 'unified' ? 'active' : ''}`}
-                            onClick={() => {
-                              toggleGroupViewMode(globalGroupIndex, 'unified')
-                              toast.success('Switched to unified question view', { duration: 2000, icon: <Layers size={16} /> })
-                            }}
-                            title="Show unified question for this group"
-                          >
-                            <Layers size={14} />
-                            Unified
-                          </button>
-                          <button 
-                            className={`view-mode-btn ${currentViewMode === 'individual' ? 'active' : ''}`}
-                            onClick={() => {
-                              if (group.originalQuestions && group.originalQuestions.length > 0) {
-                                toggleGroupViewMode(globalGroupIndex, 'individual')
-                                toast.success('Switched to individual questions view', { duration: 2000, icon: <List size={16} /> })
-                              } else {
-                                toast.error('Individual questions not available for this group', { duration: 3000, icon: <AlertTriangle size={16} /> })
-                              }
-                            }}
-                            title={
-                              group.originalQuestions && group.originalQuestions.length > 0 
-                                ? "Show individual questions for this group" 
-                                : "Individual questions not available for this group"
-                            }
-                            disabled={!group.originalQuestions || group.originalQuestions.length === 0}
-                          >
-                            <List size={14} />
-                            Individual {(!group.originalQuestions || group.originalQuestions.length === 0) && '(N/A)'}
-                          </button>
-                        </div>
-                  
-                  {/* Question Content */}
-                  <div className="group-content">
-                    {currentViewMode === 'unified' ? (
-                      <div className="unified-question">
-                        <div className="question-header">
-                          <h4>❓ Unified Question:</h4>
-                          <div className="question-header-actions">
-                            <span className="repetition-badge">
-                              {group.count}x repeated
-                            </span>
+                    <div className="questions-list">
+                      {questions.map((question, index) => (
+                        <div key={question.questionKey} className="individual-question">
+                          <div className="question-header">
+                            <h4>Q.{question.questionNumber}</h4>
                             <div className="question-action-buttons">
                               <button 
                                 className="answer-btn"
                                 onClick={() => {
-                                  const questionKey = `unified-${globalGroupIndex}`
-                                  if (answers[questionKey]) {
-                                    toggleAnswer(questionKey)
+                                  if (answers[question.questionKey]) {
+                                    toggleAnswer(question.questionKey)
                                   } else {
-                                    handleGenerateAnswer(questionKey, group.unifiedQuestion)
+                                    handleGenerateAnswer(question.questionKey, question.questionText)
                                   }
                                 }}
                                 title="Generate answer for this question"
-                                disabled={loadingAnswers[`unified-${globalGroupIndex}`]}
+                                disabled={loadingAnswers[question.questionKey]}
                               >
-                                {loadingAnswers[`unified-${globalGroupIndex}`] ? (
+                                {loadingAnswers[question.questionKey] ? (
                                   <>
                                     <Loader2 size={14} className="animate-spin" />
                                     Generating...
@@ -473,13 +442,13 @@ const QuestionAnalysis = ({
                                 )}
                               </button>
                               
-                              {answers[`unified-${globalGroupIndex}`] && (
+                              {answers[question.questionKey] && (
                                 <button 
                                   className="hide-answer-btn"
-                                  onClick={() => toggleAnswerVisibility(`unified-${globalGroupIndex}`)}
-                                  title={hiddenAnswers[`unified-${globalGroupIndex}`] ? "Show answer" : "Hide answer"}
+                                  onClick={() => toggleAnswerVisibility(question.questionKey)}
+                                  title={hiddenAnswers[question.questionKey] ? "Show answer" : "Hide answer"}
                                 >
-                                  {hiddenAnswers[`unified-${globalGroupIndex}`] ? (
+                                  {hiddenAnswers[question.questionKey] ? (
                                     <>
                                       <Eye size={14} />
                                       Show
@@ -494,19 +463,18 @@ const QuestionAnalysis = ({
                               )}
                               
                               <button 
-                                className={`bookmark-btn ${isBookmarked(`unified-${globalGroupIndex}`) ? 'bookmarked' : ''}`}
+                                className={`bookmark-btn ${isBookmarked(question.questionKey) ? 'bookmarked' : ''}`}
                                 onClick={(e) => {
-                                  const questionKey = `unified-${globalGroupIndex}`
-                                  toggleBookmark(questionKey, {
-                                    questionText: group.unifiedQuestion,
-                                    groupTitle: `Group ${group.groupNumber || groupIndex + 1}`,
-                                    marks: marksGroup.marks,
-                                    sections: marksGroup.sections
+                                  toggleBookmark(question.questionKey, {
+                                    questionText: question.questionText,
+                                    questionNumber: question.questionNumber,
+                                    marks: question.marks,
+                                    sections: question.sections
                                   }, e.target)
                                 }}
-                                title={isBookmarked(`unified-${globalGroupIndex}`) ? "Remove bookmark" : "Bookmark this question"}
+                                title={isBookmarked(question.questionKey) ? "Remove bookmark" : "Bookmark this question"}
                               >
-                                {isBookmarked(`unified-${globalGroupIndex}`) ? (
+                                {isBookmarked(question.questionKey) ? (
                                   <>
                                     <BookmarkCheck size={14} />
                                     Saved
@@ -520,243 +488,96 @@ const QuestionAnalysis = ({
                               </button>
                             </div>
                           </div>
-                        </div>
-                        <div 
-                          className="question-text"
-                          dangerouslySetInnerHTML={{ 
-                            __html: highlightSearchTerm(group.unifiedQuestion, searchQuery) 
-                          }}
-                        />
-                        {answers[`unified-${globalGroupIndex}`] && !hiddenAnswers[`unified-${globalGroupIndex}`] && (
-                          <div className={`answer-section ${focusedAnswer === `unified-${globalGroupIndex}` ? 'focused-answer' : ''}`}>
-                            <div className="answer-header">
-                              <h5>💡 Answer:</h5>
-                              <div className="answer-actions">
-                                <button 
-                                  className="copy-answer-btn"
-                                  onClick={() => {
-                                    navigator.clipboard.writeText(answers[`unified-${globalGroupIndex}`])
-                                    toast.success('Answer copied to clipboard!', { icon: <Copy size={16} /> })
-                                  }}
-                                  title="Copy answer to clipboard"
-                                >
-                                  <Copy size={12} />
-                                </button>
-                                <AnsBlur 
-                                  questionKey={`unified-${globalGroupIndex}`}
-                                  focusedAnswer={focusedAnswer}
-                                  setFocusedAnswer={setFocusedAnswer}
-                                  size={12}
-                                />
-                              </div>
-                            </div>
-                            <div 
-                              className="answer-text"
-                              dangerouslySetInnerHTML={{ 
-                                __html: formatAnswerText(answers[`unified-${globalGroupIndex}`]) 
-                              }}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="individual-questions">
-                        <div className="question-header">
-                          <h4>📝 Individual Questions:</h4>
-                          <span className="questions-count">
-                            {group.originalQuestions ? group.originalQuestions.length : group.count} questions
-                          </span>
-                        </div>
-                        <div className="questions-list">
-                          {group.originalQuestions ? (
-                            group.originalQuestions.map((question, qIndex) => {
-                              const questionKey = `individual-${globalGroupIndex}-${qIndex}`
-                              return (
-                                <div key={qIndex} className="individual-question">
-                                  <div className="individual-question-content">
-                                    <span className="question-number">{qIndex + 1}.</span>
-                                    <span 
-                                      className="question-text"
-                                      dangerouslySetInnerHTML={{ 
-                                        __html: highlightSearchTerm(question, searchQuery) 
-                                      }}
-                                    />
-                                    <div className="individual-question-actions">
-                                      <button 
-                                        className="answer-btn individual-answer-btn"
-                                        onClick={() => {
-                                          if (answers[questionKey]) {
-                                            toggleAnswer(questionKey)
-                                          } else {
-                                            handleGenerateAnswer(questionKey, question)
-                                          }
-                                        }}
-                                        title="Generate answer for this question"
-                                        disabled={loadingAnswers[questionKey]}
-                                      >
-                                        {loadingAnswers[questionKey] ? (
-                                          <>
-                                            <Loader2 size={12} className="animate-spin" />
-                                            Generating...
-                                          </>
-                                        ) : (
-                                          <>
-                                            <Lightbulb size={12} />
-                                            Ans.
-                                          </>
-                                        )}
-                                      </button>
-                                      
-                                      {answers[questionKey] && (
-                                        <button 
-                                          className="hide-answer-btn individual-hide-btn"
-                                          onClick={() => toggleAnswerVisibility(questionKey)}
-                                          title={hiddenAnswers[questionKey] ? "Show answer" : "Hide answer"}
-                                        >
-                                          {hiddenAnswers[questionKey] ? (
-                                            <>
-                                              <Eye size={12} />
-                                              Show
-                                            </>
-                                          ) : (
-                                            <>
-                                              <EyeOff size={12} />
-                                              Hide
-                                            </>
-                                          )}
-                                        </button>
-                                      )}
-                                      
-                                      <button 
-                                        className={`bookmark-btn individual-bookmark-btn ${isBookmarked(questionKey) ? 'bookmarked' : ''}`}
-                                        onClick={(e) => {
-                                          toggleBookmark(questionKey, {
-                                            questionText: question,
-                                            groupTitle: `Group ${group.groupNumber || groupIndex + 1}`,
-                                            marks: marksGroup.marks,
-                                            sections: marksGroup.sections
-                                          }, e.target)
-                                        }}
-                                        title={isBookmarked(questionKey) ? "Remove bookmark" : "Bookmark this question"}
-                                      >
-                                        {isBookmarked(questionKey) ? (
-                                          <>
-                                            <BookmarkCheck size={12} />
-                                            Saved
-                                          </>
-                                        ) : (
-                                          <>
-                                            <Bookmark size={12} />
-                                            Save
-                                          </>
-                                        )}
-                                      </button>
-                                    </div>
-                                  </div>
-                                  {answers[questionKey] && !hiddenAnswers[questionKey] && (
-                                    <div className={`individual-answer-section ${focusedAnswer === questionKey ? 'focused-answer' : ''}`}>
-                                      <div className="answer-header">
-                                        <h6>💡 Answer:</h6>
-                                        <div className="answer-actions">
-                                          <button 
-                                            className="copy-answer-btn"
-                                            onClick={() => {
-                                              navigator.clipboard.writeText(answers[questionKey])
-                                              toast.success('Answer copied to clipboard!', { icon: <Copy size={16} /> })
-                                            }}
-                                            title="Copy answer to clipboard"
-                                          >
-                                            <Copy size={10} />
-                                          </button>
-                                          <AnsBlur 
-                                            questionKey={questionKey}
-                                            focusedAnswer={focusedAnswer}
-                                            setFocusedAnswer={setFocusedAnswer}
-                                            size={10}
-                                          />
-                                        </div>
-                                      </div>
-                                      <div 
-                                        className="answer-text"
-                                        dangerouslySetInnerHTML={{ 
-                                          __html: formatAnswerText(answers[questionKey]) 
-                                        }}
-                                      />
-                                    </div>
-                                  )}
+                          <div 
+                            className="question-text"
+                            dangerouslySetInnerHTML={{ 
+                              __html: highlightSearchTerm(question.questionText, searchQuery) 
+                            }}
+                          />
+                          {answers[question.questionKey] && !hiddenAnswers[question.questionKey] && (
+                            <div className={`answer-section ${focusedAnswer === question.questionKey ? 'focused-answer' : ''}`}>
+                              <div className="answer-header">
+                                <h5>💡 Answer:</h5>
+                                <div className="answer-actions">
+                                  <button 
+                                    className="copy-answer-btn"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(answers[question.questionKey])
+                                      toast.success('Answer copied to clipboard!', { icon: <Copy size={16} /> })
+                                    }}
+                                    title="Copy answer to clipboard"
+                                  >
+                                    <Copy size={12} />
+                                  </button>
+                                  <AnsBlur 
+                                    questionKey={question.questionKey}
+                                    focusedAnswer={focusedAnswer}
+                                    setFocusedAnswer={setFocusedAnswer}
+                                    size={12}
+                                  />
                                 </div>
-                              )
-                            })
-                          ) : (
-                            <div className="no-individual-questions">
-                              <p>Individual questions not available for this group.</p>
-                              <p className="note">This might happen when:</p>
-                              <ul className="note-list">
-                                <li>The AI couldn't parse the original questions properly</li>
-                                <li>Only one unique question was found in this group</li>
-                                <li>The original text format wasn't recognized</li>
-                              </ul>
-                              <p className="note">The unified question above represents the content of this group.</p>
+                              </div>
+                              <div 
+                                className="answer-text"
+                                dangerouslySetInnerHTML={{ 
+                                  __html: formatAnswerText(answers[question.questionKey]) 
+                                }}
+                              />
                             </div>
                           )}
                         </div>
-                        </div>
-                      )}
+                      ))}
                     </div>
                   </div>
-                )
-              })}
-            </div>
-          </div>
-        ))}
-      </div>
+                ))}
+              </div>
+            )
+          })()}
           
           <div className="groups-controls">
             <button 
               className="copy-btn"
               onClick={() => {
-                let groupedText = ''
+                let questionsText = ''
                 
-                groupedText = groupedQuestions.map((marksGroup, marksIndex) => {
-                  let marksText = `${marksGroup.marks ? `${marksGroup.marks} MARKS` : 'QUESTIONS'}\n`
-                  if (marksGroup.sections && marksGroup.sections.length > 0) {
-                    marksText += `Sections: ${marksGroup.sections.join(', ')}\n`
+                // Group questions by marks for copying
+                const questionsByMarks = {}
+                flatQuestions.forEach(question => {
+                  const marksKey = question.marks || 'Other'
+                  if (!questionsByMarks[marksKey]) {
+                    questionsByMarks[marksKey] = []
+                  }
+                  questionsByMarks[marksKey].push(question)
+                })
+                
+                // Sort marks to ensure 5 marks appear before 2 marks
+                const sortedMarksEntries = Object.entries(questionsByMarks).sort(([marksA], [marksB]) => {
+                  if (marksA === '5' && marksB === '2') return -1
+                  if (marksA === '2' && marksB === '5') return 1
+                  return 0
+                })
+                
+                questionsText = sortedMarksEntries.map(([marks, questions]) => {
+                  let marksText = `${marks !== 'Other' ? `${marks} MARKS` : 'QUESTIONS'}\n`
+                  if (questions.length > 0 && questions[0].sections && questions[0].sections.length > 0) {
+                    marksText += `Sections: ${questions[0].sections.join(', ')}\n`
                   }
                   marksText += '='.repeat(50) + '\n\n'
                   
-                  if (marksGroup.groups) {
-                    marksText += marksGroup.groups.map((group, groupIndex) => {
-                      const globalGroupIndex = `${marksIndex}-${groupIndex}`
-                      const currentViewMode = getGroupViewMode(globalGroupIndex)
-                      let text = `Group ${group.groupNumber || groupIndex + 1}:\n`
-                      text += `Question Count: ${group.count}\n`
-                      
-                      if (currentViewMode === 'unified') {
-                        text += `Unified Question: ${group.unifiedQuestion}\n`
-                      } else {
-                        if (group.originalQuestions) {
-                          text += `Individual Questions:\n`
-                          group.originalQuestions.forEach((question, qIndex) => {
-                            text += `${qIndex + 1}. ${question}\n`
-                          })
-                        } else {
-                          text += `Unified Question: ${group.unifiedQuestion}\n`
-                        }
-                      }
-                      return text
-                    }).join('\n' + '-'.repeat(30) + '\n\n')
-                  }
+                  marksText += questions.map((question) => {
+                    return `Q.${question.questionNumber}: ${question.questionText}\n`
+                  }).join('\n')
                   
                   return marksText
                 }).join('\n' + '='.repeat(70) + '\n\n')
                 
-                navigator.clipboard.writeText(groupedText)
-                toast.success('All groups copied to clipboard!')
+                navigator.clipboard.writeText(questionsText)
+                toast.success('All questions copied to clipboard!')
               }}
-              title="Copy all groups with their current view modes to clipboard"
+              title="Copy all questions to clipboard"
             >
               <Copy size={16} />
-              Copy All Groups
+              Copy All Questions
             </button>
           </div>
         </div>

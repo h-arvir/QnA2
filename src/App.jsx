@@ -83,8 +83,6 @@ function App() {
     setLoadingAnswers,
     hiddenAnswers,
     setHiddenAnswers,
-    groupViewModes,
-    setGroupViewModes,
     bookmarkedQuestions,
     setBookmarkedQuestions
   } = state
@@ -275,8 +273,6 @@ function App() {
                     setLoadingAnswers={setLoadingAnswers}
                     hiddenAnswers={hiddenAnswers}
                     setHiddenAnswers={setHiddenAnswers}
-                    groupViewModes={groupViewModes}
-                    setGroupViewModes={setGroupViewModes}
                     bookmarkedQuestions={bookmarkedQuestions}
                     setBookmarkedQuestions={setBookmarkedQuestions}
                   />

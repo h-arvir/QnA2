@@ -26,11 +26,13 @@ export class AIProcessingService {
       const prompt = `You are given OCR-scanned text from a question paper. The text is unstructured and may contain grammar errors, layout issues, and irrelevant content like instructions or metadata.
 
 Your task is to:
-1.Extract only the exam questions, and remove all other non-question content (instructions, titles, page numbers, etc).
-2.Ensure each question starts on a new line, and is numbered correctly.
-3.Fix grammar, spelling, and punctuation issues only for the questions.
-4.Maintain the original section headers (e.g., Section A, Section B) if they exist.
-5.Do not add or invent any content.
+1. Extract only the actual exam questions, and remove all other non-question content (instructions, titles, page numbers, etc).
+2. Remove instructional phrases like "Explain the following terms:", "Answer the following:", "Define the following:", etc. - these are NOT questions themselves.
+3. Ensure each question starts on a new line, and is numbered correctly.
+4. Fix grammar, spelling, and punctuation issues only for the questions.
+5. Maintain the original section headers (e.g., Section A, Section B) if they exist.
+6. Do not add or invent any content.
+7. Only include complete, standalone questions that can be answered independently.
 
 Here is the OCR text to process:
 

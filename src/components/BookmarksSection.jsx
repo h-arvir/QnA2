@@ -274,10 +274,10 @@ const BookmarksSection = ({
             <div key={bookmark.questionKey} className="bookmark-item">
               <div className="bookmark-header">
                 <div className="bookmark-info">
-                  <h4>Question {index + 1}</h4>
-                  {/* {bookmark.marks && (
+                  <h4>Q.{bookmark.questionNumber || (index + 1)}</h4>
+                  {bookmark.marks && (
                     <span className="marks-badge">{bookmark.marks} Marks</span>
-                  )} */}
+                  )}
                 </div>
                 <button
                   className="remove-bookmark-btn"

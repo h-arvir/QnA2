@@ -11,8 +11,7 @@ export const useQuestionAnalysis = (state) => {
     geminiApiKey,
     setAnswers,
     setLoadingAnswers,
-    setHiddenAnswers,
-    setGroupViewModes
+    setHiddenAnswers
   } = state
 
   const analyzeQuestions = async (cleanedText) => {
@@ -40,7 +39,6 @@ export const useQuestionAnalysis = (state) => {
       setAnswers({})
       setLoadingAnswers({})
       setHiddenAnswers({})
-      setGroupViewModes({})
 
       const groups = await AIProcessingService.analyzeQuestions(
         cleanedText,
