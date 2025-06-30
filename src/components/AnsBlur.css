@@ -79,21 +79,33 @@
   transition: filter 0.3s ease-in-out;
 }
 
-/* Important: Apply thick blur to other answer sections but NOT the focused one */
-.answer-focus-mode .answer-section:not(.focused-answer),
-.answer-focus-mode .individual-answer-section:not(.focused-answer) {
+/* Important: Apply thick blur to all answer sections during focus mode */
+.answer-focus-mode .answer-section.focused-answer,
+.answer-focus-mode .individual-answer-section.focused-answer {
   filter: blur(8px);
   pointer-events: none;
   transition: filter 0.3s ease-in-out;
 }
 
-/* Focused answer styling - keep it crystal clear and prominent */
+/* Remove blur from the currently active focused answer */
+.answer-focus-mode .answer-section.focused-answer.active-focus,
+.answer-focus-mode .individual-answer-section.focused-answer.active-focus {
+  filter: none !important;
+  pointer-events: all !important;
+}
+
+/* Default focused answer styling - no special effects when not in focus mode */
 .focused-answer {
   position: relative;
+  box-sizing: border-box;
+  transition: all 0.3s ease-in-out;
+}
+
+/* Focused answer styling - only activate for active-focus during focus mode */
+.answer-focus-mode .focused-answer.active-focus {
   z-index: 1000;
   filter: none !important;
   pointer-events: all !important;
-  box-sizing: border-box;
   box-shadow: 
     0 0 30px rgba(227, 97, 140, 0.5), 
     0 0 60px rgba(227, 97, 140, 0.3),
@@ -101,37 +113,20 @@
   border-radius: var(--radius-lg);
   background: var(--bg-primary);
   border: 2px solid var(--primary-400);
-  animation: focusGlow 2s ease-in-out infinite alternate;
-  /* Maintain original dimensions by using box-sizing and no extra padding/margin */
 }
 
-/* Ensure all content within focused answer is completely clear and interactive */
-.focused-answer,
-.focused-answer *,
-.focused-answer .answer-header,
-.focused-answer .answer-text,
-.focused-answer .answer-actions,
-.focused-answer button {
+/* Ensure all content within active focused answer is completely clear and interactive during focus mode */
+.answer-focus-mode .focused-answer.active-focus,
+.answer-focus-mode .focused-answer.active-focus *,
+.answer-focus-mode .focused-answer.active-focus .answer-header,
+.answer-focus-mode .focused-answer.active-focus .answer-text,
+.answer-focus-mode .focused-answer.active-focus .answer-actions,
+.answer-focus-mode .focused-answer.active-focus button {
   filter: none !important;
   pointer-events: all !important;
 }
 
-@keyframes focusGlow {
-  0% {
-    box-shadow: 
-      0 0 30px rgba(227, 97, 140, 0.5), 
-      0 0 60px rgba(227, 97, 140, 0.3),
-      0 0 100px rgba(227, 97, 140, 0.1);
-    border-color: var(--primary-400);
-  }
-  100% {
-    box-shadow: 
-      0 0 40px rgba(227, 97, 140, 0.7), 
-      0 0 80px rgba(227, 97, 140, 0.4),
-      0 0 120px rgba(227, 97, 140, 0.2);
-    border-color: var(--primary-500);
-  }
-}
+
 
 /* Focus button styles */
 .focus-answer-btn {

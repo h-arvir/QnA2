@@ -16,13 +16,26 @@ const AnsBlur = ({
   const toggleFocusMode = (questionKey) => {
     if (focusedAnswer === questionKey) {
       setFocusedAnswer(null)
-      // Remove blur effect from body
+      // Remove blur effect from body and clear focused answer
       document.body.classList.remove('answer-focus-mode')
+      // Remove active-focus class from all answers
+      document.querySelectorAll('.focused-answer.active-focus').forEach(el => {
+        el.classList.remove('active-focus')
+      })
       toast.success('Focus mode disabled', { duration: 1500, icon: <EyeOff size={16} /> })
     } else {
       setFocusedAnswer(questionKey)
       // Add blur effect to body
       document.body.classList.add('answer-focus-mode')
+      // Remove active-focus from all answers first
+      document.querySelectorAll('.focused-answer.active-focus').forEach(el => {
+        el.classList.remove('active-focus')
+      })
+      // Add active-focus to the target answer
+      const targetAnswer = document.querySelector(`[data-question-key="${questionKey}"]`)
+      if (targetAnswer) {
+        targetAnswer.classList.add('active-focus')
+      }
       toast.success('Focus mode enabled', { duration: 1500, icon: <Focus size={16} /> })
     }
   }

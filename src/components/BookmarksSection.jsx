@@ -354,7 +354,7 @@ const BookmarksSection = ({
                 />
                 
                 {answers[bookmark.questionKey] && !hiddenAnswers[bookmark.questionKey] && (
-                  <div className={`answer-section ${focusedAnswer === bookmark.questionKey ? 'focused-answer' : ''}`}>
+                  <div className="answer-section focused-answer" data-question-key={bookmark.questionKey}>
                     <div className="answer-header">
                       <h5>💡 Answer:</h5>
                       <div className="answer-actions">

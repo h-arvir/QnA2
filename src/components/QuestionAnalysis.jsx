@@ -495,7 +495,7 @@ const QuestionAnalysis = ({
                             }}
                           />
                           {answers[question.questionKey] && !hiddenAnswers[question.questionKey] && (
-                            <div className={`answer-section ${focusedAnswer === question.questionKey ? 'focused-answer' : ''}`}>
+                            <div className="answer-section focused-answer" data-question-key={question.questionKey}>
                               <div className="answer-header">
                                 <h5>💡 Answer:</h5>
                                 <div className="answer-actions">
