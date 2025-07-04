@@ -292,7 +292,7 @@ const BookmarksSection = ({
                 </button>
               </div>
               
-              <div className="bookmark-question">
+              <div className="bookmark-question" data-question-key={bookmark.questionKey}>
                 <div className="question-header">
                   <h5>❓ Question:</h5>
                   <div className="question-action-buttons">
@@ -326,38 +326,24 @@ const BookmarksSection = ({
                     </button>
                     
                     {answers[bookmark.questionKey] && (
-                      <button 
-                        className="hide-answer-btn"
-                        onClick={() => toggleAnswerVisibility(bookmark.questionKey)}
-                        title={hiddenAnswers[bookmark.questionKey] ? "Show answer" : "Hide answer"}
-                      >
-                        {hiddenAnswers[bookmark.questionKey] ? (
-                          <>
-                            <Eye size={14} />
-                            Show
-                          </>
-                        ) : (
-                          <>
-                            <EyeOff size={14} />
-                            Hide
-                          </>
-                        )}
-                      </button>
-                    )}
-                  </div>
-                </div>
-                <div 
-                  className="question-text"
-                  dangerouslySetInnerHTML={{ 
-                    __html: highlightSearchTerm(bookmark.questionText, searchQuery) 
-                  }}
-                />
-                
-                {answers[bookmark.questionKey] && !hiddenAnswers[bookmark.questionKey] && (
-                  <div className="answer-section focused-answer" data-question-key={bookmark.questionKey}>
-                    <div className="answer-header">
-                      <h5>💡 Answer:</h5>
-                      <div className="answer-actions">
+                      <>
+                        <button 
+                          className="hide-answer-btn"
+                          onClick={() => toggleAnswerVisibility(bookmark.questionKey)}
+                          title={hiddenAnswers[bookmark.questionKey] ? "Show answer" : "Hide answer"}
+                        >
+                          {hiddenAnswers[bookmark.questionKey] ? (
+                            <>
+                              <Eye size={14} />
+                              Show
+                            </>
+                          ) : (
+                            <>
+                              <EyeOff size={14} />
+                              Hide
+                            </>
+                          )}
+                        </button>
                         <button 
                           className="copy-answer-btn"
                           onClick={() => {
@@ -374,15 +360,24 @@ const BookmarksSection = ({
                           setFocusedAnswer={setFocusedAnswer}
                           size={12}
                         />
-                      </div>
-                    </div>
-                    <div 
-                      className="answer-text"
-                      dangerouslySetInnerHTML={{ 
-                        __html: formatAnswerText(answers[bookmark.questionKey]) 
-                      }}
-                    />
+                      </>
+                    )}
                   </div>
+                </div>
+                <div 
+                  className="question-text"
+                  dangerouslySetInnerHTML={{ 
+                    __html: highlightSearchTerm(bookmark.questionText, searchQuery) 
+                  }}
+                />
+                
+                {answers[bookmark.questionKey] && !hiddenAnswers[bookmark.questionKey] && (
+                  <div 
+                    className="answer-text"
+                    dangerouslySetInnerHTML={{ 
+                      __html: formatAnswerText(answers[bookmark.questionKey]) 
+                    }}
+                  />
                 )}
               </div>
             </div>

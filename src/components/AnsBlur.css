@@ -79,6 +79,16 @@
   transition: filter 0.3s ease-in-out;
 }
 
+/* Don't blur question content when it's part of the active focused question */
+.answer-focus-mode .individual-question.active-focus .question-header,
+.answer-focus-mode .individual-question.active-focus .question-text,
+.answer-focus-mode .individual-question.active-focus .individual-question-content,
+.answer-focus-mode .bookmark-question.active-focus .question-header,
+.answer-focus-mode .bookmark-question.active-focus .question-text {
+  filter: none !important;
+  pointer-events: all !important;
+}
+
 /* Important: Apply thick blur to all answer sections during focus mode */
 .answer-focus-mode .answer-section.focused-answer,
 .answer-focus-mode .individual-answer-section.focused-answer {
@@ -101,8 +111,9 @@
   transition: all 0.3s ease-in-out;
 }
 
-/* Focused answer styling - only activate for active-focus during focus mode */
-.answer-focus-mode .focused-answer.active-focus {
+/* Focused question styling - only activate for active-focus during focus mode */
+.answer-focus-mode .individual-question.active-focus,
+.answer-focus-mode .bookmark-question.active-focus {
   z-index: 1000;
   filter: none !important;
   pointer-events: all !important;
@@ -115,13 +126,21 @@
   border: 2px solid var(--primary-400);
 }
 
-/* Ensure all content within active focused answer is completely clear and interactive during focus mode */
-.answer-focus-mode .focused-answer.active-focus,
-.answer-focus-mode .focused-answer.active-focus *,
-.answer-focus-mode .focused-answer.active-focus .answer-header,
-.answer-focus-mode .focused-answer.active-focus .answer-text,
-.answer-focus-mode .focused-answer.active-focus .answer-actions,
-.answer-focus-mode .focused-answer.active-focus button {
+/* Ensure all content within active focused question is completely clear and interactive during focus mode */
+.answer-focus-mode .individual-question.active-focus,
+.answer-focus-mode .individual-question.active-focus *,
+.answer-focus-mode .individual-question.active-focus .question-header,
+.answer-focus-mode .individual-question.active-focus .question-text,
+.answer-focus-mode .individual-question.active-focus .answer-text,
+.answer-focus-mode .individual-question.active-focus .question-action-buttons,
+.answer-focus-mode .individual-question.active-focus button,
+.answer-focus-mode .bookmark-question.active-focus,
+.answer-focus-mode .bookmark-question.active-focus *,
+.answer-focus-mode .bookmark-question.active-focus .question-header,
+.answer-focus-mode .bookmark-question.active-focus .question-text,
+.answer-focus-mode .bookmark-question.active-focus .answer-text,
+.answer-focus-mode .bookmark-question.active-focus .question-action-buttons,
+.answer-focus-mode .bookmark-question.active-focus button {
   filter: none !important;
   pointer-events: all !important;
 }
@@ -130,31 +149,43 @@
 
 /* Focus button styles */
 .focus-answer-btn {
-  background: none;
-  border: none;
-  color: var(--neutral-500);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  font-weight: 600;
   cursor: pointer;
-  padding: var(--spacing-xs);
-  border-radius: var(--radius-sm);
   transition: all var(--transition-normal);
-  margin-left: var(--spacing-xs);
+  white-space: nowrap;
+  outline: none;
 }
 
 .focus-answer-btn:hover {
-  background: var(--primary-100);
-  color: var(--primary-600);
-  transform: scale(1.1);
+  background: var(--accent-50);
+  color: var(--accent-600);
+  border-color: var(--accent-200);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
 .focus-answer-btn.active {
-  background: var(--primary-500);
-  color: white;
-  box-shadow: 0 0 10px rgba(227, 97, 140, 0.4);
+  background: var(--accent-50);
+  color: var(--accent-600);
+  border-color: var(--accent-200);
+  box-shadow: var(--shadow-sm);
+  transform: scale(1.05);
 }
 
 .focus-answer-btn.active:hover {
-  background: var(--primary-600);
-  transform: scale(1.05);
+  background: var(--accent-100);
+  color: var(--accent-700);
+  border-color: var(--accent-300);
+  transform: scale(1.02);
 }
 
 /* Responsive adjustments */

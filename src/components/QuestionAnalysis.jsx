@@ -413,7 +413,7 @@ const QuestionAnalysis = ({
                     
                     <div className="questions-list">
                       {questions.map((question, index) => (
-                        <div key={question.questionKey} className="individual-question">
+                        <div key={question.questionKey} className="individual-question" data-question-key={question.questionKey}>
                           <div className="question-header">
                             <h4>Q.{question.questionNumber}</h4>
                             <div className="question-action-buttons">
@@ -486,19 +486,9 @@ const QuestionAnalysis = ({
                                   </>
                                 )}
                               </button>
-                            </div>
-                          </div>
-                          <div 
-                            className="question-text"
-                            dangerouslySetInnerHTML={{ 
-                              __html: highlightSearchTerm(question.questionText, searchQuery) 
-                            }}
-                          />
-                          {answers[question.questionKey] && !hiddenAnswers[question.questionKey] && (
-                            <div className="answer-section focused-answer" data-question-key={question.questionKey}>
-                              <div className="answer-header">
-                                <h5>💡 Answer:</h5>
-                                <div className="answer-actions">
+                              
+                              {answers[question.questionKey] && (
+                                <>
                                   <button 
                                     className="copy-answer-btn"
                                     onClick={() => {
@@ -515,15 +505,23 @@ const QuestionAnalysis = ({
                                     setFocusedAnswer={setFocusedAnswer}
                                     size={12}
                                   />
-                                </div>
-                              </div>
-                              <div 
-                                className="answer-text"
-                                dangerouslySetInnerHTML={{ 
-                                  __html: formatAnswerText(answers[question.questionKey]) 
-                                }}
-                              />
+                                </>
+                              )}
                             </div>
+                          </div>
+                          <div 
+                            className="question-text"
+                            dangerouslySetInnerHTML={{ 
+                              __html: highlightSearchTerm(question.questionText, searchQuery) 
+                            }}
+                          />
+                          {answers[question.questionKey] && !hiddenAnswers[question.questionKey] && (
+                            <div 
+                              className="answer-text"
+                              dangerouslySetInnerHTML={{ 
+                                __html: formatAnswerText(answers[question.questionKey]) 
+                              }}
+                            />
                           )}
                         </div>
                       ))}
