@@ -93,12 +93,9 @@ If your code is not already in a Git repository:
 3. **Root Directory**: Keep as default if your project is at the root of the repository
 4. **Build and Output Settings**: These should be automatically configured based on your vercel.json
 
-5. **Environment Variables**: Add any necessary environment variables
-   - Click on "Environment Variables"
-   - Add your Gemini API key:
-     - NAME: `VITE_GEMINI_API_KEY`
-     - VALUE: Your Gemini API key
-   - Make sure to set this as a production environment variable
+5. **Environment Variables**: No environment variables are required
+   - Note: The application will prompt users to enter their own Google Gemini API key
+   - Users can get their API key from: https://makersuite.google.com/app/apikey
 
 6. **Advanced Build Settings**: Usually, you can leave these at their defaults
 

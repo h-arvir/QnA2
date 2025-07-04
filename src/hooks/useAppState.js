@@ -23,8 +23,8 @@ export const useAppState = () => {
   const [isAutoProcessing, setIsAutoProcessing] = useState(false)
   
   // API key state
-  const [geminiApiKey, setGeminiApiKey] = useState(import.meta.env.VITE_GEMINI_API_KEY || '')
-  const [showApiKeyInput, setShowApiKeyInput] = useState(!import.meta.env.VITE_GEMINI_API_KEY)
+  const [geminiApiKey, setGeminiApiKey] = useState('')
+  const [showApiKeyInput, setShowApiKeyInput] = useState(true)
   
   // Multiple file processing state
   const [processingProgress, setProcessingProgress] = useState({})
