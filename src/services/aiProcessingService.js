@@ -1,4 +1,3 @@
-import { GoogleGenerativeAI } from '@google/generative-ai'
 import { CacheService } from './cacheService'
 
 export class AIProcessingService {
@@ -20,27 +19,26 @@ export class AIProcessingService {
     onStatusUpdate('Processing text with Google Gemini AI...')
 
     try {
-      const genAI = new GoogleGenerativeAI(apiKey.trim())
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+      // Use the serverless API endpoint instead of direct Gemini API call
+      const response = await fetch('/api/gemini', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          apiKey: apiKey.trim(),
+          text,
+          action: 'processText'
+        }),
+      });
 
-      const prompt = `You are given OCR-scanned text from a question paper. The text is unstructured and may contain grammar errors, layout issues, and irrelevant content like instructions or metadata.
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to process text with API');
+      }
 
-Your task is to:
-1. Extract only the actual exam questions, and remove all other non-question content (instructions, titles, page numbers, etc).
-2. Remove instructional phrases like "Explain the following terms:", "Answer the following:", "Define the following:", etc. - these are NOT questions themselves.
-3. Ensure each question starts on a new line, and is numbered correctly.
-4. Fix grammar, spelling, and punctuation issues only for the questions.
-5. Maintain the original section headers (e.g., Section A, Section B) if they exist.
-6. Do not add or invent any content.
-7. Only include complete, standalone questions that can be answered independently.
-
-Here is the OCR text to process:
-
-${text}`
-
-      const result = await model.generateContent(prompt)
-      const response = await result.response
-      const cleanedText = response.text()
+      const data = await response.json();
+      const cleanedText = data.cleanedText;
 
       // Cache the result if fileHash is provided
       if (fileHash) {
@@ -59,7 +57,7 @@ ${text}`
       
       return cleanedText
     } catch (error) {
-      console.error('Gemini API Error:', error)
+      console.error('API Error:', error)
       let errorMsg = 'Failed to process text with Google Gemini AI. '
       
       if (error.message.includes('API_KEY_INVALID') || error.message.includes('401')) {
@@ -104,56 +102,29 @@ ${text}`
     try {
       onStatusUpdate('Analyzing questions with AI...')
 
-      const genAI = new GoogleGenerativeAI(apiKey.trim())
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+      // Use the serverless API endpoint instead of direct Gemini API call
+      const response = await fetch('/api/gemini', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          apiKey: apiKey.trim(),
+          text: cleanedText,
+          action: 'analyzeQuestions'
+        }),
+      });
 
-      const prompt = `You are an assistant that analyzes OCR-extracted exam questions. Your task is to:
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to analyze questions with API');
+      }
 
-1. First, identify and parse section headers (Section A, Section B, Section C, etc.) from the text
-2. Categorize questions by marks based on sections:
-   - Section A and Section B questions = 5 Marks
-   - Section C questions = 2 Marks
-3. Within each marks category, group only those questions that ask for the same concept and expect the same type of response (e.g., advantages, disadvantages, or explanation), differing only in phrasing or examples.
-4. When unifying repeated questions, merge unique subparts from each into a single comprehensive question. For example, if one asks for a definition and characteristics, and another asks for a definition and architecture, the unified question should be: “Define [concept], its characteristics and architecture.
-5.Do not group questions that combine a concept definition with its architecture, advantages, applications, or examples.
-5. Avoid merging core concepts with tools or models, or questions from different learning objectives
-6. It is better to have multiple small and accurate groups than fewer large and imprecise ones
-
-Output Format:
-MARKS_GROUP: 5 Marks
-SECTIONS: Section A, Section B
-
-Group <number>:
-Question Count: <number>
-Unified Question: <merged version>
-Individual Questions:
-- <original question 1>
-- <original question 2>
-...
-
-MARKS_GROUP: 2 Marks
-SECTIONS: Section C
-
-Group <number>:
-Question Count: <number>
-Unified Question: <merged version>
-Individual Questions:
-- <original question 1>
-- <original question 2>
-...
-
-Here are the extracted questions to analyze:
-
-${cleanedText}`
-
-      const result = await model.generateContent(prompt)
-      const response = await result.response
-      const analysisResult = response.text()
+      const data = await response.json();
+      const analysisResult = data.analysisResult;
 
       // Parse the AI response into structured groups by marks
       const groupsByMarks = this.parseAIAnalysisResponseByMarks(analysisResult)
-      
-
       
       // Cache the result if fileHash is provided
       if (fileHash) {
@@ -329,8 +300,6 @@ ${cleanedText}`
     return groups
   }
 
-
-
   static async generateAnswer(question, context, apiKey, onStatusUpdate = () => {}) {
     if (!question || question.trim().length === 0) {
       throw new Error('Question is required to generate an answer.')
@@ -355,29 +324,27 @@ ${cleanedText}`
     try {
       onStatusUpdate('Generating detailed answer with AI...')
 
-      const genAI = new GoogleGenerativeAI(apiKey.trim())
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+      // Use the serverless API endpoint instead of direct Gemini API call
+      const response = await fetch('/api/gemini', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          apiKey: apiKey.trim(),
+          question,
+          context,
+          action: 'generateAnswer'
+        }),
+      });
 
-      const prompt = `You are an expert educational assistant. Your task is to provide a comprehensive, detailed, and well-structured answer to the given question.
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate answer with API');
+      }
 
-Guidelines for your response:
-1. Provide a clear, detailed explanation that demonstrates deep understanding
-2. Structure your answer with proper headings and bullet points where appropriate
-3. Include relevant examples, definitions, and context
-4. Make the answer educational and easy to understand
-5. If the question requires technical details, provide them in a logical sequence
-6. Use proper formatting with line breaks for readability
-7. Aim for completeness while maintaining clarity
-
-${context ? `Context from the document: ${context}` : ''}
-
-Question: ${question}
-
-Please provide a comprehensive answer:`
-
-      const result = await model.generateContent(prompt)
-      const response = await result.response
-      const answer = response.text()
+      const data = await response.json();
+      const answer = data.answer;
 
       // Cache the result using content-based key
       await CacheService.setCacheData(contentBasedCacheKey, CacheService.STAGES.GENERATED_ANSWERS, {
